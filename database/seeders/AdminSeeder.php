@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
+use App\Models\Usuario\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,25 +11,27 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-
         // Crear usuario administrador por defecto si no existe
         $admin = User::firstOrCreate([
             'email' => 'admin@universidad.com'
         ], [
-            'tipo_identificacion' => 'CÉDULA DE CIUDADANÍA',
-            'numero_identificacion' => '123456789',
-            'primer_nombre' => 'Admin',
-            'segundo_nombre' => 'Sistema',
-            'primer_apellido' => 'Universidad',
-            'segundo_apellido' => 'Gestión',
-            'email' => 'admin@universidad.com',
-            'password' => Hash::make('admin123'), // Cambia la contraseña si lo deseas
+            'user_municipio_id'      => 1, // Cambia este valor según el municipio en tu DB
+            'tipo_identificacion'    => 'Cédula de ciudadanía',
+            'numero_identificacion'  => '123456789',
+            'genero'                 => 'Masculino', // Cambia según los valores en Genero::all()
+            'primer_nombre'          => 'Admin',
+            'segundo_nombre'         => 'Sistema',
+            'primer_apellido'        => 'Universidad',
+            'segundo_apellido'       => 'Gestión',
+            'fecha_nacimiento'       => '1990-01-01', // Ajusta según necesidad
+            'estado_civil'           => 'Soltero', // Cambia según los valores en EstadoCivil::all()
+            'email'                  => 'admin@universidad.com',
+            'password'               => Hash::make('admin123'), // Cambia la contraseña si lo deseas
         ]);
 
         // Asignar el rol de admin
-        $admin->assignRole('admin');
-        
+        $admin->assignRole('Administrador');
+
         echo "✅ Administrador creado con email: admin@universidad.com y contraseña: admin123\n";
     }
 }
-

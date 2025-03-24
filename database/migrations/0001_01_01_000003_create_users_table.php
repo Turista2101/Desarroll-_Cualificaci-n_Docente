@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Municipio;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,16 +10,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    // tabla para gestionar los usuarios
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_municipio_id')->constrained('municipios')->onDelete('cascade');
             $table->string('tipo_identificacion');
             $table->string('numero_identificacion')->unique();
+            $table->string('genero')->nullable();
             $table->string('primer_nombre');
             $table->string('segundo_nombre')->nullable();
             $table->string('primer_apellido');
             $table->string('segundo_apellido')->nullable();
+            $table->date('fecha_nacimiento');
+            $table->string('estado_civil')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

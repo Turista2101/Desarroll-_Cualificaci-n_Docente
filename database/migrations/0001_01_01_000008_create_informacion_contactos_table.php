@@ -13,14 +13,11 @@ return new class extends Migration
     {
         Schema::create('informacion_contactos', function (Blueprint $table) {
             $table->id();
-            $table->string('genero');
-            $table->string('estado_civil')->nullable();
+            $table->foreignId('informacioncontacto_user_id')->constrained('users')->onDelete('cascade');//relacion de muchos a uno con la tabla usuarios
+            $table->foreignId('informacioncontacto_municipio_id')->constrained('municipios')->onDelete('cascade');//relacion de muchos a uno con la tabla municipios
             $table->string('categoria_libreta_militar')->nullable();
             $table->string('numero_libreta_militar')->nullable();
             $table->string('numero_distrito_militar')->nullable();
-            $table->string('pais');
-            $table->string('departamento_residencia')->nullable();
-            $table->string('ciudad_residencia')->nullable();
             $table->string('direccion_residencia')->nullable();
             $table->string('barrrio')->nullable();
             $table->string('telefono_movil');

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Usuario\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -11,6 +11,9 @@ use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Constants\TipoIdentificacion;
+use App\Constants\Genero;
+use App\Constants\EstadoCivil;
 
 
 class AuthController
@@ -23,12 +26,16 @@ class AuthController
          //Validar los datos de entrada
 
         $validator = Validator::make(request()->all(), [
-            'tipo_identificacion'    => 'required|in:CÉDULA DE CIUDADANÍA,CÉDULA DE EXTRANJERIA,NÚMERO IDENTIFICACIÓN PERSONAL,NÚMERO UNICO IDENTIFICACIÓN PERSONAL,PASAPORTE,REGISTRO CIVIL,NÚMERO POR SECRETARIA DE EDUCACIÓN,SERVICIO NACIONAL DE PRUEBAS,TARJETA DE IDENTIDAD,TARJETA PROFESIONAL',
-            'numero_identificacion'  => 'required|string|max:50|unique:users',
+            'user_municipio_id'      => 'requiered|exists:municipios,id',
+            'tipo_identificacion'    => 'required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
+            'numero_identificacion'  => 'required|string|max:50',
+            'genero'                 => 'nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
             'primer_nombre'          => 'required|string|max:100',
             'segundo_nombre'         => 'nullabe|string|max:100',
             'primer_apellido'        => 'required|string|max:50',
             'segundo_apellido'       => 'nullable|string|max:50',
+            'fecha_nacimiento'       => 'required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
+            'estado_civil'           => 'nullable|in:' . implode(',', EstadoCivil::all()),//llamo a la constante estadocivil para obtener los tipos de estado civil
             'email'                  => 'required|string|email|max:100|unique:users',
             'password'               => 'required|string|min:8',
         ]);
@@ -40,15 +47,19 @@ class AuthController
         }
 
         // crear un usuario
-        $user = user::create([
-            'tipo_identificacion' => $request->tipo_identificacion,
-            'numero_identificacion' => $request->numero_identificacion,
-            'primer_nombre' => $request->primer_nombre,
-            'segundo_nombre' => $request->segundo_nombre,
-            'primer_apellido' => $request->primer_apellido,
-            'segundo_apellido' => $request->segundo_apellido,
-            'email'=>$request->email,
-            'password'=>Hash::make($request->password), //Encriptar la contraseña
+        $user = User::create([
+            'user_municipio_id' => $request->input('user_municipio_id'),
+            'tipo_identificacion' => $request->input('tipo_identificacion'),
+            'numero_identificacion' => $request->input('numero_identificacion'),
+            'genero' => $request->input('genero'),
+            'primer_nombre' => $request->input('primer_nombre'),
+            'segundo_nombre' => $request->input('segundo_nombre'),
+            'primer_apellido' => $request->input('primer_apellido'),
+            'segundo_apellido' => $request->input('segundo_apellido'),
+            'fecha_nacimiento' => $request->input('fecha_nacimiento'),
+            'estado_civil' => $request->input('estado_civil'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')), // Encriptar la contraseña
         ]);
 
 
@@ -70,6 +81,7 @@ class AuthController
     
     }
 
+
     //Iniciar sesión
     public function iniciarSesion(Request $request) {
         // Validar los datos de entrada
@@ -86,6 +98,7 @@ class AuthController
         // Credenciales para autenticar
         $credentials = $request->only('email', 'password');
     
+
         // Intentar autenticar y generar un token
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
@@ -94,6 +107,7 @@ class AuthController
         // Obtener el usuario autenticado
         $user = Auth::user();
     
+        // Devolver respuesta con el token y el usuario
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
             'user'    => $user,
@@ -199,6 +213,7 @@ class AuthController
         return response()->json(['message'=>'Correo electrónico enviado'], 200);
     }
 
+    
 
 
 
