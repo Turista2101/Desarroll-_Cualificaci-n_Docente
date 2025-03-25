@@ -1,10 +1,6 @@
 <?php
 
-namespace App\Constants;
-
-// Tipos de constantes de identificacion, contiene los diferentes tipos de identificacion
-// si desea agregar uno nuevo hagalo desde aqui, y se reflejara en la base de datos
-
+namespace App\Constants\ConstUsuario;
 
 class TipoIdentificacion
 {
@@ -35,42 +31,4 @@ class TipoIdentificacion
         ];
     }
 
-}
-
-
-class Genero
-{
-    // Tipos de generos
-    public const MASCULINO = 'Masculino';
-    public const FEMENINO = 'Femenino';
-    public const OTRO = 'Otro';
-    // Retorna todos los tipos de generos
-    public static function all(): array
-    {
-        return [
-            self::MASCULINO,
-            self::FEMENINO,
-            self::OTRO
-        ];
-    }
-}
-
-
-class EstadoCivil
-{
-    // Tipos de estados civiles
-    public const SOLTERO = 'Soltero';
-    public const CASADO = 'Casado';
-    public const DIVORCIADO = 'Divorciado';
-    public const VIUDO = 'Viudo';
-    // Retorna todos los tipos de estados civiles
-    public static function all(): array
-    {
-        return [
-            self::SOLTERO,
-            self::CASADO,
-            self::DIVORCIADO,
-            self::VIUDO
-        ];
-    }
 }

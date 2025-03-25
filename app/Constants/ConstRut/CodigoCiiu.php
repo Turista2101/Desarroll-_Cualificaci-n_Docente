@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Constants;
+namespace App\Constants\ConstRut;
 
 class CodigoCiiu
 {
@@ -26,7 +26,7 @@ class CodigoCiiu
     public const SECCION_T = 'Actividades de los hogares como empleadores; actividades de los hogares como productores de bienes y servicios para uso propio';
     public const SECCION_U = 'Organizaciones y organismos extraterritoriales';
 
-
+    
     public static function all(): array
     {
         return [

@@ -8,12 +8,12 @@ Route::group([
     'prefix' => 'auth'
 ], function () {
     Route::post('registrar', [AuthController::class, 'registrar']);
-    Route::post('iniciarSesion', [AuthController::class, 'iniciarSesion']);
-    Route::post('restablecerContraseña/{id}', [AuthController::class, 'restablecerContraseña']);
+    Route::post('iniciar-sesion', [AuthController::class, 'iniciarSesion']);
+    Route::post('restablecer-contraseña/{id}', [AuthController::class, 'restablecerContraseña']);
 
     Route::group(['middleware' => 'auth:api'], function () {
-        Route::post('cerrarSesion', [AuthController::class, 'cerrarSesion']);
-        Route::get('obtenerUsuarioAutenticado', [AuthController::class, 'obtenerUsuarioAutenticado']);
-        Route::post('actualizarContrasena/{id}', [AuthController::class, 'actualizarContrasena']);
+        Route::post('cerrar-sesion', [AuthController::class, 'cerrarSesion']);
+        Route::get('obtener-usuario-utenticado', [AuthController::class, 'obtenerUsuarioAutenticado']);
+        Route::post('actualizar-contrasena/{id}', [AuthController::class, 'actualizarContrasena']);
     });
 });

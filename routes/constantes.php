@@ -9,6 +9,14 @@ Route::group([
     'prefix' => 'constantes'
 ], function () {
     
-    // Route::get('enviar', [ConstantsController::class, 'getConstants']);
+    Route::get('codigos-ciiu', [ConstantsController::class, 'getCodigosCiuu']);
+    Route::get('estado-civil', [ConstantsController::class, 'getEstadocivil']);
+    Route::get('genero', [ConstantsController::class, 'getGenero']);
+    Route::get('tipo-identificacion', [ConstantsController::class, 'getTipoIdentificacion']);
+    Route::get('categoria-libreta-militar', [ConstantsController::class, 'getCategoriaLibretaMilitar']);
+    Route::get('estado-afiliacion', [ConstantsController::class, 'getEstadoAfilicacion']);
+    Route::get('tipo-afiliacion', [ConstantsController::class, 'getTipoAfiliacion']);
+    Route::get('tipo-afiliado', [ConstantsController::class, 'getTipoAfiliado']);
+    Route::get('tipo-documento',[ConstantsController::class , 'getTipoDocumento']);
    
 });

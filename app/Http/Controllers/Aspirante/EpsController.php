@@ -1,14 +1,12 @@
 <?php
-
 namespace App\Http\Controllers\Aspirante;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Aspirante\Eps;
-use App\Constants\TipoAfiliacion;
-use App\Constants\EstadoAfiliacion;
-use App\Constants\TipoAfiliado;
-
+use App\Constants\ConstEps\TipoAfiliacion;
+use App\Constants\ConstEps\EstadoAfiliacion;
+use App\Constants\ConstEps\TipoAfiliado;
 
 class EpsController
 {
@@ -23,7 +21,7 @@ class EpsController
             'nombre_eps'                    => 'required|string|min:7|max:100',
             'tipo_afiliacion'               => 'required|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
             'estado_afiliacion'             => 'required|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
-            'fecha_afiliacion_efectiva'     => 'required|date',
+            'fecha_afiliacion_efectia'     => 'required|date',
             'fecha_finalizacion_afiliacion' => 'nullable|date',
             'tipo_afiliado'                 => 'required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
             'numero_afiliado'               => 'nullable|string|max:100',

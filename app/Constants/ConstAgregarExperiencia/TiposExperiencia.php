@@ -1,11 +1,8 @@
 <?php
 
-namespace App\Constants;
+namespace App\Constants\ConstAgregarExperiencia;
 
-// Tipos de constantes de experiencia, contiene las diferentes tipos de experiencias
-// si desea agregar uno nuevo hagalo desde aqui, y se reflejara en la base de datos
-
-class Experiencia
+class TiposExperiencia
 {
     // Tipos de experiencias
     public const INVESTIGACION = 'Investigación';
@@ -25,10 +22,5 @@ class Experiencia
             self::DIRECCION_ACADEMICA
         ];
     }
-
-
-
-
-
 
 }

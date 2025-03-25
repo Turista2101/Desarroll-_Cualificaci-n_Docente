@@ -10,14 +10,14 @@ Route::group([
     'prefix' => 'aspirante'
 ], function () {
     // Informacion de contacto
-    Route::get('ObtenerInformacionContacto', [InformacionContactoController::class, 'obtenerInformacionContacto']);
-    Route::post('CrearInformacionContacto', [InformacionContactoController::class, 'crearInformacionContacto']);
-    Route::put('ActualizarInformacionContacto', [InformacionContactoController::class, 'actualizarInformacionContacto']);
+    Route::get('obtener-informacion-contacto', [InformacionContactoController::class, 'obtenerInformacionContacto']);
+    Route::post('crear-informacion-contacto', [InformacionContactoController::class, 'crearInformacionContacto']);
+    Route::put('actualizar-informacion-Contacto', [InformacionContactoController::class, 'actualizarInformacionContacto']);
 
     // eps
-    Route::get('ObtenerEps', [EpsController::class, 'obtenerEps']);
-    Route::post('CrearEps', [EpsController::class, 'crearEps']);
-    Route::put('ActualizarEps', [EpsController::class, 'actualizarEps']);
+    Route::get('obtener-eps', [EpsController::class, 'obtenerEps']);
+    Route::post('crear-eps', [EpsController::class, 'crearEps']);
+    Route::put('actualizar-eps', [EpsController::class, 'actualizarEps']);
 
     // rut
     

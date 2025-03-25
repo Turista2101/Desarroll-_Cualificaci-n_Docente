@@ -11,9 +11,9 @@ use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Constants\TipoIdentificacion;
-use App\Constants\Genero;
-use App\Constants\EstadoCivil;
+use App\Constants\ConstUsuario\TipoIdentificacion;
+use App\Constants\ConstUsuario\Genero;
+use App\Constants\ConstUsuario\EstadoCivil;
 
 
 class AuthController

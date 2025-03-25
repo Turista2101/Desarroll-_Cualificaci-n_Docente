@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Constants;
+namespace App\Constants\ConstInformacionContacto;
 
 // Tipos de constantes de informacion de contacto, contiene los diferentes tipos de seleccion que usamos en  informacion de contacto
 // si desea agregar uno nuevo hagalo desde aqui, y se reflejara en la base de datos
@@ -22,4 +22,3 @@ class CategoriaLibretaMilitar
         ];
     }
 }
-

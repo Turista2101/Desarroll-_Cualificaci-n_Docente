@@ -19,20 +19,20 @@ class RoleController
         return response()->json($roles);
     }
 
-    // Crear un nuevo rol
-    public function crearRol(Request $request)
-    {
-        // Validar los datos de entrada
-        $request->validate([
-            'name' => 'required|string|unique:roles',
-        ]);
+    // // Crear un nuevo rol
+    // public function crearRol(Request $request)
+    // {
+    //     // Validar los datos de entrada
+    //     $request->validate([
+    //         'name' => 'required|string|unique:roles',
+    //     ]);
 
-        // Crear el rol
-        $rol = Role::create(['name' => $request->name]);
+    //     // Crear el rol
+    //     $rol = Role::create(['name' => $request->name]);
 
-        // Devolver respuesta con el rol creado
-        return response()->json(['message' => 'Rol creado con éxito', 'rol' => $rol]);
-    }
+    //     // Devolver respuesta con el rol creado
+    //     return response()->json(['message' => 'Rol creado con éxito', 'rol' => $rol]);
+    // }
 
     // Asignar un rol a un usuario
     public function asignarRol(Request $request)
@@ -87,11 +87,11 @@ class RoleController
         return response()->json(['message' => 'Rol actualizado con éxito']);
     }
 
-    // Eliminar un rol
-    public function eliminarRol(Role $rol)
-    {
-        // Eliminar el rol
-        $rol->delete();
-        return response()->json(['message' => 'Rol eliminado con éxito']);
-    }
+    // // Eliminar un rol
+    // public function eliminarRol(Role $rol)
+    // {
+    //     // Eliminar el rol
+    //     $rol->delete();
+    //     return response()->json(['message' => 'Rol eliminado con éxito']);
+    // }
 }

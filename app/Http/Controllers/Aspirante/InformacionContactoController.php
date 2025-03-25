@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Aspirante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Aspirante\InformacionContacto;
-use App\Constants\CategoriaLibretaMilitar;
+use App\Constants\ConstInformacionContacto\CategoriaLibretaMilitar;
 
 
 class InformacionContactoController

@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Constants;
+namespace App\Constants\ConstAgregarProduccionAcademica;
 
-// Tipos de constantes de produccion, contiene las diferentes tipos de producciones
-// si desea agregar uno nuevo hagalo desde aqui, y se reflejara en la base de datos
 
-class Produccion
+class TiposProduccion
 {
     // Tipos de producciones
     public const ENSAYO_O_ARTICULO = 'Ensayo o artículo';

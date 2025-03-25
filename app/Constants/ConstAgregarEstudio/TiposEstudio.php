@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Constants;
+namespace App\Constants\ConstAgregarEstudio;
 
-// Tipos de constantes de estuido, contiene las diferentes tipos de estudios
-// si desea agregar uno nuevo hagalo desde aqui, y se reflejara en la base de datos
 
-class Estudio
+class TiposEstudio
 {
     // Tipos de estudios
     public const CURSO_PROGRAMADO_O_CAPACITACION = 'Curso programado o capacitación';
