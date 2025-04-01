@@ -19,6 +19,8 @@ class Departamento extends Model
      use HasFactory;
      // definimos el nombre de la tabla
      protected $table = 'departamentos';
+     // definimos la clave primaria de la tabla
+     protected $primaryKey = 'id_departamento';
  
     // definimos los campos de la tabla departamentos que se pueden llenar
      protected $fillable = [
@@ -27,14 +29,16 @@ class Departamento extends Model
     ];
 
     // relacion de muchos a uno con la tabla paises
-     public function pais(): BelongsTo
+     public function paisDepartamento(): BelongsTo
      {
-            return $this->belongsTo(Pais::class,'pais_id');
+            return $this->belongsTo(Pais::class,'pais_id','id_pais');
      }
+
+     
      // relacion de uno a muchos con la tabla municipios
-     public function municipios(): HasMany
+     public function municipiosDepartamento(): HasMany
      {
-         return $this->hasMany(Municipio::class,'departamento_id');
+         return $this->hasMany(Municipio::class,'departamento_id','id_departamento');
      }
 
 }

@@ -18,6 +18,7 @@ class TiposEstudio
     public const TECNOLOGICO = 'Tecnológico';
     public const DIPLOMADO = 'Diplomado';
     public const CERTIFICACION = 'Certificación';
+    
 
     // Retorna todos los tipos de estudios
     public static function all(): array

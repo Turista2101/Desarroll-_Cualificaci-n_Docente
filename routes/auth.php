@@ -7,7 +7,7 @@ Route::group([
     'middleware' => 'api',
     'prefix' => 'auth'
 ], function () {
-    Route::post('registrar', [AuthController::class, 'registrar']);
+    Route::post('registrar-usuario', [AuthController::class, 'registrar']);
     Route::post('iniciar-sesion', [AuthController::class, 'iniciarSesion']);
     Route::post('restablecer-contraseña/{id}', [AuthController::class, 'restablecerContraseña']);
 

@@ -20,6 +20,8 @@ class Municipio extends Model
     use HasFactory;
     // definimos el nombre de la tabla
     protected $table = 'municipios';
+    // definimos el nombre de la clave primaria
+    protected $primaryKey = 'id_municipio';
     // definimos los campos de la tabla municipios que se pueden llenar
     protected $fillable = [
         'nombre',
@@ -27,26 +29,26 @@ class Municipio extends Model
     ];
 
 
-    // relacion de muchos a uno con la tabla departamentos
-    public function departamento():BelongsTo
-    {
-        return $this->belongsTo(Departamento::class,'departamento_id');
-    }
 
+    // relacion de muchos a uno con la tabla departamentos
+    public function departamentoMunicipio():BelongsTo
+    {
+        return $this->belongsTo(Departamento::class,'departamento_id','id_departamento');
+    }
 
 
     // relacion de uno a muchos con la tabla informacion_contactos
-    public function informacionContacto():HasMany
+    public function informacionContactosMunicipio():HasMany
     {
-        return $this->hasMany(InformacionContacto::class,'informacioncontacto_municipio_id');
+        return $this->hasMany(InformacionContacto::class,'municipio_id','id_municipio');
     }
 
 
+    
     //  relacion de uno a muchos con la tabla Users
-    public function ubicacionNacimientoUsers():HasMany
+    public function usuariosMunicipio():HasMany
     {
-        return $this->hasMany(User::class,'user_municipio_id');
-
+        return $this->hasMany(User::class,'municipio_id', 'id_municipio');
     }
 
 

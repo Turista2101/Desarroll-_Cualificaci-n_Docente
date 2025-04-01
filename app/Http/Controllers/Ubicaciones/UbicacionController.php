@@ -58,7 +58,7 @@ class UbicacionController
         fclose($handle);
     }
 
-    // Procesar archivo CSV de departamentos    
+    // Procesar archivo CSV de departamentos
     private function procesarDepartamentos($file)
     {
         // Abrir el archivo CSV

@@ -19,10 +19,12 @@ class InformacionContacto extends Model
     use HasFactory;
     // definimos el nombre de la tabla
     protected $table = 'informacion_contactos';
+    // definimos la clave primaria de la tabla
+    protected $primaryKey = 'id_informacion_contacto';
     // definimos los campos de la tabla informacion_contactos que se pueden llenar
     protected $fillable = [
-        'informacioncontacto_user_id',
-        'informacioncontacto_municipio_id',
+        'user_id',
+        'municipio_id',
         'categoria_libreta_militar',
         'numero_libreta_militar',
         'numero_distrito_militar',
@@ -35,17 +37,20 @@ class InformacionContacto extends Model
     ];
 
     // relacion de muchos a uno con la tabla municipios
-    public function municipio(): BelongsTo
+    // en este caso la tabla informacion_contactos tiene una relacion de muchos a uno con la tabla municipios
+
+    public function municipioInformacionContacto(): BelongsTo
     {
-        return $this->belongsTo(Municipio::class, 'informacioncontacto_municipio_id');
+        return $this->belongsTo(Municipio::class, 'municipio_id','id_municipio');
     }
 
 
 
     // relacion de uno a uno con la tabla usuarios
-    public function  usuario(): BelongsTo
+    // en este caso la tabla informacion_contactos tiene una relacion de muchos a uno con la tabla usuarios
+    public function  usuarioInformacionContacto(): BelongsTo
     {
-        return $this->belongsTo(User::class,'informacioncontacto_user_id');
+        return $this->belongsTo(User::class,'user_id','id');
     }
 
 

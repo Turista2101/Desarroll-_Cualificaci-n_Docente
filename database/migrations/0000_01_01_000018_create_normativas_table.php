@@ -9,12 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // tabla para gestionar los paises
     public function up(): void
     {
-        Schema::create('paises', function (Blueprint $table) {
-            $table->smallIncrements('id_pais');
+        Schema::create('normativas', function (Blueprint $table) {
+            $table->id();
             $table->string('nombre')->unique();
+            $table->string('descripcion')->nullable();
+            $table->string('tipo')->nullable();
             $table->timestamps();
         });
     }
@@ -22,9 +23,8 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    // elimina la tabla paises
     public function down(): void
     {
-        Schema::dropIfExists('paises');
+        Schema::dropIfExists('normativas');
     }
 };

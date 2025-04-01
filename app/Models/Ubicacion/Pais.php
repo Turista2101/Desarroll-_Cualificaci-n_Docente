@@ -15,13 +15,16 @@ class Pais extends Model
     use hasFactory;
     //definimos el nombre de la tabla
     protected $table = 'paises';
+    //definimos la clave primaria de la tabla
+    protected $primaryKey = 'id_pais';
     //definimos los campos de la tabla paises que se pueden llenar
     protected $fillable = [
         'nombre'
     ];
+
     //relacion de uno a muchos con la tabla departamentos
-    public function departamentos(): HasMany
+    public function departamentosPais(): HasMany
     {
-        return $this->hasMany(Departamento::class,'pais_id');
+        return $this->hasMany(Departamento::class,'pais_id','id_pais');
     }
 }

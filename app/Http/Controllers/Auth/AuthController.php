@@ -26,12 +26,12 @@ class AuthController
          //Validar los datos de entrada
 
         $validator = Validator::make(request()->all(), [
-            'user_municipio_id'      => 'requiered|exists:municipios,id',
+            'municipio_id'           => 'required|exists:municipios,id',
             'tipo_identificacion'    => 'required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
             'numero_identificacion'  => 'required|string|max:50',
             'genero'                 => 'nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
             'primer_nombre'          => 'required|string|max:100',
-            'segundo_nombre'         => 'nullabe|string|max:100',
+            'segundo_nombre'         => 'nullable|string|max:100',
             'primer_apellido'        => 'required|string|max:50',
             'segundo_apellido'       => 'nullable|string|max:50',
             'fecha_nacimiento'       => 'required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
@@ -48,7 +48,7 @@ class AuthController
 
         // crear un usuario
         $user = User::create([
-            'user_municipio_id' => $request->input('user_municipio_id'),
+            'municipio_id' => $request->input('municipio_id'),
             'tipo_identificacion' => $request->input('tipo_identificacion'),
             'numero_identificacion' => $request->input('numero_identificacion'),
             'genero' => $request->input('genero'),
@@ -75,7 +75,7 @@ class AuthController
         //Devolver respuesat con el token y el usuario
         return response()->json([
             'menssage'=>'Usuario creado exitosamente',
-            'user'=>$user,
+            // 'user'=>$user,
             'token'=>$token
         ], 201);
     
@@ -110,7 +110,7 @@ class AuthController
         // Devolver respuesta con el token y el usuario
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
-            'user'    => $user,
+            // 'user'    => $user,
             'token'   => $token
         ], 200);
     }

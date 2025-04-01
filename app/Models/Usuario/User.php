@@ -19,6 +19,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Aspirante\Eps;
 use App\Models\Aspirante\Rut;
+use App\Models\Aspirante\Idioma;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Aspirante\Experiencia;
+use App\Models\Aspirante\Documento;
+use App\Models\Aspirante\Estudio;
+use App\Models\Aspirante\ProduccionAcademica;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -26,6 +32,7 @@ class User extends Authenticatable implements JWTSubject
     // utilizamos el trait Notifiable para definir las notificaciones de usuarios
     // utilizamos el trait HasRoles para definir los roles de usuarios
     use HasFactory, Notifiable, HasRoles;
+    
     protected $table = 'users';
 
  
@@ -36,8 +43,7 @@ class User extends Authenticatable implements JWTSubject
      */
     // definimos los campos de la tabla users que se pueden llenar
     protected $fillable = [
-
-        'user_municipio_id',
+        'municipio_id',
         'tipo_identificacion',
         'numero_identificacion',
         'genero',
@@ -99,29 +105,42 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
+    
     // relacion de uno a uno con la tabla informacion_contacto
-    public function informacionContacto():HasOne
+    public function informacionContactoUsuario():HasOne
     {
-        return $this->hasOne(InformacionContacto::class, 'informacioncontacto_user_id');
+        return $this->hasOne(InformacionContacto::class, 'user_id','id');
     }
 
     // relacion de uno a uno con la tabla municipios
-    public function municipio():BelongsTo
+    public function municipioUsuarios():BelongsTo
     {
-        return $this->belongsTo(Municipio::class,'user_municipio_id');
+        return $this->belongsTo(Municipio::class,'municipio_id', 'id_municipio');
     }
     
     // relacion de uno a uno con la tabla eps
-    public function eps():HasOne
+    public function epsUsuario():HasOne
     {
-        return $this->hasOne(Eps::class, 'eps_user_id');
+        return $this->hasOne(Eps::class, 'user_id', 'id');
     }
 
     // relacion de uno a uno con la tabla ruts
-    public function rut():HasOne
+    public function rutUsuario():HasOne
     {
-        return $this->hasOne(Rut::class, 'rut_user_id');
+        return $this->hasOne(Rut::class, 'user_id', 'id');
     }
+
+    // relacion de uno a uno con la tabla documentos
+    public function documentosUsuario(): HasMany
+    {
+        return $this->hasMany(Documento::class, 'user_id', 'id');
+    }
+
    
 
+   
+   
+
+    
+    
 }

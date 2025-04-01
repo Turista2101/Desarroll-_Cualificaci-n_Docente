@@ -12,13 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('documentos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('')->constrained('users')->onDelete('cascade');// Usuario que sube el documento
+            $table->smallIncrements('id_documento');
+            $table->unsignedBigInteger('user_id');
             $table->string('archivo'); // Ruta del archivo
             $table->string('estado')->default('pendiente'); // Estado como string
             $table->nullableMorphs('documentable');// Relación polimórfica
             $table->string('tipo_documento')->nullable(); // "RUT", "EPS", "Cédula"
             $table->timestamps();
+            // llaves foraneas
+            $table->foreign('user_id')
+            ->references('id')
+            ->on('users');
 
         });
     }

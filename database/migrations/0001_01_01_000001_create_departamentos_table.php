@@ -13,10 +13,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('departamentos', function (Blueprint $table) {
-            $table->id();
+            $table->smallIncrements('id_departamento');
             $table->string('nombre')->unique();
-            $table->foreignId('pais_id')->constrained('paises')->cascadeOnDelete();
+            $table->unsignedSmallInteger('pais_id');
             $table->timestamps();
+
+            $table->foreign('pais_id')
+                ->references('id_pais')
+                ->on('paises');
         });
     }
 
