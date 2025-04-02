@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Models\Aspirante;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Usuario\User;
+use App\Models\Aspirante\Documento;
+
 
 class Estudio extends Model
 {
@@ -13,7 +13,6 @@ class Estudio extends Model
     protected $primaryKey = 'id_estudio';
 
     protected $fillable = [
-        'user_id',
         'tipo_estudio',
         'graduado',
         'institucion',
@@ -26,6 +25,12 @@ class Estudio extends Model
         'fecha_inicio',
         'fecha_fin'
     ];
+
+     // Relación polimórfica con documentos
+     public function documentosEstudio()
+     {
+         return $this->morphMany(Documento::class, 'documentable');
+     }
 
 
 }

@@ -3,8 +3,9 @@
 namespace App\Models\Aspirante;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Usuario\User;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Models\Aspirante\Documento;
+
 
 class Idioma extends Model
 {
@@ -14,12 +15,17 @@ class Idioma extends Model
     protected $primaryKey = 'id_idioma';
 
     protected $fillable = [
-        'user_id',
         'idioma',
         'institucion_idioma',
         'fecha_certificado',
         'nivel'
     ];
+    
+       // Relación polimórfica con documentos
+       public function documentosIdioma():MorphMany
+       {
+           return $this->morphMany(Documento::class, 'documentable');
+       }
 
 
 

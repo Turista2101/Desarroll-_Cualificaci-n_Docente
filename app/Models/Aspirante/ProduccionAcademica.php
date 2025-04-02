@@ -4,6 +4,10 @@ namespace App\Models\Aspirante;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TiposProductoAcademico\AmbitoDivulgacion;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Models\Aspirante\Documento;
+
 
 class ProduccionAcademica extends Model
 {
@@ -14,7 +18,7 @@ class ProduccionAcademica extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'user_id',
+        'ambito_divulgacion_id',
         'titulo',
         'numero_autores',
         'medio_divulgacion',
@@ -22,11 +26,16 @@ class ProduccionAcademica extends Model
     ];
 
 
-    // Relación uno a muchos con el modelo AmbitoDivulgacion
-    public function ambitoDivulgacionProduccionAcademica()
-    {
-        return $this->belongsTo(AmbitoDivulgacion::class, 'ambito_divulgacion_id', 'id_ambito_divulgacion');
-    }
+     // Relación polimórfica con documentos
+     public function documentosProduccionAcademica():MorphMany
+     {
+         return $this->morphMany(Documento::class, 'documentable');
+     }
 
+    // Relación con el modelo AmbitoDivulgacion
+    public function ambitoDivulgacionProduccionAcademica():BelongsTo
+    {
+        return $this->belongsTo(AmbitoDivulgacion::class, 'medio_divulgacion', 'id_ambito_divulgacion');
+    }
 
 }

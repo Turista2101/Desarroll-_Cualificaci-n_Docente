@@ -4,8 +4,8 @@ namespace App\Constants\ConstAgregarEstudio;
 
 class Graduado
 {
-    const SI = 'SI';
-    const NO = 'NO';
+    const SI = 'Si';
+    const NO = 'No';
 
     public static function all(): array
     {

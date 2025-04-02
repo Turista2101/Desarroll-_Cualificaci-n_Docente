@@ -16,8 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('archivo'); // Ruta del archivo
             $table->string('estado')->default('pendiente'); // Estado como string
-            $table->nullableMorphs('documentable');// Relación polimórfica
-            $table->string('tipo_documento')->nullable(); // "RUT", "EPS", "Cédula"
+            $table->morphs('documentable');// Relación polimórfica
             $table->timestamps();
             // llaves foraneas
             $table->foreign('user_id')

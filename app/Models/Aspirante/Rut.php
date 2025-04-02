@@ -24,8 +24,7 @@ class Rut extends Model
         'codigo_ciiu',
         'Responsabilidades_tributarias',
     ];
-
-
+    
     // Relación uno a uno con la tabla users
     public function usuarioRut(): BelongsTo
     {

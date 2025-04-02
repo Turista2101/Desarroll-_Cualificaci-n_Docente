@@ -22,17 +22,15 @@ return new class extends Migration
             $table->enum('graduado', Graduado::all());
             $table->string('institucion');
             $table->date('fecha_graduacion')->nullable();
-
             $table->enum('titulo_convalidado', TituloConvalidado::all());
             $table->date('fecha_convalidacion')->nullable();
             $table->string('resolucion_convalidacion')->nullable();
-
             $table->date('posible_fecha_graduacion')->nullable();
             $table->string('titulo_estudio')->nullable();
-
-            $table->date('fecha_inicio');
+            $table->date('fecha_inicio')->nullable();
             $table->date('fecha_fin')->nullable();
             $table->timestamps();
+
         });
     }
 

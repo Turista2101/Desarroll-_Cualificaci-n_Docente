@@ -18,13 +18,13 @@ return new class extends Migration
             $table->string('titulo');
             $table->tinyInteger('numero_autores')->default(1);
             $table->string('medio_divulgacion');
-            $table->date('fecha_divulgacion');
+            $table->date('fecha_divulgacion')->nullable();
             $table->timestamps();
             
             // llave foranea
             $table->foreign('ambito_divulgacion_id')
                 ->references('id_ambito_divulgacion')
-                ->on('ambitos_divulgacions');
+                ->on('ambito_divulgacions');
 
         });
     }

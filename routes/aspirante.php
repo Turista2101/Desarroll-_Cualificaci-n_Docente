@@ -4,6 +4,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Aspirante\InformacionContactoController;
 use App\Http\Controllers\Aspirante\EpsController;
+use App\Http\Controllers\Aspirante\IdiomaController;
+use App\Http\Controllers\Aspirante\ExperienciaController;
+use App\Http\Controllers\Aspirante\ProduccionAcademicaController;
+use App\Http\Controllers\Aspirante\EstudioController;
 
 Route::group([
     'middleware' => 'api', 'auth:api', 'role:Aspirante',
@@ -19,7 +23,19 @@ Route::group([
     Route::post('crear-eps', [EpsController::class, 'crearEps']);
     Route::put('actualizar-eps', [EpsController::class, 'actualizarEps']);
 
-    // rut
+    // idioma
+    Route::post('crear-idioma', [IdiomaController::class, 'crearIdioma']);
+
+    //Experiencia
+    Route::post('crear-experiencia', [ExperienciaController::class, 'crearExperiencia']);
+
+    //Produccion Academica
+    Route::post('crear-produccion', [ProduccionAcademicaController::class, 'crearProduccion']);
+
+    //Estudios
+    Route::post('crear-estudio', [EstudioController::class, 'crearEstudio']);
+    
+
     
 
 

@@ -23,10 +23,11 @@ return new class extends Migration
             $table->string('cargo');
             $table->enum('trabajo_actual', TrabajoActual::all())->nullable();
             $table->tinyInteger('intensidad_horaria')->nullable();
-            $table->date('fecha_inicio');
+            $table->date('fecha_inicio')->nullable();
             $table->date('fecha_finalizacion')->nullable();
             $table->date('fecha_expedicion_certificado')->nullable();
             $table->timestamps();
+
         });
     }
 

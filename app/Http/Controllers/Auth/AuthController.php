@@ -26,7 +26,7 @@ class AuthController
          //Validar los datos de entrada
 
         $validator = Validator::make(request()->all(), [
-            'municipio_id'           => 'required|exists:municipios,id',
+            'municipio_id'           => 'required|exists:municipios,id_municipio',
             'tipo_identificacion'    => 'required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
             'numero_identificacion'  => 'required|string|max:50',
             'genero'                 => 'nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero

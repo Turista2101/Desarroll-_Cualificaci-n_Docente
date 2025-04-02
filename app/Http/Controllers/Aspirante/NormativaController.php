@@ -8,6 +8,34 @@ use Illuminate\Support\Facades\Validator;
 
 class NormativaController
 {
+    // Crear una nueva normativa
+    public function crearNormativa(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nombre'        => 'required|string|max:255',
+            'descripcion'   => 'nullable|string',
+            'tipo'          => 'required|string|max:50',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        $normativa = Normativa::create($request->only([
+            'nombre',
+            'descripcion',
+            'tipo'
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Normativa creada correctamente',
+            'data' => $normativa
+        ], 201);
+    }
     // Obtener todas las normativas
     public function obtenerNormativas(Request $request)
     {
