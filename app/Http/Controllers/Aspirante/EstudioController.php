@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Aspirante\Estudio;
 use App\Models\Aspirante\Documento;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class EstudioController
 {
@@ -26,7 +28,7 @@ class EstudioController
             'resolucion_convalidacion'  => 'nullable|string|min:7|max:100',
             'posible_fecha_graduacion'  => 'nullable|date',
             'titulo_estudio'            => 'nullable|string|min:7|max:100',
-            'fecha_inicio'              => 'nullable|date',// volver este campo a requerido
+            'fecha_inicio'              => 'nullable|date', // volver este campo a requerido
             'fecha_fin'                 => 'nullable|date',
             'archivo'                   => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ]);
@@ -55,12 +57,12 @@ class EstudioController
         if ($request->hasFile('archivo')) {
             $archivo = $request->file('archivo');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('public/documentos/Estudios', $nombreArchivo);
+            $rutaArchivo = $archivo->storeAs('documentos/Estudios', $nombreArchivo, 'public');
 
             // Guardar el documento relacionado con el estudio
             Documento::create([
                 'user_id'        => $request->user()->id, // Usuario autenticado
-                'archivo'        => str_replace('public/', 'storage/','Estudios/', $rutaArchivo),
+                'archivo'        => str_replace('public/', '', $rutaArchivo),
                 'estado'         => 'pendiente',
                 'documentable_id' => $estudio->id_estudio, // Relación polimórfica
                 'documentable_type' => Estudio::class,
@@ -69,116 +71,156 @@ class EstudioController
 
         // Devolver respuesta con el registro creado
         return response()->json([
-            'message' => 'Registro creado correctamente',
+            'message' => 'Estudio y documento creados exitosamente',
             'data'    => $estudio,
         ], 201);
     }
 
 
 
-
-
-
-    
-    //obtener todos los registros de estudio
-    public function obtenerEstudio(Request $request)
+    // Obtener estudios del usuario autenticado
+    public function obtenerEstudios(Request $request)
     {
+        $user = $request->user(); // Obtiene el usuario autenticado
 
-        // Obtener todos los estudios del usuario autenticado
-        $estudios = Estudio::where('user_id', $request->user()->id)->get();
-    
-        // Si el usuario no tiene estudios, devolver un mensaje de error
-        if ($estudios->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No tiene estudios registrados'
-            ], 404);
+        // Verificar si el usuario está autenticado
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
         }
-    
-        // Devolver los estudios encontrados con una respuesta estructurada
-        return response()->json([
-            'success' => true,
-            'data' => $estudios
-        ], 200);
+
+        // Obtener solo los estudios que tienen documentos pertenecientes al usuario autenticado
+        $estudios = Estudio::whereHas('documentosEstudio', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->with(['documentosEstudio' => function ($query) {
+            $query->select('id_documento', 'documentable_id', 'archivo', 'user_id'); // Relación polimórfica usa documentable_id
+        }])->get();
+
+        // Agregar la URL del archivo a cada documento si existe
+        $estudios->each(function ($estudio) {
+            $estudio->documentosEstudio->each(function ($documento) {
+                if (!empty($documento->archivo)) {
+                    $documento->archivo_url = asset('storage/' . $documento->archivo);
+                }
+            });
+        });
+
+        return response()->json(['estudios' => $estudios], 200);
     }
 
 
-    //actualizar un registro de estudio
+
+    // Actualizar estudio
     public function actualizarEstudio(Request $request, $id)
     {
-        
-        //Buscar el registro de estudio por su id
-        $estudio = Estudio::where('id', $id)->where('user_id', $request->user()->id)->first();
-        
-        //Si no se encuentra el registro, devolver un mensaje de error
-        if (!$estudio) {
-            return response()->json(['error' => 'Registro no encontrado'], 404);
-        }
+        $user = $request->user();
 
-        //Validar los datos de entrada
-        $validator = Validator::make(request()->all(), [
-            'tipo_estudio'              => 'sometimes|in:'. implode(',',TiposEstudio::all()),
-            'graduado'                  => 'sometimes|in:'. implode(',',Graduado::all()),
-            'institucion'               => 'sometimes|string|min:7|max:100',
+        // Buscar el estudio que tenga documentos del usuario autenticado
+        $estudio = Estudio::whereHas('documentosEstudio', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->where('id_estudio', $id)->firstOrFail(); // Asegurar que use la clave primaria id_estudio
+
+        // Validar solo los campos que se envían en la solicitud
+        $validator = Validator::make($request->all(), [
+            'tipo_estudio'              => 'sometimes|required|in:' . implode(',', TiposEstudio::all()),
+            'graduado'                  => 'sometimes|required|in:' . implode(',', Graduado::all()),
+            'institucion'               => 'sometimes|required|string|min:7|max:100',
             'fecha_graduacion'          => 'sometimes|nullable|date',
-            'titulo_convalidado'        => 'sometimes|nullable|in:'. implode(',',TituloConvalidado::all()),
+            'titulo_convalidado'        => 'sometimes|required|in:' . implode(',', TituloConvalidado::all()),
             'fecha_convalidacion'       => 'sometimes|nullable|date',
             'resolucion_convalidacion'  => 'sometimes|nullable|string|min:7|max:100',
             'posible_fecha_graduacion'  => 'sometimes|nullable|date',
             'titulo_estudio'            => 'sometimes|nullable|string|min:7|max:100',
-            'fecha_inicio'              => 'sometimes|date',
+            'fecha_inicio'              => 'sometimes|required|date', 
             'fecha_fin'                 => 'sometimes|nullable|date',
+            'archivo'                   => 'sometimes|file|mimes:pdf,jpg,png|max:2048',
         ]);
 
-        //Si la validación falla, se devuelve un mensaje de error
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        //Actualizar el registro de estudio
-        $estudio->update($request->only([
-            'tipo_estudio',
-            'graduado',
-            'institucion',
-            'fecha_graduacion',
-            'titulo_convalidado',
-            'fecha_convalidacion',
-            'resolucion_convalidacion',
-            'posible_fecha_graduacion',
-            'titulo_estudio',
-            'fecha_inicio',
-            'fecha_fin'
-        ]));
+        // Depurar: Ver qué datos se están enviando
+        \Log::info('Datos recibidos para actualización:', $request->all());
 
-        //Devolver respuesta con el registro actualizado
+        // Filtrar solo los campos enviados para actualizar
+        $data = $request->only([
+            'tipo_estudio', 'graduado', 'institucion', 'fecha_graduacion',
+            'titulo_convalidado', 'fecha_convalidacion', 'resolucion_convalidacion',
+            'posible_fecha_graduacion', 'titulo_estudio', 'fecha_inicio', 'fecha_fin'
+        ]);
+
+        // Actualizar solo si hay cambios
+        $estudio->fill($data);
+        if ($estudio->isDirty()) {
+            $estudio->save();
+        } else {
+            return response()->json(['message' => 'No se realizaron cambios en el estudio'], 200);
+        }
+
+        // Manejo del archivo
+        if ($request->hasFile('archivo')) {
+            $archivo = $request->file('archivo');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $rutaArchivo = $archivo->storeAs('documentos/Estudios', $nombreArchivo, 'public');
+
+            // Buscar el documento asociado
+            $documento = Documento::where('documentable_id', $estudio->id_estudio)
+                ->where('documentable_type', Estudio::class)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if ($documento) {
+                Storage::disk('public')->delete($documento->archivo);
+                $documento->update([
+                    'archivo' => str_replace('public/', '', $rutaArchivo),
+                    'estado'  => 'pendiente',
+                ]);
+            } else {
+                Documento::create([
+                    'user_id'        => $user->id,
+                    'archivo'        => str_replace('public/', '', $rutaArchivo),
+                    'estado'         => 'pendiente',
+                    'documentable_id' => $estudio->id_estudio,
+                    'documentable_type' => Estudio::class,
+                ]);
+            }
+        }
+
         return response()->json([
-            'message' => 'Registro actualizado correctamente',
-            'data'    => $estudio->fresh()
+            'message' => 'Estudio actualizado correctamente',
+            'data'    => $estudio->refresh()
         ], 200);
     }
 
-
     
 
-    
-    //eliminar un registro de estudio
+    // Eliminar estudio
     public function eliminarEstudio(Request $request, $id)
     {
-
-        //Buscar el registro de estudio por su id
-        $estudio = Estudio::where('id', $id)->where('user_id', $request->user()->id)->first();
-        
-        //Si no se encuentra el registro, devolver un mensaje de error
+        $user = $request->user(); // Usuario autenticado
+    
+        // Buscar el estudio que tenga documentos del usuario autenticado
+        $estudio = Estudio::whereHas('documentosEstudio', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->where('id_estudio', $id)->first();
+    
         if (!$estudio) {
-            return response()->json(['error' => 'Registro no encontrado'], 404);
+            return response()->json(['error' => 'Estudio no encontrado o no tienes permiso para eliminarlo'], 403);
         }
-
-        //Eliminar el registro de estudio
+    
+        // Eliminar los documentos relacionados
+        foreach ($estudio->documentosEstudio as $documento) {
+            // Eliminar el archivo del almacenamiento si existe
+            if (!empty($documento->archivo) && Storage::exists('public/' . $documento->archivo)) {
+                Storage::delete('public/' . $documento->archivo);
+            }
+            $documento->delete(); // Eliminar el documento de la base de datos
+        }
+    
+        // Eliminar el estudio
         $estudio->delete();
-
-        //Devolver respuesta con un mensaje de éxito
-        return response()->json(['message' => 'Registro eliminado correctamente'], 200);
+    
+        return response()->json(['message' => 'Estudio eliminado correctamente'], 200);
     }
-
 
 }

@@ -34,6 +34,7 @@ class InformacionContacto extends Model
         'celular_alternativo',
         'correo_alterno',
         
+        
     ];
 
     // relacion de muchos a uno con la tabla municipios
@@ -52,6 +53,12 @@ class InformacionContacto extends Model
     {
         return $this->belongsTo(User::class,'user_id','id');
     }
+
+
+   
+    
+    
+
 
 
 

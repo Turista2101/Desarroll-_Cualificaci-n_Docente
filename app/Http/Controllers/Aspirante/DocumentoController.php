@@ -1,10 +1,23 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Aspirante\Documento;
+use App\Models\Aspirante\Estudio;
 
 use Illuminate\Http\Request;
 
 class DocumentoController
 {
-    //
+    public function filtrarPorTipoEstudio($tipo)
+{
+    // Obtener los IDs de los estudios que coincidan con el tipo solicitado
+    $estudios = Estudio::where('tipo_estudio', $tipo)->pluck('id');
+
+    // Obtener documentos relacionados con esos estudios
+    $documentos = Documento::whereIn('documentable_id', $estudios)
+        ->where('documentable_type', Estudio::class)
+        ->get();
+
+    return response()->json(['documentos' => $documentos]);
+}
 }

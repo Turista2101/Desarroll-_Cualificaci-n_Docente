@@ -23,5 +23,7 @@ Route::group([
     Route::get('listar-usuarios', [UserController::class, 'listarUsuarios']);
     Route::put('editar-usuario/{id}', [UserController::class, 'editarUsuario']);
     Route::delete('eliminar-usuario/{id}', [UserController::class, 'eliminarUsuario']);
+
+    
     
 });

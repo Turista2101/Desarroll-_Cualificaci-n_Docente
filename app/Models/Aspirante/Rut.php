@@ -31,5 +31,11 @@ class Rut extends Model
         return $this->belongsTo(User::class, 'user_id', 'id_user');
     }
 
+    //relacion polimorfica con la tabla documentos
+    public function documentosRut()
+    {
+        return $this->morphMany(Documento::class, 'documentable');
+    }
+
 
 }

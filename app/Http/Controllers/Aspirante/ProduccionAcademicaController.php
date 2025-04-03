@@ -56,4 +56,8 @@ class ProduccionAcademicaController
       ], 201);
    
    }
+
+
+   // Actualizar un registro de producción académica
+   
 }

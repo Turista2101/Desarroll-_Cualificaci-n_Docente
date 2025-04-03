@@ -7,6 +7,7 @@ use App\Models\Aspirante\Eps;
 use App\Constants\ConstEps\TipoAfiliacion;
 use App\Constants\ConstEps\EstadoAfiliacion;
 use App\Constants\ConstEps\TipoAfiliado;
+use App\Models\Aspirante\Documento;
 
 class EpsController
 {
@@ -20,20 +21,21 @@ class EpsController
             'nombre_eps'                    => 'required|string|min:7|max:100',
             'tipo_afiliacion'               => 'required|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
             'estado_afiliacion'             => 'required|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
-            'fecha_afiliacion_efectiva'      => 'required|date',
+            'fecha_afiliacion_efectiva'     => 'required|date',
             'fecha_finalizacion_afiliacion' => 'nullable|date',
             'tipo_afiliado'                 => 'required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
             'numero_afiliado'               => 'nullable|string|max:100',
+            'archivo'                       => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ]);
 
         //Si la validación falla, se devuelve un mensaje de error
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            return response()->json($validator->errors()->toJson(), 400);
         }
 
         // crear un registro de eps
-        Eps::create([
+        $eps = Eps::create([
             'nombre_eps'                    => $request->input('nombre_eps'),
             'tipo_afiliacion'               => $request->input('tipo_afiliacion'),
             'estado_afiliacion'             => $request->input('estado_afiliacion'),
@@ -43,8 +45,27 @@ class EpsController
             'numero_afiliado'               => $request->input('numero_afiliado'),
         ]);
 
-        //Devolver respuesta con el registro creado
-        return response()->json(['menssage'=>'Usuario creado exitosamente'], 201);
+        // Verificar si se envió un archivo
+        if ($request->hasFile('archivo')) {
+            $archivo = $request->file('archivo');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $rutaArchivo = $archivo->storeAs('public/documentos/Eps', $nombreArchivo);
+            
+            // Guardar el documento relacionado con el eps
+            Documento::create([
+                'user_id'          => $request->user()->id,
+                'archivo'          => str_replace('public/', 'storage/', 'Eps/', $rutaArchivo),
+                'estado'           => 'pendiente',
+                'documentable_id' => $eps->id_eps,
+                'documentable_type' => Eps::class,
+            ]);
+        }
+
+        // Devolver respuesta con la información de eps creada
+        return response()->json([
+            'message' => 'Eps y documento creado exitosamente',
+            'data'    => $eps
+        ], 201);
     }
 
 
@@ -52,74 +73,11 @@ class EpsController
 
     
     //Obtener la información de eps del usuario autenticado
-    public function obtenerEps(Request $request)
-
-    {
-        //obtener la información de eps del usuario autenticado
-        $eps = Eps::where('user_id', $request->user()->id)->first();
-
-        //sino se encuentra la información de eps, se devuelve un mensaje de error
-        if (!$eps) {
-            return response()->json(['message' => 'No se ha encontrado información de eps para el usuario autenticado'], 404);
-        }
-        //devolver respuesta con la información de eps
-        return response()->json([
-            'message' => 'Información de EPS obtenida exitosamente',
-            'data'    => $eps
-        ], 200);
-        
-    }
-
-
+    
 
 
     //Actualizar la información de eps del usuario autenticado
-    public function actualizarEps(Request $request)
-    {
    
-        //buscar la información de eps del usuario autenticado
-        $eps = Eps::where('user_id', $request->user()->id)->first();
-
-        //si no se encuentra la información de eps, se devuelve un mensaje de error
-        if (!$eps) {
-            return response()->json(['message' => 'No se ha encontrado información de eps para el usuario autenticado'], 404);
-        }
-
-        //validar los datos de entrada
-        $validator = Validator::make(request()->all(), [
-
-            'nombre_eps'                    => 'sometimes|string|min:7|max:100',
-            'tipo_afiliacion'               => 'sometimes|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
-            'estado_afiliacion'             => 'sometimes|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
-            'fecha_afiliacion_efectiva'     => 'sometimes|date',
-            'fecha_finalizacion_afiliacion' => 'sometimes|nullable|date',
-            'tipo_afiliado'                 => 'sometimes|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
-            'numero_afiliado'               => 'sometimes|nullable|string|max:100',
-        ]);
-
-        //si la validación falla, se devuelve un mensaje de error
-        if ($validator->fails()) {
-            return response()->json(['errors'=>$validator->errors()], 400);
-        }
-        
-        //actualizar la información de eps
-        $eps->update($request->only([
-            'nombre_eps',
-            'tipo_afiliacion',
-            'estado_afiliacion',
-            'fecha_afiliacion_efectiva',
-            'fecha_finalizacion_afiliacion',
-            'tipo_afiliado',
-            'numero_afiliado'
-        ]));
-
-        //devolver respuesta con la información de eps actualizada
-        return response()->json([
-            'message' => 'Información de EPS actualizada exitosamente',
-            'data'    => $eps->fresh()
-        ], 200);
-    }
-
 
 
 

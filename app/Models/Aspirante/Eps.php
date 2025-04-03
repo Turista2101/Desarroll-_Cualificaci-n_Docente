@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Usuario\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Aspirante\Documento;
 
 class Eps extends Model
 {
@@ -30,6 +31,12 @@ class Eps extends Model
     public function usuarioEps(): BelongsTo
     {
         return $this->belongsTo(User::class,'user_id','id');
+    }
+
+    // relacion polimorfia con documentos
+    public function documentosEps()
+    {
+        return $this->morphMany(Documento::class, 'documentable');
     }
 
 }

@@ -34,6 +34,9 @@ Route::group([
 
     //Estudios
     Route::post('crear-estudio', [EstudioController::class, 'crearEstudio']);
+    Route::get('obtener-estudios', [EstudioController::class, 'obtenerEstudios']);
+    Route::put('actualizar-estudio/{id}', [EstudioController::class, 'actualizarEstudio']);
+    Route::delete('eliminar-estudio/{id}', [EstudioController::class, 'eliminarEstudio']);
     
 
     
