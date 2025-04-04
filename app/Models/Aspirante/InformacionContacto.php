@@ -25,6 +25,8 @@ class InformacionContacto extends Model
     protected $fillable = [
         'user_id',
         'municipio_id',
+        'tipo_identificacion',
+        'numero_identificacion',
         'categoria_libreta_militar',
         'numero_libreta_militar',
         'numero_distrito_militar',
@@ -33,7 +35,7 @@ class InformacionContacto extends Model
         'telefono_movil',
         'celular_alternativo',
         'correo_alterno',
-        
+
         
     ];
 
@@ -44,15 +46,17 @@ class InformacionContacto extends Model
     {
         return $this->belongsTo(Municipio::class, 'municipio_id','id_municipio');
     }
-
-
-
-    // relacion de uno a uno con la tabla usuarios
-    // en este caso la tabla informacion_contactos tiene una relacion de muchos a uno con la tabla usuarios
-    public function  usuarioInformacionContacto(): BelongsTo
+    // relacion polimorfica con documentos
+    public function documentosInformacionContacto()
     {
-        return $this->belongsTo(User::class,'user_id','id');
+        return $this->morphMany(Documento::class, 'documentable');
     }
+    
+
+
+
+    
+
 
 
    

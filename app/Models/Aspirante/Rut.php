@@ -25,17 +25,12 @@ class Rut extends Model
         'Responsabilidades_tributarias',
     ];
     
-    // Relación uno a uno con la tabla users
-    public function usuarioRut(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id', 'id_user');
-    }
-
+    
     //relacion polimorfica con la tabla documentos
     public function documentosRut()
     {
         return $this->morphMany(Documento::class, 'documentable');
     }
-
+    
 
 }

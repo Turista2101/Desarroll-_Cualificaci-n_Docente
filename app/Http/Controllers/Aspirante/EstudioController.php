@@ -107,7 +107,7 @@ class EstudioController
         return response()->json(['estudios' => $estudios], 200);
     }
 
-
+    
 
     // Actualizar estudio
     public function actualizarEstudio(Request $request, $id)
@@ -140,22 +140,17 @@ class EstudioController
         }
 
         // Depurar: Ver qué datos se están enviando
-        \Log::info('Datos recibidos para actualización:', $request->all());
+        Log::info('Datos recibidos para actualización:', $request->all());
+        Log::info('Datos actuales del modelo:', $estudio->toArray());
 
-        // Filtrar solo los campos enviados para actualizar
+        // Actualizar los datos directamente
         $data = $request->only([
             'tipo_estudio', 'graduado', 'institucion', 'fecha_graduacion',
             'titulo_convalidado', 'fecha_convalidacion', 'resolucion_convalidacion',
             'posible_fecha_graduacion', 'titulo_estudio', 'fecha_inicio', 'fecha_fin'
         ]);
 
-        // Actualizar solo si hay cambios
-        $estudio->fill($data);
-        if ($estudio->isDirty()) {
-            $estudio->save();
-        } else {
-            return response()->json(['message' => 'No se realizaron cambios en el estudio'], 200);
-        }
+        $estudio->update($data);
 
         // Manejo del archivo
         if ($request->hasFile('archivo')) {

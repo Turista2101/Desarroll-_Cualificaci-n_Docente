@@ -44,8 +44,6 @@ class User extends Authenticatable implements JWTSubject
     // definimos los campos de la tabla users que se pueden llenar
     protected $fillable = [
         'municipio_id',
-        'tipo_identificacion',
-        'numero_identificacion',
         'genero',
         'primer_nombre',
         'segundo_nombre',

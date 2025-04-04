@@ -16,8 +16,6 @@ class AdminSeeder extends Seeder
             'email' => 'admin@universidad.com'
         ], [
             'municipio_id'           => 703, // Cambia este valor según el municipio en tu DB
-            'tipo_identificacion'    => 'Cédula de ciudadanía',
-            'numero_identificacion'  => '123456789',
             'genero'                 => 'Masculino', // Cambia según los valores en Genero::all()
             'primer_nombre'          => 'Admin',
             'segundo_nombre'         => 'Sistema',

@@ -26,12 +26,7 @@ class Eps extends Model
         'tipo_afiliado',
         'numero_afiliado'
     ];
-
-    // Relación uno a uno con la tabla users
-    public function usuarioEps(): BelongsTo
-    {
-        return $this->belongsTo(User::class,'user_id','id');
-    }
+    
 
     // relacion polimorfia con documentos
     public function documentosEps()

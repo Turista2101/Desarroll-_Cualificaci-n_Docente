@@ -11,9 +11,9 @@ use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Constants\ConstUsuario\TipoIdentificacion;
 use App\Constants\ConstUsuario\Genero;
 use App\Constants\ConstUsuario\EstadoCivil;
+
 
 
 class AuthController
@@ -27,8 +27,6 @@ class AuthController
 
         $validator = Validator::make(request()->all(), [
             'municipio_id'           => 'required|exists:municipios,id_municipio',
-            'tipo_identificacion'    => 'required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
-            'numero_identificacion'  => 'required|string|max:50',
             'genero'                 => 'nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
             'primer_nombre'          => 'required|string|max:100',
             'segundo_nombre'         => 'nullable|string|max:100',
@@ -49,8 +47,6 @@ class AuthController
         // crear un usuario
         $user = User::create([
             'municipio_id' => $request->input('municipio_id'),
-            'tipo_identificacion' => $request->input('tipo_identificacion'),
-            'numero_identificacion' => $request->input('numero_identificacion'),
             'genero' => $request->input('genero'),
             'primer_nombre' => $request->input('primer_nombre'),
             'segundo_nombre' => $request->input('segundo_nombre'),
@@ -115,11 +111,53 @@ class AuthController
         ], 200);
     }
 
+    //actualizar la informacion del usuario
+    public function actualizarUsuario(Request $request) {
+        // Obtener el usuario autenticado
+        $user = JWTAuth::user();
+
+        // Validar los datos de entrada
+        $validator = Validator::make($request->all(), [
+            'municipio_id'           => 'sometimes|nullable|exists:municipios,id_municipio',
+            'genero'                 => 'sometimes|nullable|in:' . implode(',', Genero::all()),
+            'primer_nombre'          => 'sometimes|nullable|string|max:100',
+            'segundo_nombre'         => 'sometimes|nullable|string|max:100',
+            'primer_apellido'        => 'sometimes|nullable|string|max:50',
+            'segundo_apellido'       => 'sometimes|nullable|string|max:50',
+            'fecha_nacimiento'       => 'sometimes|nullable|date|before:today',
+            'estado_civil'           => 'sometimes|nullable|in:' . implode(',', EstadoCivil::all()),
+            'email'                  => 'sometimes|nullable|string|email|max:100|unique:users,email,' . $user->id,
+        ]);
+
+        // Si la validación falla, devolver mensaje de error
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        // Actualizar los campos proporcionados en la solicitud
+        $user->update($request->only([
+            'municipio_id',
+            'genero',
+            'primer_nombre',
+            'segundo_nombre',
+            'primer_apellido',
+            'segundo_apellido',
+            'fecha_nacimiento',
+            'estado_civil',
+            'email'
+        ]));
+
+        // Devolver respuesta con el usuario actualizado
+        return response()->json([
+            'message' => 'Información actualizada exitosamente',
+            'user' => $user
+        ], 200);
+    }
 
 
+    
 
     //Cerrar sesión
-
     public function cerrarSesion(){
         //Invalidar el token actual
         JWTAuth::invalidate(JWTAuth::getToken());
@@ -200,14 +238,16 @@ class AuthController
         $token = bin2hex(random_bytes(32));
 
         //Guardar el token en la base de datos
-        DB::table('password_reset_tokens')->updateOrInsert([
-            'email' => $request->email,
-            'token' => $token,
-            'created_at' => now(),
-        ]);
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email], // Condición para buscar
+            ['token' => $token, 'created_at' => now()] // Datos a actualizar o insertar
+        );
+
+        //Generar el enlace de restablecimiento de contraseña
+        $resetLink = url('/password/reset', ['token' => $token, 'email' => $user->email]);
 
         //Enviar un correo electrónico con el token
-        Mail::to($request->email)->send(new ResetPasswordMail($token));
+        Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink));
 
         //Devolver respuesta
         return response()->json(['message'=>'Correo electrónico enviado'], 200);

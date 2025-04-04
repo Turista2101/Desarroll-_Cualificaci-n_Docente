@@ -9,11 +9,12 @@ Route::group([
 ], function () {
     Route::post('registrar-usuario', [AuthController::class, 'registrar']);
     Route::post('iniciar-sesion', [AuthController::class, 'iniciarSesion']);
-    Route::post('restablecer-contraseña/{id}', [AuthController::class, 'restablecerContraseña']);
+    Route::post('restablecer-contrasena', [AuthController::class, 'restablecerContrasena']);
 
     Route::group(['middleware' => 'auth:api'], function () {
         Route::post('cerrar-sesion', [AuthController::class, 'cerrarSesion']);
         Route::get('obtener-usuario-utenticado', [AuthController::class, 'obtenerUsuarioAutenticado']);
         Route::post('actualizar-contrasena/{id}', [AuthController::class, 'actualizarContrasena']);
+        Route::post('actualizar-usuario', [AuthController::class, 'actualizarUsuario']);
     });
 });

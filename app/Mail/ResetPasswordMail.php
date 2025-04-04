@@ -13,41 +13,24 @@ class ResetPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    public $resetLink;
+    public $user;
+
+    public function __construct($user, $resetLink)
     {
-        //
+        $this->user = $user;
+        $this->resetLink = $resetLink;
     }
 
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Reset Password Mail',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'view.name',
-        );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
+        return $this->subject('Restablecimiento de Contraseña')
+                    ->html("
+                        <p>Hola, {$this->user->name}</p>
+                        <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+                        <p><a href='{$this->resetLink}'>Haz clic aquí para restablecer tu contraseña</a></p>
+                        <p>Si no solicitaste este cambio, ignora este mensaje.</p>
+                        <p>Gracias,<br>" . config('app.name') . "</p>
+                    ");
     }
 }
