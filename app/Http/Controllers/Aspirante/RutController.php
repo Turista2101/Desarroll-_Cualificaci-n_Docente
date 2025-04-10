@@ -64,6 +64,7 @@ class RutController
     }
 
     
+    
     //obtener estudios del usuario autenticado
     public function obtenerRut(Request $request)
     {

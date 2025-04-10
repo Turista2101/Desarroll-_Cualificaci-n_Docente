@@ -15,7 +15,6 @@ return new class extends Migration
     {
         Schema::create('informacion_contactos', function (Blueprint $table) {
             $table->smallIncrements('id_informacion_contacto');
-            $table->unsignedBigInteger('user_id');//relacion de muchos a uno con la tabla usuarios
             $table->unsignedSmallInteger('municipio_id');//relacion de muchos a uno con la tabla municipios
             $table->enum('tipo_identificacion', TipoIdentificacion::all());
             $table->string('numero_identificacion')->unique();
@@ -29,11 +28,6 @@ return new class extends Migration
             $table->string('correo_alterno')->nullable();
             $table->timestamps();
 
-            //llave foranea de la tabla usuarios
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
             //llave foranea de la tabla municipios
             $table->foreign('municipio_id')
                 ->references('id_municipio')

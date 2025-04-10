@@ -15,17 +15,12 @@ return new class extends Migration
     {
         Schema::create('ruts', function (Blueprint $table) {
             $table->smallIncrements('id_rut');
-            $table->unsignedBigInteger('user_id');//relacion de muchos a uno con la tabla usuarios
-            $table->string('nombre_rut');
             $table->string('razon_social');
             $table->enum('tipo_persona',TipoPersona::all());
             $table->enum('codigo_ciiu', CodigoCiiu::all() );
             $table->string('Responsabilidades_tributarias');
             $table->timestamps();
-            //llave foranea de la tabla usuarios
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users');
+           
         });
     }
 

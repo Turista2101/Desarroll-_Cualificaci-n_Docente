@@ -17,7 +17,6 @@ class Eps extends Model
     protected $primaryKey = 'id_eps';
 
     protected $fillable = [
-        'user_id',
         'nombre_eps',
         'tipo_afiliacion',
         'estado_afiliacion',

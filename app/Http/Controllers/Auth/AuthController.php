@@ -23,6 +23,7 @@ class AuthController
    //Registro de usuario
      
     public function registrar(Request $request){
+        
          //Validar los datos de entrada
 
         $validator = Validator::make(request()->all(), [
@@ -169,8 +170,8 @@ class AuthController
 
 
 
+    
     //Obtener el usuario autenticado
-
     public function obtenerUsuarioAutenticado(){
         //Obtener el usuario autenticado
         $user = JWTAuth::user();

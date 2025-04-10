@@ -94,7 +94,7 @@ class EpsController
                 if(!empty($documento->archivo)) {
                     $documento->archivo_url = asset('storage/' . $documento->archivo);
             }
-        }); 
+        });
     });
     return response()->json(['eps'=>$eps], 200);
 

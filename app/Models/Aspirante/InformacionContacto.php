@@ -23,7 +23,6 @@ class InformacionContacto extends Model
     protected $primaryKey = 'id_informacion_contacto';
     // definimos los campos de la tabla informacion_contactos que se pueden llenar
     protected $fillable = [
-        'user_id',
         'municipio_id',
         'tipo_identificacion',
         'numero_identificacion',

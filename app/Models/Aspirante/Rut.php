@@ -17,7 +17,6 @@ class Rut extends Model
     protected $primaryKey = 'id_rut';
 
     protected $fillable = [
-        'user_id',
         'nombre_rut',
         'razon_social',
         'tipo_persona',

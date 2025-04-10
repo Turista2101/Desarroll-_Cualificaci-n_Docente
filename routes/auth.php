@@ -13,7 +13,7 @@ Route::group([
 
     Route::group(['middleware' => 'auth:api'], function () {
         Route::post('cerrar-sesion', [AuthController::class, 'cerrarSesion']);
-        Route::get('obtener-usuario-utenticado', [AuthController::class, 'obtenerUsuarioAutenticado']);
+        Route::get('obtener-usuario-autenticado', [AuthController::class, 'obtenerUsuarioAutenticado']);
         Route::post('actualizar-contrasena/{id}', [AuthController::class, 'actualizarContrasena']);
         Route::post('actualizar-usuario', [AuthController::class, 'actualizarUsuario']);
     });
