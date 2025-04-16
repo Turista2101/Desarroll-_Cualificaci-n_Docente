@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Usuario\User;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
@@ -16,6 +15,8 @@ class AdminSeeder extends Seeder
             'email' => 'admin@universidad.com'
         ], [
             'municipio_id'           => 703, // Cambia este valor según el municipio en tu DB
+            'tipo_identificacion'    => 'Cédula de ciudadanía', // Cambia según los valores en TipoIdentificacion::all()
+            'numero_identificacion'  => '123456789', // Cambia según necesidad
             'genero'                 => 'Masculino', // Cambia según los valores en Genero::all()
             'primer_nombre'          => 'Admin',
             'segundo_nombre'         => 'Sistema',

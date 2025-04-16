@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('titulo');
             $table->tinyInteger('numero_autores')->default(1);
             $table->string('medio_divulgacion');
-            $table->date('fecha_divulgacion')->nullable();
+            $table->date('fecha_divulgacion');
             $table->timestamps();
             
             // llave foranea

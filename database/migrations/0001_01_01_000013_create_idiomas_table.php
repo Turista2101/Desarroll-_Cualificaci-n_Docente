@@ -16,7 +16,7 @@ return new class extends Migration
             $table->smallIncrements('id_idioma');
             $table->string('idioma');
             $table->string('institucion_idioma');
-            $table->date('fecha_certificado')->nullable();
+            $table->date('fecha_certificado');
             $table->enum('nivel', NivelIdioma::all());
             $table->timestamps();
 

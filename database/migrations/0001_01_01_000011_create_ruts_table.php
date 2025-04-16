@@ -15,10 +15,11 @@ return new class extends Migration
     {
         Schema::create('ruts', function (Blueprint $table) {
             $table->smallIncrements('id_rut');
+            $table->string('numero_rut')->unique();
             $table->string('razon_social');
             $table->enum('tipo_persona',TipoPersona::all());
             $table->enum('codigo_ciiu', CodigoCiiu::all() );
-            $table->string('Responsabilidades_tributarias');
+            $table->string('responsabilidades_tributarias');
             $table->timestamps();
            
         });

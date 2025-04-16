@@ -17,11 +17,11 @@ class Rut extends Model
     protected $primaryKey = 'id_rut';
 
     protected $fillable = [
-        'nombre_rut',
+        'numero_rut',
         'razon_social',
         'tipo_persona',
         'codigo_ciiu',
-        'Responsabilidades_tributarias',
+        'responsabilidades_tributarias',
     ];
     
     

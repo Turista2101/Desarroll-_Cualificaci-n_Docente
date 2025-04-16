@@ -1,178 +1,239 @@
 <?php
 namespace App\Http\Controllers\Aspirante;
 
+use App\Http\Requests\RequestAspirante\RequestEps\ActualizarEpsRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Aspirante\Eps;
-use App\Constants\ConstEps\TipoAfiliacion;
-use App\Constants\ConstEps\EstadoAfiliacion;
-use App\Constants\ConstEps\TipoAfiliado;
 use App\Models\Aspirante\Documento;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\RequestAspirante\RequestEps\CrearEpsRequest;
 
+/**
+ * @OA\Info(
+ *     title="API de Gestión de EPS",
+ *     version="1.0.0",
+ *     description="Endpoints para manejar información de EPS y documentos asociados."
+ * )
+ * @OA\Server(url="http://localhost:8000/api")
+ */
 
 class EpsController
 {
+    /**
+     * Crear un registro de EPS con documento adjunto.
+     *
+     * @OA\Post(
+     *     path="/aspirante/crear-eps",
+     *     tags={"EPS"},
+     *     summary="Crear EPS",
+     *     description="Crea una nueva EPS y sube un archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"nombre_eps", "tipo_afiliacion", "estado_afiliacion", "fecha_afiliacion_efectiva", "tipo_afiliado", "archivo"},
+     *                 @OA\Property(property="nombre_eps", type="string", minLength=7, maxLength=100, example="Salud Total EPS"),
+     *                 @OA\Property(property="tipo_afiliacion", type="string", enum={"contributivo", "subsidiado", "especial"}, example="contributivo"),
+     *                 @OA\Property(property="estado_afiliacion", type="string", enum={"activo", "inactivo", "pendiente"}, example="activo"),
+     *                 @OA\Property(property="fecha_afiliacion_efectiva", type="string", format="date", example="2023-01-15"),
+     *                 @OA\Property(property="fecha_finalizacion_afiliacion", type="string", format="date", nullable=true, example="2025-01-15"),
+     *                 @OA\Property(property="tipo_afiliado", type="string", enum={"titular", "beneficiario"}, example="titular"),
+     *                 @OA\Property(property="numero_afiliado", type="string", maxLength=100, nullable=true, example="AF123456"),
+     *                 @OA\Property(property="archivo", type="string", format="binary", description="Archivo PDF, JPG o PNG (máx. 2MB)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="EPS creada exitosamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="EPS y documento creado exitosamente"),
+     *             @OA\Property(property="data", ref="#/components/schemas/EPS")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error al crear la EPS"),
+     *             @OA\Property(property="error", type="string", example="Detalles del error...")
+     *         )
+     *     )
+     * )
+     */
+
     //Crear un registro de eps
-    public function crearEps(Request $request)
+    public function crearEps(CrearEpsRequest $request)
     {
-        //Validar los datos de entrada
-
-        $validator = Validator::make(request()->all(), [
-
-            'nombre_eps'                    => 'required|string|min:7|max:100',
-            'tipo_afiliacion'               => 'required|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
-            'estado_afiliacion'             => 'required|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
-            'fecha_afiliacion_efectiva'     => 'required|date',
-            'fecha_finalizacion_afiliacion' => 'nullable|date',
-            'tipo_afiliado'                 => 'required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
-            'numero_afiliado'               => 'nullable|string|max:100',
-            'archivo'                       => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
-        ]);
-
-        //Si la validación falla, se devuelve un mensaje de error
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-
-        // crear un registro de eps
-        $eps = Eps::create([
-            'nombre_eps'                    => $request->input('nombre_eps'),
-            'tipo_afiliacion'               => $request->input('tipo_afiliacion'),
-            'estado_afiliacion'             => $request->input('estado_afiliacion'),
-            'fecha_afiliacion_efectiva'     => $request->input('fecha_afiliacion_efectiva'),
-            'fecha_finalizacion_afiliacion' => $request->input('fecha_finalizacion_afiliacion'),
-            'tipo_afiliado'                 => $request->input('tipo_afiliado'),
-            'numero_afiliado'               => $request->input('numero_afiliado'),
-        ]);
-
-        // Verificar si se envió un archivo
-        if ($request->hasFile('archivo')) {
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('public/documentos/Eps', $nombreArchivo);
-            
-            // Guardar el documento relacionado con el eps
-            Documento::create([
-                'user_id'          => $request->user()->id,
-                'archivo'          => str_replace('public/', 'storage/', 'Eps/', $rutaArchivo),
-                'estado'           => 'pendiente',
-                'documentable_id' => $eps->id_eps,
-                'documentable_type' => Eps::class,
-            ]);
-        }
-
-        // Devolver respuesta con la información de eps creada
-        return response()->json([
-            'message' => 'Eps y documento creado exitosamente',
-            'data'    => $eps
-        ], 201);
-    }
+        try {
+            $eps = DB::transaction(function () use ($request) {
+                // Validar los datos de la solicitud
+                $datosEpsCrear = $request->validated();
     
+                // Crear EPS
+                $eps = Eps::create($datosEpsCrear);
+    
+                // Subir archivo si existe
+                if ($request->hasFile('archivo')) {
+                    $archivo = $request->file('archivo');
+                    $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+                    $rutaArchivo = $archivo->storeAs('documentos/Eps', $nombreArchivo, 'public');
+    
+                    Documento::create([
+                        'user_id'           => $request->user()->id,
+                        'archivo'           => str_replace('public/', '', $rutaArchivo),
+                        'estado'            => 'pendiente',
+                        'documentable_id'   => $eps->id_eps,
+                        'documentable_type' => Eps::class,
+                    ]);
+                }
+    
+                return $eps;
+            });
+    
+            return response()->json([
+                'message' => 'EPS y documento creado exitosamente',
+                'data'    => $eps
+            ], 201);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear la EPS o subir el archivo.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Schema(
+     *     schema="EPS",
+     *     type="object",
+     *     @OA\Property(property="id_eps", type="integer", example=1),
+     *     @OA\Property(property="nombre_eps", type="string", example="Salud Total EPS"),
+     *     @OA\Property(property="tipo_afiliacion", type="string", example="contributivo"),
+     *     @OA\Property(property="estado_afiliacion", type="string", example="activo"),
+     *     @OA\Property(property="fecha_afiliacion_efectiva", type="string", format="date", example="2023-01-15"),
+     *     @OA\Property(property="fecha_finalizacion_afiliacion", type="string", format="date", nullable=true),
+     *     @OA\Property(property="tipo_afiliado", type="string", example="titular"),
+     *     @OA\Property(property="numero_afiliado", type="string", nullable=true)
+     * )
+     * @OA\Schema(
+     *     schema="Documento",
+     *     type="object",
+     *     @OA\Property(property="id", type="integer", example=1),
+     *     @OA\Property(property="archivo", type="string", example="documentos/Eps/123456789_carnet.pdf"),
+     *     @OA\Property(property="estado", type="string", example="pendiente")
+     * )
+     */
+    
+
+
     //Obtener la información de eps del usuario autenticado
     public function obtenerEps(Request $request)
     {
-        // Obtener el usuario autenticado
-        $user = $request->user();
-
-        // verificar si el usuario esta autenticado
-        if (!$user) {
-            return response()->json(['error' => 'Usuario no autenticado'], 401);
-        }
-        //obtener solo los estudios que tiene documentos pertenecientes al usuario autenticado
-        $eps = Eps::whereHas ('documentos', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->with(['documentos'=>function ($query) {
-            $query->select('id_documento','documentable_id','archivo','user_id','estado');
-        }])->first();
-
-        //Agregar la URL del archivo a cada documento si existe
-        $eps->each(function ($eps){
-            $eps->documentos->each(function($documento){
-                if(!empty($documento->archivo)) {
-                    $documento->archivo_url = asset('storage/' . $documento->archivo);
+        try {
+            // Obtener el usuario autenticado
+            $user = $request->user();
+    
+            // verificar si el usuario esta autenticado
+            if (!$user) {
+                throw new \Exception('Usuario no autenticado', 401);
             }
-        });
-    });
-    return response()->json(['eps'=>$eps], 200);
-
+    
+            //obtener solo los estudios que tiene documentos pertenecientes al usuario autenticado
+            $eps = Eps::whereHas('documentosEps', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->with(['documentosEps' => function ($query) {
+                $query->select('id_documento', 'documentable_id', 'archivo', 'user_id');
+            }])->first();
+    
+            //verificar si el eps existe
+            if (!$eps) {
+                throw new \Exception('No se encontró información de EPS', 404);
+            }
+    
+            //Agregar la URL del archivo a cada documento si existe
+            foreach ($eps->documentosEps as $documento) {
+                if (!empty($documento->archivo)) {
+                    $documento->archivo_url = asset('storage/' . $documento->archivo);
+                }
+            }
+    
+            return response()->json(['eps' => $eps], 200);
+    
+        } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Error al actualizar el EPS',
+                    'error'   => $e->getMessage()
+            ],$e->getCode() ?: 500);
+        }
     }
+
+
 
     //actualizar eps
-    public function actualizarEps(Request $request,$id){
-        $user = $request->user();
-        // Buscar el estudio que tenga documentos del usuario autenticado
-        $eps = Eps::whereHas('documentosEps', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->where('id_estudio', $id)->firstOrFail();
-        // Validar solo los campos que se envían en la solicitud
-        $validator = Validator::make($request->all(), [
-         'nombre_eps'                    => 'sometimes|required|string|min:7|max:100',
-            'tipo_afiliacion'               => 'sometimes|required|in:' . implode(',', TipoAfiliacion::all()),
-            'estado_afiliacion'             => 'sometimes|required|in:' . implode(',', EstadoAfiliacion::all()),
-            'fecha_afiliacion_efectiva'     => 'sometimes|required|date',
-            'fecha_finalizacion_afiliacion' => 'sometimes|nullable|date',
-            'tipo_afiliado'                 => 'sometimes|required|in:' . implode(',', TipoAfiliado::all()),
-            'numero_afiliado'               => 'sometimes|nullable|string|max:100',
-            'archivo'                       => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
+    public function actualizarEps(ActualizarEpsRequest $request)
+    {
+        try {
+            $eps = DB::transaction(function () use ($request) {
+                $user = $request->user();
+    
+                // Buscar el EPS del usuario autenticado
+                $eps = Eps::whereHas('documentosEps', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })->firstOrFail();
+    
+                // Validar y actualizar los campos
+                $datosEpsActualizar = $request->validated();
+                $eps->update($datosEpsActualizar);
+    
+                // Manejo del archivo
+                if ($request->hasFile('archivo')) {
+                    $archivo = $request->file('archivo');
+                    $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+                    $rutaArchivo = $archivo->storeAs('documentos/Eps', $nombreArchivo, 'public');
+    
+                    // Buscar documento existente
+                    $documento = Documento::where('documentable_id', $eps->id_eps)
+                        ->where('documentable_type', Eps::class)
+                        ->where('user_id', $user->id)
+                        ->first();
+    
+                    if ($documento) {
+                        Storage::disk('public')->delete($documento->archivo);
+                        $documento->update([
+                            'archivo' => str_replace('public/', '', $rutaArchivo),
+                            'estado'  => 'pendiente',
+                        ]);
+                    } else {
+                        Documento::create([
+                            'user_id'           => $user->id,
+                            'archivo'           => str_replace('public/', '', $rutaArchivo),
+                            'estado'            => 'pendiente',
+                            'documentable_id'   => $eps->id_eps,
+                            'documentable_type' => Eps::class,
+                        ]);
+                    }
+                }
+    
+                return $eps;
+            });
+    
+            return response()->json([
+                'message' => 'EPS actualizado exitosamente',
+                'data'    => $eps->fresh()
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar el EPS',
+                'error'   => $e->getMessage()
+            ], 500);
         }
-
-        //acrualizar los datos directamente
-        $data=$request->only([
-            'nombre_eps',
-            'tipo_afiliacion',
-            'estado_afiliacion',
-            'fecha_afiliacion_efectiva',
-            'fecha_finalizacion_afiliacion',
-            'tipo_afiliado',
-            'numero_afiliado'
-        ]);
-        $eps->update($data);
-        //Manejo del archivo
-        if ($request->hasFile('archivo')) {
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('public/documentos/Eps', $nombreArchivo,'public');
-            
-            // Buscar el doumento asociado
-            $documento = Documento::where('documentable_id', $eps->id_eps)
-                ->where('documentable_type', Eps::class)
-                ->where('user_id', $user->id)
-                ->first();
-
-            if ($documento){
-                Storage::disk('public')->delete($documento->archivo);
-                $documento->update([
-                    'archivo' => str_replace('public/', '', $rutaArchivo),
-                    'estado'  => 'pendiente',
-                ]);
-            }else{
-                // Guardar el documento relacionado con el eps
-                Documento::create([
-                    'user_id'          => $user->id,
-                    'archivo'          => str_replace('public/', '', $rutaArchivo),
-                    'estado'           => 'pendiente',
-                    'documentable_id'  => $eps->id_eps,
-                    'documentable_type' => Eps::class,
-                ]);
-            }
-        }
-        return response()->json([
-            'message' => 'Eps actualizado exitosamente',
-            'data'    => $eps->fresh() // Obtener la instancia actualizada
-        ], 200);
     }
-   
-
-
-
-
-
 
 
 

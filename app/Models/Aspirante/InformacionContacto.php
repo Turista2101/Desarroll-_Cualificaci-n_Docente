@@ -24,8 +24,6 @@ class InformacionContacto extends Model
     // definimos los campos de la tabla informacion_contactos que se pueden llenar
     protected $fillable = [
         'municipio_id',
-        'tipo_identificacion',
-        'numero_identificacion',
         'categoria_libreta_militar',
         'numero_libreta_militar',
         'numero_distrito_militar',
@@ -34,8 +32,6 @@ class InformacionContacto extends Model
         'telefono_movil',
         'celular_alternativo',
         'correo_alterno',
-
-        
     ];
 
     // relacion de muchos a uno con la tabla municipios

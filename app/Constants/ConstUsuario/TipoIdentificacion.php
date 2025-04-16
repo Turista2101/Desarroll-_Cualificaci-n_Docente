@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Constants\ConstInformacionContacto;
+namespace App\Constants\ConstUsuario;
 
 class TipoIdentificacion
 {
