@@ -12,6 +12,37 @@ use Illuminate\Support\Facades\DB;
 
 class InformacionContactoController
 {
+/**
+ * @OA\Post(
+ *     path="/aspirante/informacion-contacto",
+ *     tags={"Información de Contacto"},
+ *     summary="Crear información de contacto",
+ *     description="Crea un nuevo registro de información de contacto con archivo adjunto. Requiere autenticación.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 required={"telefono", "direccion", "ciudad", "archivo"},
+ *                 @OA\Property(property="telefono", type="string", example="3123456789"),
+ *                 @OA\Property(property="direccion", type="string", example="Calle 123 #45-67"),
+ *                 @OA\Property(property="ciudad", type="string", example="Popayán"),
+ *                 @OA\Property(property="archivo", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Información de contacto creada",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Información de contacto y documento guardados correctamente"),
+ *             @OA\Property(property="data", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(response=500, description="Error interno")
+ * )
+ */
 
 
     //Crear un registro de información de contacto
@@ -21,7 +52,7 @@ class InformacionContactoController
             $informacionContacto= DB::transaction(function () use ($request) {
                 // Validar los datos de la solicitud
                 $datosInfomacionContacto = $request->validated();
-    
+
                 // Crear información de contacto
                 $informacionContacto = InformacionContacto::create($datosInfomacionContacto);
 
@@ -58,7 +89,25 @@ class InformacionContactoController
     }
 
 
-    
+
+/**
+ * @OA\Get(
+ *     path="/aspirante/informacion-contacto",
+ *     tags={"Información de Contacto"},
+ *     summary="Obtener información de contacto",
+ *     description="Retorna la información de contacto del usuario autenticado. Requiere autenticación.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Información de contacto obtenida",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="informacion_contacto", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Información no encontrada"),
+ *     @OA\Response(response=401, description="No autenticado")
+ * )
+ */
 
 
     // Obtener la información de contacto del usuario autenticado
@@ -108,6 +157,36 @@ class InformacionContactoController
     }
 
 
+/**
+ * @OA\Put(
+ *     path="/aspirante/informacion-contacto",
+ *     tags={"Información de Contacto"},
+ *     summary="Actualizar información de contacto",
+ *     description="Actualiza los datos de información de contacto del usuario autenticado. Requiere autenticación.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 @OA\Property(property="telefono", type="string", example="3201234567"),
+ *                 @OA\Property(property="direccion", type="string", example="Carrera 12 #34-56"),
+ *                 @OA\Property(property="ciudad", type="string", example="Cali"),
+ *                 @OA\Property(property="archivo", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Información de contacto actualizada correctamente",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Información de contacto actualizada correctamente"),
+ *             @OA\Property(property="data", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(response=500, description="Error al actualizar")
+ * )
+ */
 
     //Actualizar información de contacto
     public function actualizarInformacionContacto(ActualizarInformacionContactoRequest $request)
@@ -126,13 +205,13 @@ class InformacionContactoController
 
                 // Actualizar solo los campos que se envían en la solicitud
                 $informacionContacto->update($datosInfomacionContactoActualizar);
-        
+
                 // Verificar si se envió un archivo
                 if ($request->hasFile('archivo')) {
                     $archivo = $request->file('archivo');
                     $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
                     $rutaArchivo = $archivo->storeAs('documentos/Indentificacion', $nombreArchivo, 'public');
-            
+
                     // Buscar el documento asociado
                     $documento = Documento::where('documentable_id', $informacionContacto->id_informacion_contacto)
                         ->where('documentable_type', InformacionContacto::class)
@@ -159,7 +238,7 @@ class InformacionContactoController
 
                  return $informacionContacto;
             });
-            
+
             // Devolver respuesta con la información de contacto actualizada
             return response()->json([
                     'message' => 'Información de contacto actualizada correctamente',

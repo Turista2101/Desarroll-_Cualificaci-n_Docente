@@ -17,6 +17,33 @@ use Illuminate\Support\Facades\DB; // Importar la clase DB para transacciones
 
 class IdiomaController
 {
+    /**
+ * @OA\Post(
+ *     path="/aspirante/idiomas",
+ *     tags={"Idiomas"},
+ *     summary="Crear idioma",
+ *     description="Registra un nuevo idioma y guarda el documento relacionado. Requiere autenticación.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 required={"idioma", "nivel", "archivo"},
+ *                 @OA\Property(property="idioma", type="string", example="Inglés"),
+ *                 @OA\Property(property="nivel", type="string", example="Avanzado"),
+ *                 @OA\Property(property="archivo", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Idioma creado correctamente"
+ *     ),
+ *     @OA\Response(response=500, description="Error al crear idioma")
+ * )
+ */
+
     // Guardar un nuevo idioma en la base de datos
     public function crearIdioma(CrearIdiomaRequest $request)
     {
@@ -52,7 +79,7 @@ class IdiomaController
                 'mensaje'  => 'Idioma y documento guardados correctamente',
                 'idioma'   => $idioma,
             ], 201);
-    
+
         } catch(\Exception $e) {
             return response()->json([
                 'message' => 'Error al crear el idioma',
@@ -61,6 +88,18 @@ class IdiomaController
         }
     }
 
+/**
+ * @OA\Get(
+ *     path="/aspirante/idiomas",
+ *     tags={"Idiomas"},
+ *     summary="Obtener idiomas del usuario",
+ *     description="Obtiene todos los idiomas registrados por el usuario autenticado.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Response(response=200, description="Lista de idiomas"),
+ *     @OA\Response(response=404, description="No se encontraron idiomas"),
+ *     @OA\Response(response=401, description="Usuario no autenticado")
+ * )
+ */
 
     // Obtener todos los registros de idiomas del usuario autenticado
     public function obtenerIdiomas(Request $request)
@@ -105,6 +144,23 @@ class IdiomaController
         }
     }
 
+/**
+ * @OA\Get(
+ *     path="/aspirante/idiomas/{id}",
+ *     tags={"Idiomas"},
+ *     summary="Obtener idioma por ID",
+ *     description="Devuelve los detalles de un idioma específico registrado por el usuario.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(response=200, description="Idioma encontrado"),
+ *     @OA\Response(response=404, description="No se encontró el idioma")
+ * )
+ */
 
     public function obtenerIdiomaPorId(Request $request, $id)
     {
@@ -149,6 +205,34 @@ class IdiomaController
         }
     }
 
+/**
+ * @OA\Put(
+ *     path="/aspirante/idiomas/{id}",
+ *     tags={"Idiomas"},
+ *     summary="Actualizar idioma",
+ *     description="Actualiza un idioma existente y su documento si se proporciona. Requiere autenticación.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 @OA\Property(property="idioma", type="string", example="Francés"),
+ *                 @OA\Property(property="nivel", type="string", example="Intermedio"),
+ *                 @OA\Property(property="archivo", type="string", format="binary")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response=200, description="Idioma actualizado correctamente"),
+ *     @OA\Response(response=404, description="Idioma no encontrado")
+ * )
+ */
 
     // Actualizar un registro de idioma
     public function actualizarIdioma(ActualizarIdiomaRequest $request, $id)
@@ -156,7 +240,7 @@ class IdiomaController
         try{
             $idioma =DB::transaction(function () use($request, $id) {
                 $user = $request->user();
-                
+
                 // Buscar el estudio que tenga documentos del usuario autenticado
                 $idioma = Idioma::whereHas('documentosIdioma', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -212,6 +296,25 @@ class IdiomaController
 
 
     // Eliminar un registro de idioma
+    /**
+ * @OA\Delete(
+ *     path="/aspirante/idiomas/{id}",
+ *     tags={"Idiomas"},
+ *     summary="Eliminar idioma",
+ *     description="Elimina un idioma y su documento asociado. Requiere autenticación.",
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(response=200, description="Idioma eliminado correctamente"),
+ *     @OA\Response(response=404, description="Idioma no encontrado"),
+ *     @OA\Response(response=500, description="Error al eliminar idioma")
+ * )
+ */
+
     public function eliminarIdioma(Request $request, $id)
     {
         try{
@@ -235,11 +338,11 @@ class IdiomaController
                 }
                 // Eliminar el idioma
                 $idioma->delete();
-                
+
             });
- 
+
             return response()->json(['mensaje' => 'Idioma eliminado correctamente'], 200);
-        
+
         }catch(\Exception $e){
             return response()->json([
                 'message' => 'Error al eliminar el idioma',
