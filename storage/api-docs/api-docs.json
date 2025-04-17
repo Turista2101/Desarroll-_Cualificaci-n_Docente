@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API de Gestión de EPS",
+        "title": "API de Gestión",
         "description": "Endpoints para manejar información de EPS y documentos asociados.",
         "version": "1.0.0"
     },
@@ -140,6 +140,2172 @@
                     }
                 ]
             }
+        },
+        "/aspirante/crear-estudio": {
+            "post": {
+                "tags": [
+                    "Estudio"
+                ],
+                "summary": "Crear estudio",
+                "description": "Crea un nuevo registro de estudio y sube un archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+                "operationId": "caf4d15f5af5ee1946cf0ef6d9024388",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "tipo_estudio",
+                                    "graduado",
+                                    "institucion",
+                                    "fecha_inicio"
+                                ],
+                                "properties": {
+                                    "tipo_estudio": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Curso programado o capacitación",
+                                            "Pregrado",
+                                            "Especialización",
+                                            "Maestría",
+                                            "Doctorado",
+                                            "Postdoctorado",
+                                            "Técnico",
+                                            "Tecnológico",
+                                            "Diplomado",
+                                            "Certificación"
+                                        ],
+                                        "example": "Pregrado"
+                                    },
+                                    "graduado": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Si",
+                                            "No"
+                                        ],
+                                        "example": "Si"
+                                    },
+                                    "institucion": {
+                                        "type": "string",
+                                        "example": "Universidad Nacional"
+                                    },
+                                    "fecha_graduacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01",
+                                        "nullable": true
+                                    },
+                                    "titulo_convalidado": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Si",
+                                            "No"
+                                        ],
+                                        "example": "No"
+                                    },
+                                    "fecha_convalidacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-02-01",
+                                        "nullable": true
+                                    },
+                                    "resolucion_convalidacion": {
+                                        "type": "string",
+                                        "example": "12345-CONV",
+                                        "nullable": true
+                                    },
+                                    "posible_fecha_graduacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-01",
+                                        "nullable": true
+                                    },
+                                    "titulo_estudio": {
+                                        "type": "string",
+                                        "example": "Ingeniería de Sistemas",
+                                        "nullable": true
+                                    },
+                                    "fecha_inicio": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2018-01-01"
+                                    },
+                                    "fecha_fin": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2022-12-01",
+                                        "nullable": true
+                                    },
+                                    "archivo": {
+                                        "description": "Archivo PDF, JPG o PNG (máx. 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Estudio creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Estudio creado exitosamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Estudio"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al crear el estudio"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/obtener-estudios": {
+            "get": {
+                "tags": [
+                    "Estudio"
+                ],
+                "summary": "Obtener estudios",
+                "description": "Obtiene todos los estudios del usuario autenticado, incluyendo los documentos asociados.",
+                "operationId": "2bb0773a0bdbfeee5f8de4775fac9aa8",
+                "responses": {
+                    "200": {
+                        "description": "Estudios obtenidos exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "estudios": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Estudio"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No se encontraron estudios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontraron estudios"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al obtener los estudios"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/obtener-estudio/{id}": {
+            "get": {
+                "tags": [
+                    "Estudio"
+                ],
+                "summary": "Obtener estudio por ID",
+                "description": "Obtiene un registro de estudio específico del usuario autenticado, incluyendo los documentos asociados.",
+                "operationId": "97330b138a63d62d64aa897d5346a798",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del estudio",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Estudio obtenido exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Estudio"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Estudio no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontró el estudio"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al obtener el estudio"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/actualizar-estudio/{id}": {
+            "post": {
+                "tags": [
+                    "Estudio"
+                ],
+                "summary": "Actualizar estudio",
+                "description": "Actualiza un registro de estudio existente y permite reemplazar el archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+                "operationId": "fcf20332c809172e873b52d4838ddd16",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del estudio",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "tipo_estudio": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Curso programado o capacitación",
+                                            "Pregrado",
+                                            "Especialización",
+                                            "Maestría",
+                                            "Doctorado",
+                                            "Postdoctorado",
+                                            "Técnico",
+                                            "Tecnológico",
+                                            "Diplomado",
+                                            "Certificación"
+                                        ],
+                                        "example": "Pregrado"
+                                    },
+                                    "graduado": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Si",
+                                            "No"
+                                        ],
+                                        "example": "Si"
+                                    },
+                                    "institucion": {
+                                        "type": "string",
+                                        "example": "Universidad Nacional"
+                                    },
+                                    "fecha_graduacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01",
+                                        "nullable": true
+                                    },
+                                    "titulo_convalidado": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Si",
+                                            "No"
+                                        ],
+                                        "example": "No"
+                                    },
+                                    "fecha_convalidacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-02-01",
+                                        "nullable": true
+                                    },
+                                    "resolucion_convalidacion": {
+                                        "type": "string",
+                                        "example": "12345-CONV",
+                                        "nullable": true
+                                    },
+                                    "posible_fecha_graduacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-01",
+                                        "nullable": true
+                                    },
+                                    "titulo_estudio": {
+                                        "type": "string",
+                                        "example": "Ingeniería de Sistemas",
+                                        "nullable": true
+                                    },
+                                    "fecha_inicio": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2018-01-01"
+                                    },
+                                    "fecha_fin": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2022-12-01",
+                                        "nullable": true
+                                    },
+                                    "archivo": {
+                                        "description": "Archivo PDF, JPG o PNG (máx. 2MB)",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estudio actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Estudio actualizado correctamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Estudio"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Estudio no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontró el estudio"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al actualizar el estudio"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/crear-experiencia": {
+            "post": {
+                "tags": [
+                    "Experiencia"
+                ],
+                "summary": "Crear experiencia",
+                "description": "Crea un nuevo registro de experiencia y sube un archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+                "operationId": "182178ee70b7025c1ff0b1e7972993ee",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "tipo_experiencia",
+                                    "institucion_experiencia",
+                                    "cargo",
+                                    "fecha_inicio"
+                                ],
+                                "properties": {
+                                    "tipo_experiencia": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Docencia universitaria",
+                                            "Docencia no universitaria",
+                                            "Investigación",
+                                            "Profesoral"
+                                        ],
+                                        "example": "Docencia universitaria"
+                                    },
+                                    "institucion_experiencia": {
+                                        "type": "string",
+                                        "example": "Universidad Nacional"
+                                    },
+                                    "cargo": {
+                                        "type": "string",
+                                        "example": "Profesor Asociado"
+                                    },
+                                    "trabajo_actual": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Si",
+                                            "No"
+                                        ],
+                                        "example": "Si",
+                                        "nullable": true
+                                    },
+                                    "intensidad_horaria": {
+                                        "type": "integer",
+                                        "example": 40,
+                                        "nullable": true
+                                    },
+                                    "fecha_inicio": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2020-01-01"
+                                    },
+                                    "fecha_finalizacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01",
+                                        "nullable": true
+                                    },
+                                    "fecha_expedicion_certificado": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-02-01",
+                                        "nullable": true
+                                    },
+                                    "archivo": {
+                                        "description": "Archivo PDF, JPG o PNG (máx. 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Experiencia creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Experiencia creada exitosamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Experiencia"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al crear la experiencia"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/obtener-experiencias": {
+            "get": {
+                "tags": [
+                    "Experiencia"
+                ],
+                "summary": "Obtener todas las experiencias",
+                "description": "Obtiene todos los registros de experiencia del usuario autenticado, incluyendo los documentos asociados.",
+                "operationId": "0949532e272714cdcd15319e3b052bc6",
+                "responses": {
+                    "200": {
+                        "description": "Experiencias obtenidas exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "experiencias": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id_experiencia": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "tipo_experiencia": {
+                                                        "type": "string",
+                                                        "example": "Docencia universitaria"
+                                                    },
+                                                    "institucion_experiencia": {
+                                                        "type": "string",
+                                                        "example": "Universidad Nacional"
+                                                    },
+                                                    "cargo": {
+                                                        "type": "string",
+                                                        "example": "Profesor Asociado"
+                                                    },
+                                                    "trabajo_actual": {
+                                                        "type": "string",
+                                                        "example": "Si"
+                                                    },
+                                                    "intensidad_horaria": {
+                                                        "type": "integer",
+                                                        "example": 40
+                                                    },
+                                                    "fecha_inicio": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2020-01-01"
+                                                    },
+                                                    "fecha_finalizacion": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2023-01-01",
+                                                        "nullable": true
+                                                    },
+                                                    "fecha_expedicion_certificado": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2023-02-01",
+                                                        "nullable": true
+                                                    },
+                                                    "documentosExperiencia": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id_documento": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "archivo": {
+                                                                    "type": "string",
+                                                                    "example": "documentos/Experiencias/archivo.pdf"
+                                                                },
+                                                                "archivo_url": {
+                                                                    "type": "string",
+                                                                    "example": "http://localhost/storage/documentos/Experiencias/archivo.pdf"
+                                                                },
+                                                                "user_id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No se encontraron experiencias",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontraron experiencias"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no autenticado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al obtener las experiencias"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/obtener-experiencia/{id}": {
+            "get": {
+                "tags": [
+                    "Experiencia"
+                ],
+                "summary": "Obtener experiencia por ID",
+                "description": "Obtiene un registro de experiencia específico del usuario autenticado, incluyendo los documentos asociados.",
+                "operationId": "63e89dd82f334ccaa628bccbb8b5fea1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la experiencia",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Experiencia obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "experiencia": {
+                                            "properties": {
+                                                "id_experiencia": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "tipo_experiencia": {
+                                                    "type": "string",
+                                                    "example": "Docencia universitaria"
+                                                },
+                                                "institucion_experiencia": {
+                                                    "type": "string",
+                                                    "example": "Universidad Nacional"
+                                                },
+                                                "cargo": {
+                                                    "type": "string",
+                                                    "example": "Profesor Asociado"
+                                                },
+                                                "trabajo_actual": {
+                                                    "type": "string",
+                                                    "example": "Si"
+                                                },
+                                                "intensidad_horaria": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                },
+                                                "fecha_inicio": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2020-01-01"
+                                                },
+                                                "fecha_finalizacion": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-01-01",
+                                                    "nullable": true
+                                                },
+                                                "fecha_expedicion_certificado": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-02-01",
+                                                    "nullable": true
+                                                },
+                                                "documentosExperiencia": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id_documento": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "archivo": {
+                                                                "type": "string",
+                                                                "example": "documentos/Experiencias/archivo.pdf"
+                                                            },
+                                                            "archivo_url": {
+                                                                "type": "string",
+                                                                "example": "http://localhost/storage/documentos/Experiencias/archivo.pdf"
+                                                            },
+                                                            "user_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Experiencia no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontró la experiencia"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no autenticado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al obtener la experiencia"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/actualizar-experiencia/{id}": {
+            "post": {
+                "tags": [
+                    "Experiencia"
+                ],
+                "summary": "Actualizar experiencia",
+                "description": "Actualiza un registro de experiencia existente y permite reemplazar el archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+                "operationId": "4fee94a16a989869b25a5dd99e20296a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la experiencia",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "tipo_experiencia",
+                                    "institucion_experiencia",
+                                    "cargo",
+                                    "fecha_inicio"
+                                ],
+                                "properties": {
+                                    "tipo_experiencia": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Docencia universitaria",
+                                            "Docencia no universitaria",
+                                            "Investigación",
+                                            "Profesoral"
+                                        ],
+                                        "example": "Docencia universitaria"
+                                    },
+                                    "institucion_experiencia": {
+                                        "type": "string",
+                                        "example": "Universidad Nacional"
+                                    },
+                                    "cargo": {
+                                        "type": "string",
+                                        "example": "Profesor Asociado"
+                                    },
+                                    "trabajo_actual": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Si",
+                                            "No"
+                                        ],
+                                        "example": "Si",
+                                        "nullable": true
+                                    },
+                                    "intensidad_horaria": {
+                                        "type": "integer",
+                                        "example": 40,
+                                        "nullable": true
+                                    },
+                                    "fecha_inicio": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2020-01-01"
+                                    },
+                                    "fecha_finalizacion": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01",
+                                        "nullable": true
+                                    },
+                                    "fecha_expedicion_certificado": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-02-01",
+                                        "nullable": true
+                                    },
+                                    "archivo": {
+                                        "description": "Archivo PDF, JPG o PNG (máx. 2MB)",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Experiencia actualizada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Experiencia actualizada correctamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Experiencia"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Experiencia no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontró la experiencia"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al actualizar la experiencia"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/crear-rut": {
+            "post": {
+                "tags": [
+                    "RUT"
+                ],
+                "summary": "Crear RUT",
+                "description": "Crea un nuevo RUT y sube un archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+                "operationId": "fa32950c7a8ad19c49013b4c662231a1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "numero_rut",
+                                    "razon_social",
+                                    "tipo_persona",
+                                    "codigo_ciiu",
+                                    "responsabilidades_tributarias",
+                                    "archivo"
+                                ],
+                                "properties": {
+                                    "numero_rut": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 7,
+                                        "example": "123456789"
+                                    },
+                                    "razon_social": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 7,
+                                        "example": "Empresa XYZ S.A."
+                                    },
+                                    "tipo_persona": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Natural",
+                                            "Juridico"
+                                        ],
+                                        "example": "Juridico"
+                                    },
+                                    "codigo_ciiu": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Agricultura, ganadería, caza, silvicultura y pesca",
+                                            "Explotación de minas y canteras",
+                                            "Industria manufacturera",
+                                            "Suministro de electricidad, gas, vapor y aire acondicionado",
+                                            "Suministro de agua, alcantarillado, gestión de residuos y actividades de saneamiento",
+                                            "Construcción",
+                                            "Comercio al por mayor y al por menor; reparación de vehículos automotores y motocicletas",
+                                            "Transporte y almacenamiento",
+                                            "Alojamiento y servicios de comida",
+                                            "Información y comunicaciones",
+                                            "Actividades financieras y de seguros",
+                                            "Actividades inmobiliarias",
+                                            "Actividades profesionales, científicas y técnicas",
+                                            "Actividades administrativas y de servicios auxiliares",
+                                            "Administración pública y defensa; seguridad social obligatoria",
+                                            "Educación",
+                                            "Actividades de salud humana y de asistencia social",
+                                            "Artes, entretenimiento y recreación",
+                                            "Otras actividades de servicios",
+                                            "Actividades de los hogares como empleadores; actividades de los hogares como productores de bienes y servicios para uso propio",
+                                            "Organizaciones y organismos extraterritoriales"
+                                        ],
+                                        "example": "Industria manufacturera"
+                                    },
+                                    "responsabilidades_tributarias": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 7,
+                                        "example": "IVA, Renta"
+                                    },
+                                    "archivo": {
+                                        "description": "Archivo PDF, JPG o PNG (máx. 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "RUT creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "RUT creado exitosamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Rut"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en el formulario"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al crear el RUT"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/obtener-rut": {
+            "get": {
+                "tags": [
+                    "RUT"
+                ],
+                "summary": "Obtener RUT",
+                "description": "Obtiene la información del RUT y los documentos asociados del usuario autenticado.",
+                "operationId": "6864daf55aaf85cdded466a14362294a",
+                "responses": {
+                    "200": {
+                        "description": "Información del RUT obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ruts": {
+                                            "properties": {
+                                                "id_rut": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "numero_rut": {
+                                                    "type": "string",
+                                                    "example": "123456789"
+                                                },
+                                                "razon_social": {
+                                                    "type": "string",
+                                                    "example": "Empresa XYZ S.A."
+                                                },
+                                                "tipo_persona": {
+                                                    "type": "string",
+                                                    "example": "Juridico"
+                                                },
+                                                "codigo_ciiu": {
+                                                    "type": "string",
+                                                    "example": "C2023"
+                                                },
+                                                "responsabilidades_tributarias": {
+                                                    "type": "string",
+                                                    "example": "IVA, Renta"
+                                                },
+                                                "documentosRut": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id_documento": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "archivo": {
+                                                                "type": "string",
+                                                                "example": "documentos/Rut/archivo.pdf"
+                                                            },
+                                                            "archivo_url": {
+                                                                "type": "string",
+                                                                "example": "http://localhost/storage/documentos/Rut/archivo.pdf"
+                                                            },
+                                                            "user_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No se encontró información de RUT",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontró información de RUT"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al obtener la información de RUT"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/aspirante/actualizar-rut": {
+            "post": {
+                "tags": [
+                    "RUT"
+                ],
+                "summary": "Actualizar RUT",
+                "description": "Actualiza un registro de RUT existente y permite reemplazar el archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+                "operationId": "431d330dcbf8f8d6df3f88dbffec8187",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "numero_rut",
+                                    "razon_social",
+                                    "tipo_persona",
+                                    "codigo_ciiu",
+                                    "responsabilidades_tributarias"
+                                ],
+                                "properties": {
+                                    "numero_rut": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 7,
+                                        "example": "123456789"
+                                    },
+                                    "razon_social": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 7,
+                                        "example": "Empresa XYZ S.A."
+                                    },
+                                    "tipo_persona": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Natural",
+                                            "Juridico"
+                                        ],
+                                        "example": "Juridico"
+                                    },
+                                    "codigo_ciiu": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Agricultura, ganadería, caza, silvicultura y pesca",
+                                            "Explotación de minas y canteras",
+                                            "Industria manufacturera",
+                                            "Suministro de electricidad, gas, vapor y aire acondicionado",
+                                            "Suministro de agua, alcantarillado, gestión de residuos y actividades de saneamiento",
+                                            "Construcción",
+                                            "Comercio al por mayor y al por menor; reparación de vehículos automotores y motocicletas",
+                                            "Transporte y almacenamiento",
+                                            "Alojamiento y servicios de comida",
+                                            "Información y comunicaciones",
+                                            "Actividades financieras y de seguros",
+                                            "Actividades inmobiliarias",
+                                            "Actividades profesionales, científicas y técnicas",
+                                            "Actividades administrativas y de servicios auxiliares",
+                                            "Administración pública y defensa; seguridad social obligatoria",
+                                            "Educación",
+                                            "Actividades de salud humana y de asistencia social",
+                                            "Artes, entretenimiento y recreación",
+                                            "Otras actividades de servicios",
+                                            "Actividades de los hogares como empleadores; actividades de los hogares como productores de bienes y servicios para uso propio",
+                                            "Organizaciones y organismos extraterritoriales"
+                                        ],
+                                        "example": "Industria manufacturera"
+                                    },
+                                    "responsabilidades_tributarias": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 7,
+                                        "example": "IVA, Renta"
+                                    },
+                                    "archivo": {
+                                        "description": "Archivo PDF, JPG o PNG (máx. 2MB)",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "RUT actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Rut actualizado correctamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Rut"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No se encontró el RUT",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se encontró el RUT"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al actualizar el RUT"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/registrar-usuario": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Registrar usuario",
+                "description": "Registra un nuevo usuario y devuelve un token de autenticación. Requiere datos válidos.",
+                "operationId": "cb691bba47b4875e839ad4ad161b01af",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "municipio_id",
+                                    "tipo_identificacion",
+                                    "numero_identificacion",
+                                    "primer_nombre",
+                                    "primer_apellido",
+                                    "fecha_nacimiento",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "municipio_id": {
+                                        "description": "ID del municipio",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tipo_identificacion": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Cédula de ciudadanía",
+                                            "Cédula de extranjería",
+                                            "Número único de identificación personal",
+                                            "Pasaporte",
+                                            "Registro civil",
+                                            "Número por secretaría de educación",
+                                            "Servicio nacional de pruebas",
+                                            "Tarjeta de identidad",
+                                            "Tarjeta profesional"
+                                        ],
+                                        "example": "Cédula de ciudadanía"
+                                    },
+                                    "numero_identificacion": {
+                                        "description": "Número de identificación único",
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "genero": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Masculino",
+                                            "Femenino",
+                                            "Otro"
+                                        ],
+                                        "example": "Masculino",
+                                        "nullable": true
+                                    },
+                                    "primer_nombre": {
+                                        "type": "string",
+                                        "example": "Juan"
+                                    },
+                                    "segundo_nombre": {
+                                        "type": "string",
+                                        "example": "Carlos",
+                                        "nullable": true
+                                    },
+                                    "primer_apellido": {
+                                        "type": "string",
+                                        "example": "Pérez"
+                                    },
+                                    "segundo_apellido": {
+                                        "type": "string",
+                                        "example": "Gómez",
+                                        "nullable": true
+                                    },
+                                    "fecha_nacimiento": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "estado_civil": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Soltero",
+                                            "Casado",
+                                            "Divorciado",
+                                            "Viudo"
+                                        ],
+                                        "example": "Soltero",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan.perez@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario creado exitosamente"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al crear el usuario"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/actualizar-usuario": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Actualizar usuario",
+                "description": "Actualiza la información del usuario autenticado.",
+                "operationId": "974c3774c97f165b7ca4574acc5bb40b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "municipio_id",
+                                    "tipo_identificacion",
+                                    "numero_identificacion",
+                                    "primer_nombre",
+                                    "primer_apellido",
+                                    "fecha_nacimiento",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "municipio_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "tipo_identificacion": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Cédula de ciudadanía",
+                                            "Cédula de extranjería",
+                                            "Tarjeta profesional"
+                                        ],
+                                        "example": "Tarjeta profesional"
+                                    },
+                                    "numero_identificacion": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "genero": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Masculino",
+                                            "Femenino",
+                                            "Otro"
+                                        ],
+                                        "example": "Masculino",
+                                        "nullable": true
+                                    },
+                                    "primer_nombre": {
+                                        "type": "string",
+                                        "example": "Juan"
+                                    },
+                                    "segundo_nombre": {
+                                        "type": "string",
+                                        "example": "Carlos",
+                                        "nullable": true
+                                    },
+                                    "primer_apellido": {
+                                        "type": "string",
+                                        "example": "Pérez"
+                                    },
+                                    "segundo_apellido": {
+                                        "type": "string",
+                                        "example": "Gómez",
+                                        "nullable": true
+                                    },
+                                    "fecha_nacimiento": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "estado_civil": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Soltero",
+                                            "Casado",
+                                            "Divorciado"
+                                        ],
+                                        "example": "Soltero",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan.perez@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuario actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario actualizado exitosamente"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "municipio_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "tipo_identificacion": {
+                                                    "type": "string",
+                                                    "example": "Tarjeta profesional"
+                                                },
+                                                "numero_identificacion": {
+                                                    "type": "string",
+                                                    "example": "123456789"
+                                                },
+                                                "primer_nombre": {
+                                                    "type": "string",
+                                                    "example": "Juan"
+                                                },
+                                                "primer_apellido": {
+                                                    "type": "string",
+                                                    "example": "Pérez"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "juan.perez@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al actualizar el usuario"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/obtener-usuario-autenticado": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Obtener usuario autenticado",
+                "description": "Devuelve la información del usuario autenticado, incluyendo los documentos asociados.",
+                "operationId": "597d15352aff3cb2421a9874a0819868",
+                "responses": {
+                    "200": {
+                        "description": "Usuario autenticado obtenido exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "municipio_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "tipo_identificacion": {
+                                                    "type": "string",
+                                                    "example": "Cédula de ciudadanía"
+                                                },
+                                                "numero_identificacion": {
+                                                    "type": "string",
+                                                    "example": "123456789"
+                                                },
+                                                "genero": {
+                                                    "type": "string",
+                                                    "example": "Masculino"
+                                                },
+                                                "primer_nombre": {
+                                                    "type": "string",
+                                                    "example": "Juan"
+                                                },
+                                                "segundo_nombre": {
+                                                    "type": "string",
+                                                    "example": "Carlos"
+                                                },
+                                                "primer_apellido": {
+                                                    "type": "string",
+                                                    "example": "Pérez"
+                                                },
+                                                "segundo_apellido": {
+                                                    "type": "string",
+                                                    "example": "Gómez"
+                                                },
+                                                "fecha_nacimiento": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "1990-01-01"
+                                                },
+                                                "estado_civil": {
+                                                    "type": "string",
+                                                    "example": "Soltero"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "juan.perez@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no autenticado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al obtener el usuario autenticado"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/actualizar-contrasena/{id}": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Actualizar contraseña",
+                "description": "Permite al usuario autenticado actualizar su contraseña actual.",
+                "operationId": "8f397319f44e6e336a5aad50bf538b58",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password",
+                                    "new_password"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "description": "Contraseña actual",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "new_password": {
+                                        "description": "Nueva contraseña",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contraseña actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contraseña actualizada exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Contraseña actual incorrecta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contraseña incorrecta"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en los datos proporcionados"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al actualizar la contraseña"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/restablecer-contrasena": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Restablecer contraseña",
+                "description": "Envía un correo electrónico con un enlace para restablecer la contraseña del usuario.",
+                "operationId": "d384b1c015eb32de8681aac9222c549c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Correo electrónico del usuario",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan.perez@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Correo electrónico enviado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Correo electrónico enviado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en los datos proporcionados"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al enviar el correo electrónico"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalles del error..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -199,6 +2365,401 @@
                     }
                 },
                 "type": "object"
+            },
+            "Estudio": {
+                "title": "Estudio",
+                "description": "Esquema de un estudio",
+                "properties": {
+                    "id_estudio": {
+                        "description": "ID del estudio",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tipo_estudio": {
+                        "description": "Tipo de estudio",
+                        "type": "string",
+                        "example": "Pregrado"
+                    },
+                    "graduado": {
+                        "description": "Indica si el usuario se graduó",
+                        "type": "string",
+                        "enum": [
+                            "Si",
+                            "No"
+                        ],
+                        "example": "Si"
+                    },
+                    "institucion": {
+                        "description": "Nombre de la institución",
+                        "type": "string",
+                        "example": "Universidad Nacional"
+                    },
+                    "fecha_graduacion": {
+                        "description": "Fecha de graduación",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-01-01",
+                        "nullable": true
+                    },
+                    "titulo_convalidado": {
+                        "description": "Indica si el título fue convalidado",
+                        "type": "string",
+                        "enum": [
+                            "Si",
+                            "No"
+                        ],
+                        "example": "No"
+                    },
+                    "fecha_convalidacion": {
+                        "description": "Fecha de convalidación",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-02-01",
+                        "nullable": true
+                    },
+                    "resolucion_convalidacion": {
+                        "description": "Resolución de convalidación",
+                        "type": "string",
+                        "example": "12345-CONV",
+                        "nullable": true
+                    },
+                    "posible_fecha_graduacion": {
+                        "description": "Posible fecha de graduación",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-01",
+                        "nullable": true
+                    },
+                    "titulo_estudio": {
+                        "description": "Título del estudio",
+                        "type": "string",
+                        "example": "Ingeniería de Sistemas",
+                        "nullable": true
+                    },
+                    "fecha_inicio": {
+                        "description": "Fecha de inicio del estudio",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2018-01-01"
+                    },
+                    "fecha_fin": {
+                        "description": "Fecha de finalización del estudio",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2022-12-01",
+                        "nullable": true
+                    },
+                    "documentosEstudio": {
+                        "description": "Documentos asociados al estudio",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id_documento": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "archivo": {
+                                    "type": "string",
+                                    "example": "documentos/Estudios/archivo.pdf"
+                                },
+                                "archivo_url": {
+                                    "type": "string",
+                                    "example": "http://localhost/storage/documentos/Estudios/archivo.pdf"
+                                },
+                                "user_id": {
+                                    "type": "integer",
+                                    "example": 1
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Experiencia": {
+                "title": "Experiencia",
+                "description": "Esquema de una experiencia laboral",
+                "properties": {
+                    "id_experiencia": {
+                        "description": "ID de la experiencia",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tipo_experiencia": {
+                        "description": "Tipo de experiencia",
+                        "type": "string",
+                        "example": "Docencia universitaria"
+                    },
+                    "institucion_experiencia": {
+                        "description": "Nombre de la institución",
+                        "type": "string",
+                        "example": "Universidad Nacional"
+                    },
+                    "cargo": {
+                        "description": "Cargo desempeñado",
+                        "type": "string",
+                        "example": "Profesor Asociado"
+                    },
+                    "trabajo_actual": {
+                        "description": "Indica si es el trabajo actual",
+                        "type": "string",
+                        "enum": [
+                            "Si",
+                            "No"
+                        ],
+                        "example": "Si"
+                    },
+                    "intensidad_horaria": {
+                        "description": "Intensidad horaria semanal",
+                        "type": "integer",
+                        "example": 40
+                    },
+                    "fecha_inicio": {
+                        "description": "Fecha de inicio de la experiencia",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2020-01-01"
+                    },
+                    "fecha_finalizacion": {
+                        "description": "Fecha de finalización de la experiencia",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-01-01",
+                        "nullable": true
+                    },
+                    "fecha_expedicion_certificado": {
+                        "description": "Fecha de expedición del certificado",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-02-01",
+                        "nullable": true
+                    },
+                    "documentosExperiencia": {
+                        "description": "Documentos asociados a la experiencia",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id_documento": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "archivo": {
+                                    "type": "string",
+                                    "example": "documentos/Experiencias/archivo.pdf"
+                                },
+                                "archivo_url": {
+                                    "type": "string",
+                                    "example": "http://localhost/storage/documentos/Experiencias/archivo.pdf"
+                                },
+                                "user_id": {
+                                    "type": "integer",
+                                    "example": 1
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Rut": {
+                "title": "Rut",
+                "description": "Esquema de un registro de RUT",
+                "properties": {
+                    "id_rut": {
+                        "description": "ID del RUT",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "numero_rut": {
+                        "description": "Número del RUT",
+                        "type": "string",
+                        "example": "123456789"
+                    },
+                    "razon_social": {
+                        "description": "Razón social de la empresa",
+                        "type": "string",
+                        "example": "Empresa XYZ S.A."
+                    },
+                    "tipo_persona": {
+                        "description": "Tipo de persona",
+                        "type": "string",
+                        "enum": [
+                            "Natural",
+                            "Juridico"
+                        ],
+                        "example": "Juridico"
+                    },
+                    "codigo_ciiu": {
+                        "description": "Código CIIU asociado al RUT",
+                        "type": "string",
+                        "example": "Industria manufacturera"
+                    },
+                    "responsabilidades_tributarias": {
+                        "description": "Responsabilidades tributarias asociadas al RUT",
+                        "type": "string",
+                        "example": "IVA, Renta"
+                    },
+                    "documentosRut": {
+                        "description": "Documentos asociados al RUT",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id_documento": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "archivo": {
+                                    "type": "string",
+                                    "example": "documentos/RUT/archivo.pdf"
+                                },
+                                "archivo_url": {
+                                    "type": "string",
+                                    "example": "http://localhost/storage/documentos/RUT/archivo.pdf"
+                                },
+                                "user_id": {
+                                    "type": "integer",
+                                    "example": 1
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "created_at": {
+                        "description": "Fecha de creación del registro",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Fecha de última actualización del registro",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Usuario": {
+                "title": "Usuario",
+                "description": "Esquema de un usuario",
+                "properties": {
+                    "id": {
+                        "description": "ID del usuario",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "municipio_id": {
+                        "description": "ID del municipio asociado al usuario",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tipo_identificacion": {
+                        "description": "Tipo de identificación del usuario",
+                        "type": "string",
+                        "enum": [
+                            "Cédula de ciudadanía",
+                            "Cédula de extranjería",
+                            "Número único de identificación personal",
+                            "Pasaporte",
+                            "Registro civil",
+                            "Número por secretaría de educación",
+                            "Servicio nacional de pruebas",
+                            "Tarjeta de identidad",
+                            "Tarjeta profesional"
+                        ],
+                        "example": "Cédula de ciudadanía"
+                    },
+                    "numero_identificacion": {
+                        "description": "Número de identificación del usuario",
+                        "type": "string",
+                        "example": "123456789"
+                    },
+                    "genero": {
+                        "description": "Género del usuario",
+                        "type": "string",
+                        "enum": [
+                            "Masculino",
+                            "Femenino",
+                            "Otro"
+                        ],
+                        "example": "Masculino",
+                        "nullable": true
+                    },
+                    "primer_nombre": {
+                        "description": "Primer nombre del usuario",
+                        "type": "string",
+                        "example": "Juan"
+                    },
+                    "segundo_nombre": {
+                        "description": "Segundo nombre del usuario",
+                        "type": "string",
+                        "example": "Carlos",
+                        "nullable": true
+                    },
+                    "primer_apellido": {
+                        "description": "Primer apellido del usuario",
+                        "type": "string",
+                        "example": "Pérez"
+                    },
+                    "segundo_apellido": {
+                        "description": "Segundo apellido del usuario",
+                        "type": "string",
+                        "example": "Gómez",
+                        "nullable": true
+                    },
+                    "fecha_nacimiento": {
+                        "description": "Fecha de nacimiento del usuario",
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "estado_civil": {
+                        "description": "Estado civil del usuario",
+                        "type": "string",
+                        "enum": [
+                            "Soltero",
+                            "Casado",
+                            "Divorciado",
+                            "Viudo"
+                        ],
+                        "example": "Soltero",
+                        "nullable": true
+                    },
+                    "email": {
+                        "description": "Correo electrónico del usuario",
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    },
+                    "email_verified_at": {
+                        "description": "Fecha de verificación del correo electrónico",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z",
+                        "nullable": true
+                    },
+                    "password": {
+                        "description": "Contraseña del usuario",
+                        "type": "string",
+                        "format": "password",
+                        "example": "password123"
+                    },
+                    "created_at": {
+                        "description": "Fecha de creación del usuario",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Fecha de última actualización del usuario",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -206,6 +2767,22 @@
         {
             "name": "EPS",
             "description": "EPS"
+        },
+        {
+            "name": "Estudio",
+            "description": "Estudio"
+        },
+        {
+            "name": "Experiencia",
+            "description": "Experiencia"
+        },
+        {
+            "name": "RUT",
+            "description": "RUT"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
         }
     ]
 }

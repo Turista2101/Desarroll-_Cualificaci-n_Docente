@@ -12,9 +12,54 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\RequestAspirante\RequestExperiencia\CrearExperienciaRequest;
 
+
 class ExperienciaController
 {
-    // Crear un registro de experiencia
+    /**
+     * Crear un registro de experiencia.
+     *
+     * @OA\Post(
+     *     path="/aspirante/crear-experiencia",
+     *     tags={"Experiencia"},
+     *     summary="Crear experiencia",
+     *     description="Crea un nuevo registro de experiencia y sube un archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"tipo_experiencia", "institucion_experiencia", "cargo", "fecha_inicio"},
+     *                 @OA\Property(property="tipo_experiencia", type="string", enum={"Docencia universitaria", "Docencia no universitaria", "Investigación", "Profesoral"}, example="Docencia universitaria"),
+     *                 @OA\Property(property="institucion_experiencia", type="string", example="Universidad Nacional"),
+     *                 @OA\Property(property="cargo", type="string", example="Profesor Asociado"),
+     *                 @OA\Property(property="trabajo_actual", type="string", enum={"Si", "No"}, nullable=true, example="Si"),
+     *                 @OA\Property(property="intensidad_horaria", type="integer", nullable=true, example=40),
+     *                 @OA\Property(property="fecha_inicio", type="string", format="date", example="2020-01-01"),
+     *                 @OA\Property(property="fecha_finalizacion", type="string", format="date", nullable=true, example="2023-01-01"),
+     *                 @OA\Property(property="fecha_expedicion_certificado", type="string", format="date", nullable=true, example="2023-02-01"),
+     *                 @OA\Property(property="archivo", type="string", format="binary", description="Archivo PDF, JPG o PNG (máx. 2MB)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Experiencia creada exitosamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Experiencia creada exitosamente"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Experiencia")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error al crear la experiencia"),
+     *             @OA\Property(property="error", type="string", example="Detalles del error...")
+     *         )
+     *     )
+     * )
+     */
     public function crearExperiencia(CrearExperienciaRequest $request)
     {
         try {
@@ -57,8 +102,66 @@ class ExperienciaController
         }
     }
     
-    
-    // Obtener todos los registros de experiencia
+    /**
+     * Obtener todos los registros de experiencia del usuario autenticado.
+     *
+     * @OA\Get(
+     *     path="/aspirante/obtener-experiencias",
+     *     tags={"Experiencia"},
+     *     summary="Obtener todas las experiencias",
+     *     description="Obtiene todos los registros de experiencia del usuario autenticado, incluyendo los documentos asociados.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Experiencias obtenidas exitosamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="experiencias", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id_experiencia", type="integer", example=1),
+     *                     @OA\Property(property="tipo_experiencia", type="string", example="Docencia universitaria"),
+     *                     @OA\Property(property="institucion_experiencia", type="string", example="Universidad Nacional"),
+     *                     @OA\Property(property="cargo", type="string", example="Profesor Asociado"),
+     *                     @OA\Property(property="trabajo_actual", type="string", example="Si"),
+     *                     @OA\Property(property="intensidad_horaria", type="integer", example=40),
+     *                     @OA\Property(property="fecha_inicio", type="string", format="date", example="2020-01-01"),
+     *                     @OA\Property(property="fecha_finalizacion", type="string", format="date", nullable=true, example="2023-01-01"),
+     *                     @OA\Property(property="fecha_expedicion_certificado", type="string", format="date", nullable=true, example="2023-02-01"),
+     *                     @OA\Property(property="documentosExperiencia", type="array",
+     *                         @OA\Items(
+     *                             @OA\Property(property="id_documento", type="integer", example=1),
+     *                             @OA\Property(property="archivo", type="string", example="documentos/Experiencias/archivo.pdf"),
+     *                             @OA\Property(property="archivo_url", type="string", example="http://localhost/storage/documentos/Experiencias/archivo.pdf"),
+     *                             @OA\Property(property="user_id", type="integer", example=1)
+     *                         )
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No se encontraron experiencias",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No se encontraron experiencias")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuario no autenticado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Usuario no autenticado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error al obtener las experiencias"),
+     *             @OA\Property(property="error", type="string", example="Detalles del error...")
+     *         )
+     *     )
+     * )
+     */
     public function obtenerExperiencias(Request $request)
     {
         try {
@@ -104,6 +207,71 @@ class ExperienciaController
 
     
     // Obtener un registro de experiencia por ID
+    /**
+     * Obtener un registro de experiencia por ID.
+     *
+     * @OA\Get(
+     *     path="/aspirante/obtener-experiencia/{id}",
+     *     tags={"Experiencia"},
+     *     summary="Obtener experiencia por ID",
+     *     description="Obtiene un registro de experiencia específico del usuario autenticado, incluyendo los documentos asociados.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la experiencia",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Experiencia obtenida exitosamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="experiencia", type="object",
+     *                 @OA\Property(property="id_experiencia", type="integer", example=1),
+     *                 @OA\Property(property="tipo_experiencia", type="string", example="Docencia universitaria"),
+     *                 @OA\Property(property="institucion_experiencia", type="string", example="Universidad Nacional"),
+     *                 @OA\Property(property="cargo", type="string", example="Profesor Asociado"),
+     *                 @OA\Property(property="trabajo_actual", type="string", example="Si"),
+     *                 @OA\Property(property="intensidad_horaria", type="integer", example=40),
+     *                 @OA\Property(property="fecha_inicio", type="string", format="date", example="2020-01-01"),
+     *                 @OA\Property(property="fecha_finalizacion", type="string", format="date", nullable=true, example="2023-01-01"),
+     *                 @OA\Property(property="fecha_expedicion_certificado", type="string", format="date", nullable=true, example="2023-02-01"),
+     *                 @OA\Property(property="documentosExperiencia", type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="id_documento", type="integer", example=1),
+     *                         @OA\Property(property="archivo", type="string", example="documentos/Experiencias/archivo.pdf"),
+     *                         @OA\Property(property="archivo_url", type="string", example="http://localhost/storage/documentos/Experiencias/archivo.pdf"),
+     *                         @OA\Property(property="user_id", type="integer", example=1)
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Experiencia no encontrada",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No se encontró la experiencia")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuario no autenticado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Usuario no autenticado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error al obtener la experiencia"),
+     *             @OA\Property(property="error", type="string", example="Detalles del error...")
+     *         )
+     *     )
+     * )
+     */
     public function obtenerExperienciasPorId(Request $request, $id)
     {
         try {
@@ -148,8 +316,65 @@ class ExperienciaController
     }
     
 
-    
-    // Actualizar un registro de experiencia
+    /**
+     * Actualizar un registro de experiencia.
+     *
+     * @OA\Post(
+     *     path="/aspirante/actualizar-experiencia/{id}",
+     *     tags={"Experiencia"},
+     *     summary="Actualizar experiencia",
+     *     description="Actualiza un registro de experiencia existente y permite reemplazar el archivo asociado (PDF, JPG, PNG). Requiere autenticación.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la experiencia",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"tipo_experiencia", "institucion_experiencia", "cargo", "fecha_inicio"},
+     *                 @OA\Property(property="tipo_experiencia", type="string", enum={"Docencia universitaria", "Docencia no universitaria", "Investigación", "Profesoral"}, example="Docencia universitaria"),
+     *                 @OA\Property(property="institucion_experiencia", type="string", example="Universidad Nacional"),
+     *                 @OA\Property(property="cargo", type="string", example="Profesor Asociado"),
+     *                 @OA\Property(property="trabajo_actual", type="string", enum={"Si", "No"}, nullable=true, example="Si"),
+     *                 @OA\Property(property="intensidad_horaria", type="integer", nullable=true, example=40),
+     *                 @OA\Property(property="fecha_inicio", type="string", format="date", example="2020-01-01"),
+     *                 @OA\Property(property="fecha_finalizacion", type="string", format="date", nullable=true, example="2023-01-01"),
+     *                 @OA\Property(property="fecha_expedicion_certificado", type="string", format="date", nullable=true, example="2023-02-01"),
+     *                 @OA\Property(property="archivo", type="string", format="binary", description="Archivo PDF, JPG o PNG (máx. 2MB)", nullable=true)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Experiencia actualizada correctamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Experiencia actualizada correctamente"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Experiencia")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Experiencia no encontrada",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No se encontró la experiencia")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error al actualizar la experiencia"),
+     *             @OA\Property(property="error", type="string", example="Detalles del error...")
+     *         )
+     *     )
+     * )
+     */
     public function actualizarExperiencia(ActualizarExperienciaRequest $request, $id)
     {
         try {

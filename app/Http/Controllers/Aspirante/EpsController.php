@@ -11,7 +11,7 @@ use App\Http\Requests\RequestAspirante\RequestEps\CrearEpsRequest;
 
 /**
  * @OA\Info(
- *     title="API de Gestión de EPS",
+ *     title="API de Gestión",
  *     version="1.0.0",
  *     description="Endpoints para manejar información de EPS y documentos asociados."
  * )

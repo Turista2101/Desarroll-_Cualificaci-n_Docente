@@ -26,6 +26,30 @@ use App\Models\Aspirante\Documento;
 use App\Models\Aspirante\Estudio;
 use App\Models\Aspirante\ProduccionAcademica;
 
+/**
+ * @OA\Schema(
+ *     schema="Usuario",
+ *     type="object",
+ *     title="Usuario",
+ *     description="Esquema de un usuario",
+ *     @OA\Property(property="id", type="integer", example=1, description="ID del usuario"),
+ *     @OA\Property(property="municipio_id", type="integer", example=1, description="ID del municipio asociado al usuario"),
+ *     @OA\Property(property="tipo_identificacion", type="string", enum={"Cédula de ciudadanía", "Cédula de extranjería", "Número único de identificación personal", "Pasaporte", "Registro civil", "Número por secretaría de educación", "Servicio nacional de pruebas", "Tarjeta de identidad", "Tarjeta profesional"}, example="Cédula de ciudadanía", description="Tipo de identificación del usuario"),
+ *     @OA\Property(property="numero_identificacion", type="string", example="123456789", description="Número de identificación del usuario"),
+ *     @OA\Property(property="genero", type="string", enum={"Masculino", "Femenino", "Otro"}, nullable=true, example="Masculino", description="Género del usuario"),
+ *     @OA\Property(property="primer_nombre", type="string", example="Juan", description="Primer nombre del usuario"),
+ *     @OA\Property(property="segundo_nombre", type="string", nullable=true, example="Carlos", description="Segundo nombre del usuario"),
+ *     @OA\Property(property="primer_apellido", type="string", example="Pérez", description="Primer apellido del usuario"),
+ *     @OA\Property(property="segundo_apellido", type="string", nullable=true, example="Gómez", description="Segundo apellido del usuario"),
+ *     @OA\Property(property="fecha_nacimiento", type="string", format="date", example="1990-01-01", description="Fecha de nacimiento del usuario"),
+ *     @OA\Property(property="estado_civil", type="string", enum={"Soltero", "Casado", "Divorciado", "Viudo"}, nullable=true, example="Soltero", description="Estado civil del usuario"),
+ *     @OA\Property(property="email", type="string", format="email", example="juan.perez@example.com", description="Correo electrónico del usuario"),
+ *     @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true, example="2023-01-01T12:00:00Z", description="Fecha de verificación del correo electrónico"),
+ *     @OA\Property(property="password", type="string", format="password", example="password123", description="Contraseña del usuario"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", example="2023-01-01T12:00:00Z", description="Fecha de creación del usuario"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-01-01T12:00:00Z", description="Fecha de última actualización del usuario")
+ * )
+ */
 class User extends Authenticatable implements JWTSubject
 {
     // utilizamos el trait HasFactory para definir la fabrica de usuarios
