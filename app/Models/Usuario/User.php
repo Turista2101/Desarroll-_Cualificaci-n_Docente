@@ -104,20 +104,16 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-
-    
-    // relacion de uno a uno con la tabla informacion_contacto
-    public function informacionContactoUsuario():HasOne
-    {
-        return $this->hasOne(InformacionContacto::class, 'user_id','id');
-    }
-
     // relacion de uno a uno con la tabla municipios
     public function municipioUsuarios():BelongsTo
     {
         return $this->belongsTo(Municipio::class,'municipio_id', 'id_municipio');
     }
+
+
     
+
+    //relaciones que solo tienen un documento
     // relacion de uno a uno con la tabla eps
     public function epsUsuario():HasOne
     {
@@ -130,17 +126,52 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(Rut::class, 'user_id', 'id');
     }
 
-    // relacion de uno a uno con la tabla documentos
-    public function documentosUsuario(): HasMany
+    // relacion de uno a uno con la tabla informacion_contacto
+    public function informacionContactoUsuario():HasOne
     {
-        return $this->hasMany(Documento::class, 'user_id', 'id');
+        return $this->hasOne(InformacionContacto::class, 'user_id','id');
+    }
+     
+
+    
+    // relaciones que tienen varios documentos
+    // relacion de uno a muchos con la tabla idiomas
+    public function idiomasUsuario():HasMany
+    {
+        return $this->hasMany(Idioma::class, 'user_id', 'id');
     }
 
-      //relacion polimorfica con la tabla documentos
-      public function documentosUser()
-      {
-          return $this->morphMany(Documento::class, 'documentable');
-      }
+    // relacion de uno a muchos con la tabla experiencias
+    public function experienciasUsuario():HasMany
+    {
+        return $this->hasMany(Experiencia::class, 'user_id', 'id');
+    }
+    
+    // relacion de uno a muchos con la tabla estudios
+    public function estudiosUsuario():HasMany
+    {
+        return $this->hasMany(Estudio::class, 'user_id', 'id');
+    }
+
+    // relacion de uno a muchos con la tabla produccion_academica
+    public function produccionAcademicaUsuario():HasMany
+    {
+        return $this->hasMany(ProduccionAcademica::class, 'user_id', 'id');
+    }
+
+
+
+    // // relacion de uno a uno con la tabla documentos
+    // public function documentosUsuario(): HasMany
+    // {
+    //     return $this->hasMany(Documento::class, 'user_id', 'id');
+    // }
+
+    //relacion polimorfica con la tabla documentos
+    public function documentosUser()
+    {
+        return $this->morphMany(Documento::class, 'documentable');
+    }
 
    
 

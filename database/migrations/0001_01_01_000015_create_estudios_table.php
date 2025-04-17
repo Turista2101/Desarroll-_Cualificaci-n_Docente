@@ -18,6 +18,7 @@ return new class extends Migration
         //falta hacer relacion con la tabla de municipios
         Schema::create('estudios', function (Blueprint $table) {
             $table->smallIncrements('id_estudio');
+            $table->unsignedBigInteger('user_id');
             $table->enum('tipo_estudio', TiposEstudio::all());
             $table->enum('graduado', Graduado::all());
             $table->string('institucion');
@@ -30,6 +31,11 @@ return new class extends Migration
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->timestamps();
+
+            // Relación con la tabla de usuarios
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
 
         });
     }

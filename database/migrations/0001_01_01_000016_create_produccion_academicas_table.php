@@ -14,6 +14,7 @@ return new class extends Migration
     {
         Schema::create('produccion_academicas', function (Blueprint $table) {
             $table->smallIncrements('id_produccion_academica');
+            $table->unsignedBigInteger('user_id');
             $table->unsignedTinyInteger('ambito_divulgacion_id');
             $table->string('titulo');
             $table->tinyInteger('numero_autores')->default(1);
@@ -25,6 +26,10 @@ return new class extends Migration
             $table->foreign('ambito_divulgacion_id')
                 ->references('id_ambito_divulgacion')
                 ->on('ambito_divulgacions');
+            // Relación con la tabla de usuarios
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users'); // Eliminar produccion_academica si se elimina el usuario
 
         });
     }

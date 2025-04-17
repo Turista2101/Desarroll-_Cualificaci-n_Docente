@@ -6,10 +6,8 @@ use App\Constants\ConstAgregarIdioma\NivelIdioma;
 use App\Http\Requests\RequestAspirante\RequestIdioma\ActualizarIdiomaRequest;
 use Illuminate\Http\Request;
 use App\Models\Aspirante\Idioma;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Aspirante\Documento; // Importar el modelo Documento
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log; // Importar la clase Log para depuración
 use App\Http\Requests\RequestAspirante\RequestIdioma\CrearIdiomaRequest; // Importar la clase de solicitud personalizada
 use Illuminate\Support\Facades\DB; // Importar la clase DB para transacciones
 
@@ -25,6 +23,9 @@ class IdiomaController
                 // Validar los datos de entrada
                 $datosIdioma = $request->validated();
 
+                //Agregar el user_id del usuario autenticado
+                $datosIdioma['user_id'] = $request->user()->id;
+
                 // Crear un nuevo idioma
                 $idioma = Idioma::create($datosIdioma);
 
@@ -37,7 +38,7 @@ class IdiomaController
 
                 // Guardar el documento relacionado con el idioma
                     Documento::create([
-                        'user_id'        => $request->user()->id, // Usuario autenticado
+
                         'archivo'        => str_replace('public/','', $rutaArchivo),
                         'estado'         => 'pendiente',
                         'documentable_id' => $idioma->id_idioma, // Relación polimórfica
@@ -74,10 +75,9 @@ class IdiomaController
             }
 
             // Obtener todos los idiomas relacionados con el usuario autenticado
-            $idiomas = Idioma::whereHas('documentosIdioma', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->with(['documentosIdioma' => function ($query) {
-                $query->select('id_documento', 'documentable_id', 'archivo', 'user_id'); // Relación polimórfica usa documentable_id
+            $idiomas = Idioma::where('user_id', $user->id)
+            ->with(['documentosIdioma' => function ($query) {
+                $query->select('id_documento', 'documentable_id', 'archivo', 'estado'); // Relación polimórfica usa documentable_id
             }])
             ->orderby('created_at')
             ->get();
@@ -118,17 +118,14 @@ class IdiomaController
 
             // Obtener todos los idiomas relacionados con el usuario autenticado
             $idioma = Idioma::where('id_idioma', $id)
-                ->whereHas('documentosIdioma', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })
+                ->where('user_id', $user->id)
                 ->with(['documentosIdioma' => function ($query) {
-                    $query->select('id_documento', 'documentable_id', 'archivo', 'user_id'); // Relación polimórfica usa documentable_id
+                    $query->select('id_documento', 'documentable_id', 'archivo', 'estado'); // Relación polimórfica usa documentable_id
                 }])
-                ->orderby('created_at')
                 ->first();
 
             // Verificar si se encontraron idiomas
-            if ($idioma->isEmpty()) {
+            if (!$idioma) {
                 throw new \Exception('No se encontraron idiomas', 404);
             }
 
@@ -158,9 +155,9 @@ class IdiomaController
                 $user = $request->user();
                 
                 // Buscar el estudio que tenga documentos del usuario autenticado
-                $idioma = Idioma::whereHas('documentosIdioma', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })->where('id_idioma', $id)->firstOrFail();
+                $idioma = Idioma::where('id_idioma', $id)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
 
                 $datosIdiomaActualizar =$request->validated();
                 $idioma->update($datosIdiomaActualizar);
@@ -174,7 +171,6 @@ class IdiomaController
                     // Buscar el documento asociado
                     $documento = Documento::where('documentable_id', $idioma->id_idioma)
                         ->where('documentable_type', Idioma::class)
-                        ->where('user_id', $user->id)
                         ->first();
 
                     if ($documento) {
@@ -199,7 +195,7 @@ class IdiomaController
 
             return response()->json([
                 'mensaje'  => 'Idioma actualizado correctamente',
-                'idioma'   => $idioma,
+                'data'   => $idioma->refresh(),
             ], 200);
 
         }catch(\Exception $e){
@@ -218,9 +214,10 @@ class IdiomaController
 
             $user = $request->user();
             // Buscar el idioma que tenga documentos del usuario autenticado
-            $idioma = Idioma::whereHas('documentosIdioma', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->where('id_idioma', $id)->first();
+            $idioma = Idioma::where('id_idioma', $id)
+            ->where('user_id', $user->id)
+            ->with('documentosIdioma')
+            ->first();
 
             if (!$idioma) {
                 return response()->json(['error' => 'Idioma no encontrado'], 404);
@@ -228,8 +225,8 @@ class IdiomaController
             DB::transaction(function () use($idioma) {
                 foreach ($idioma->documentosIdioma as $documento) {
                     // Eliminar el archivo del almacenamiento si existe
-                    if (!empty($documento->archivo) && Storage::exists('public/' . $documento->archivo)) {
-                        Storage::delete('public/' . $documento->archivo);
+                    if (!empty($documento->archivo) && Storage::disk('public')->exists($documento->archivo)) {
+                        Storage::disk('public')->delete ($documento->archivo);
                     }
                     $documento->delete(); // Eliminar el documento de la base de datos
                 }

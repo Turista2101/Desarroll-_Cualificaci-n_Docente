@@ -72,7 +72,9 @@ class EpsController
             $eps = DB::transaction(function () use ($request) {
                 // Validar los datos de la solicitud
                 $datosEpsCrear = $request->validated();
-    
+                // Obtener el usuario autenticado
+                $datosEpsCrear['user_id'] = $request->user()->id;
+
                 // Crear EPS
                 $eps = Eps::create($datosEpsCrear);
     
@@ -83,7 +85,6 @@ class EpsController
                     $rutaArchivo = $archivo->storeAs('documentos/Eps', $nombreArchivo, 'public');
     
                     Documento::create([
-                        'user_id'           => $request->user()->id,
                         'archivo'           => str_replace('public/', '', $rutaArchivo),
                         'estado'            => 'pendiente',
                         'documentable_id'   => $eps->id_eps,
@@ -144,11 +145,11 @@ class EpsController
             }
     
             //obtener solo los estudios que tiene documentos pertenecientes al usuario autenticado
-            $eps = Eps::whereHas('documentosEps', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->with(['documentosEps' => function ($query) {
-                $query->select('id_documento', 'documentable_id', 'archivo', 'user_id');
-            }])->first();
+            $eps = Eps::where('user_id', $user->id)
+                ->with(['documentosEps' => function ($query) {
+                    $query->select('id_documento', 'documentable_id', 'archivo', 'estado');
+                }])
+                ->first();
     
             //verificar si el eps existe
             if (!$eps) {
@@ -182,9 +183,7 @@ class EpsController
                 $user = $request->user();
     
                 // Buscar el EPS del usuario autenticado
-                $eps = Eps::whereHas('documentosEps', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })->firstOrFail();
+                $eps = Eps::where('user_id', $user->id)->firstOrFail();
     
                 // Validar y actualizar los campos
                 $datosEpsActualizar = $request->validated();
@@ -199,7 +198,6 @@ class EpsController
                     // Buscar documento existente
                     $documento = Documento::where('documentable_id', $eps->id_eps)
                         ->where('documentable_type', Eps::class)
-                        ->where('user_id', $user->id)
                         ->first();
     
                     if ($documento) {
@@ -210,7 +208,6 @@ class EpsController
                         ]);
                     } else {
                         Documento::create([
-                            'user_id'           => $user->id,
                             'archivo'           => str_replace('public/', '', $rutaArchivo),
                             'estado'            => 'pendiente',
                             'documentable_id'   => $eps->id_eps,

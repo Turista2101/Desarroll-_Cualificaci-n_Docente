@@ -14,11 +14,16 @@ return new class extends Migration
     {
         Schema::create('idiomas', function (Blueprint $table) {
             $table->smallIncrements('id_idioma');
+            $table->unsignedBigInteger('user_id');
             $table->string('idioma');
             $table->string('institucion_idioma');
             $table->date('fecha_certificado');
             $table->enum('nivel', NivelIdioma::all());
             $table->timestamps();
+            // Relación con la tabla de usuarios
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users'); // Eliminar idiomas si se elimina el usuario
 
         });
     }

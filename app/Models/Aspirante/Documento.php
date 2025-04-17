@@ -16,7 +16,6 @@ class Documento extends Model
     protected $primaryKey = 'id_documento';
 
     protected $fillable = [
-        'user_id',
         'archivo',
         'estado',
         'documentable_id',
@@ -25,10 +24,10 @@ class Documento extends Model
     ];
 
     // Relación uno a uno con la tabla users
-    public function usuarioDocumento():BelongsTo
-    {
-        return $this->belongsTo(User::class,'user_id','id');
-    }
+    // public function usuarioDocumento():BelongsTo
+    // {
+    //     return $this->belongsTo(User::class,'user_id','id');
+    // }
 
     public function documentable(): MorphTo
     {

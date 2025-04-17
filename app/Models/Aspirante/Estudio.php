@@ -3,7 +3,7 @@
 namespace App\Models\Aspirante;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Aspirante\Documento;
-
+use App\Models\Usuario\User;
 
 class Estudio extends Model
 {
@@ -13,6 +13,7 @@ class Estudio extends Model
     protected $primaryKey = 'id_estudio';
 
     protected $fillable = [
+        'user_id',
         'tipo_estudio',
         'graduado',
         'institucion',
@@ -31,6 +32,15 @@ class Estudio extends Model
      {
          return $this->morphMany(Documento::class, 'documentable');
      }
+
+    // relacion de uno a muchos con  usuarios
+    public function usuarioEstudio()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+
+    
 
 
 }

@@ -17,6 +17,7 @@ class Eps extends Model
     protected $primaryKey = 'id_eps';
 
     protected $fillable = [
+        'user_id',
         'nombre_eps',
         'tipo_afiliacion',
         'estado_afiliacion',
@@ -32,5 +33,14 @@ class Eps extends Model
     {
         return $this->morphMany(Documento::class, 'documentable');
     }
+
+    //relacion uno a uno con la tabla usuarios
+    public function usuarioEps(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+ 
+
+
 
 }

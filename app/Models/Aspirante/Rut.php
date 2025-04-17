@@ -17,6 +17,7 @@ class Rut extends Model
     protected $primaryKey = 'id_rut';
 
     protected $fillable = [
+        'user_id',
         'numero_rut',
         'razon_social',
         'tipo_persona',
@@ -29,6 +30,12 @@ class Rut extends Model
     public function documentosRut()
     {
         return $this->morphMany(Documento::class, 'documentable');
+    }
+    
+    //relacion uno a uno con la tabla usuarios
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
     
 

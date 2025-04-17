@@ -18,6 +18,7 @@ return new class extends Migration
         //falta hacer relacion con la tabla de usuarios
         Schema::create('experiencias', function (Blueprint $table) {
             $table->smallIncrements('id_experiencia');
+            $table->unsignedBigInteger('user_id');
             $table->enum('tipo_experiencia',TiposExperiencia::all());
             $table->string('institucion_experiencia');
             $table->string('cargo');
@@ -27,6 +28,11 @@ return new class extends Migration
             $table->date('fecha_finalizacion')->nullable();
             $table->date('fecha_expedicion_certificado')->nullable();
             $table->timestamps();
+
+            // Relación con la tabla de usuarios
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users'); // Eliminar experiencias si se elimina el usuario
 
         });
     }

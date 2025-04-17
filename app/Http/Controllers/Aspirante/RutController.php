@@ -20,6 +20,9 @@ class RutController
             $rut = DB::transaction(function () use ($request) {
                 $datosRut = $request->validated();
 
+                // Agregar el user_id del usuario autenticado
+                $datosRut['user_id'] = $request->user()->id;
+
                 $rut = Rut::create($datosRut);
 
                 // Verificar si se envió un archivo
@@ -30,7 +33,6 @@ class RutController
 
                 // Guardar el documento relacionado con el rut
                     Documento::create([
-                        'user_id'   => $request->user()->id,
                         'archivo'   => str_replace('public/', '', $rutaArchivo),
                         'estado'    => 'pendiente',
                         'documentable_id' => $rut->id_rut,
@@ -67,11 +69,11 @@ class RutController
             }
 
             // Obtener solo los estudios que tienen documentos pertenecientes al usuario autenticado
-            $ruts = Rut::whereHas('documentosRut', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->with(['documentosRut' => function ($query) {
-                $query->select('id_documento', 'documentable_id', 'archivo', 'user_id');
-            }])->first();
+            $ruts = Rut:: where('user_id', $user->id)
+               ->with(['documentosRut' => function ($query) {
+                    $query->select('id_documento', 'documentable_id', 'archivo', 'estado');
+               }])
+               ->first();
 
             if (!$ruts) {
                 throw new \Exception('No se encontró información de RUT', 404);
@@ -98,17 +100,13 @@ class RutController
     public function actualizarRut(ActualizarRutRequest $request)
     {
         try {
-            $rut =DB::transaction(function () use ($request) {
-                    
+            $rut =DB::transaction(function () use ($request) {    
                 $user = $request->user();
 
                 // Buscar el estudio que tenga documentos del usuario autenticado
-                $rut = Rut::whereHas('documentosRut', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })->firstOrFail(); // Asegurar que use la clave primaria id_estudio
+                $rut = Rut::where('user_id', $user->id)->firstOrFail(); // Asegurar que use la clave primaria id_estudio
 
                 $datosRutActualizar = $request->validated();
-
                 $rut->update($datosRutActualizar);
                 // Validar solo los campos que se envían en la solicitud
 
@@ -121,9 +119,8 @@ class RutController
                     // Buscar el documento asociado
                     $documento = Documento::where('documentable_id', $rut->id_rut)
                         ->where('documentable_type', Rut::class)
-                        ->where('user_id', $user->id)
                         ->first();
-
+                        
                     if ($documento) {
                         Storage::disk('public')->delete($documento->archivo);
                         $documento->update([
@@ -132,7 +129,6 @@ class RutController
                         ]);
                     } else {
                         Documento::create([
-                            'user_id'        => $user->id,
                             'archivo'        => str_replace('public/', '', $rutaArchivo),
                             'estado'         => 'pendiente',
                             'documentable_id' => $rut->id_rut,

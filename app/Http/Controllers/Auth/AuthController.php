@@ -121,7 +121,6 @@ class AuthController
                     // Buscar el documento asociado
                     $documento = Documento::where('documentable_id', $user->id)
                         ->where('documentable_type', User::class)
-                        ->where('user_id', $user->id)
                         ->first();
     
                     if ($documento) {
@@ -134,7 +133,6 @@ class AuthController
                     } else {
                         // Guardar el documento
                         Documento::create([
-                            'user_id'           => $user->id,
                             'archivo'           => str_replace('public/', '', $rutaArchivo),
                             'estado'            => 'pendiente',
                             'documentable_id'   => $user->id,

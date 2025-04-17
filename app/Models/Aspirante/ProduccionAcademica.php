@@ -7,7 +7,7 @@ use App\Models\TiposProductoAcademico\AmbitoDivulgacion;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Aspirante\Documento;
-
+use App\Models\Usuario\User;
 
 class ProduccionAcademica extends Model
 {
@@ -18,6 +18,7 @@ class ProduccionAcademica extends Model
     public $timestamps = true;
 
     protected $fillable = [
+        'user_id',
         'ambito_divulgacion_id',
         'titulo',
         'numero_autores',
@@ -36,6 +37,12 @@ class ProduccionAcademica extends Model
     public function ambitoDivulgacionProduccionAcademica():BelongsTo
     {
         return $this->belongsTo(AmbitoDivulgacion::class, 'medio_divulgacion', 'id_ambito_divulgacion');
+    }
+
+    // Relación uno a uno con la tabla usuarios
+    public function usuarioProduccionAcademica(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
 }

@@ -21,6 +21,8 @@ class InformacionContactoController
             $informacionContacto= DB::transaction(function () use ($request) {
                 // Validar los datos de la solicitud
                 $datosInfomacionContacto = $request->validated();
+
+                $datosInfomacionContacto['user_id'] = $request->user()->id;
     
                 // Crear información de contacto
                 $informacionContacto = InformacionContacto::create($datosInfomacionContacto);
@@ -29,7 +31,7 @@ class InformacionContactoController
                 if ($request->hasFile('archivo')) {
                     $archivo = $request->file('archivo');
                     $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-                    $rutaArchivo = $archivo->storeAs('documentos/Indentificacion', $nombreArchivo, 'public');
+                    $rutaArchivo = $archivo->storeAs('documentos/LibretaMilitar', $nombreArchivo, 'public');
 
                     //Guardar el documento relacionado con la información de contacto
                     Documento::create([
@@ -74,22 +76,15 @@ class InformacionContactoController
             }
 
             //obtener solo los estudios que tiene documentos pertenecientes al usuario autenticado
-            $informacionContacto = InformacionContacto::whereHas('documentosInformacionContacto', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->with(['documentosInformacionContacto' => function ($query) {
-                $query->select('id_documento', 'documentable_id', 'archivo', 'user_id', );
+            $informacionContacto = InformacionContacto::where('user_id', $user->id)
+            ->with(['documentosInformacionContacto' => function ($query) {
+                $query->select('id_documento', 'documentable_id', 'archivo', 'estado', );
             }])->first();
 
             //verificar si el usuario tiene información de contacto
             if (!$informacionContacto) {
                 throw new \Exception('No se encontró información de contacto', 404);
             }
-
-            //verificar si la información de contacto existe
-            if (!$informacionContacto) {
-                return response()->json(['message' => 'No se encontró información de contacto'], 404);
-            }
-
             //Agregar la URL del archivo a cada documento si existe
             foreach ($informacionContacto->documentosInformacionContacto as $documento) {
                 if (!empty($documento->archivo)) {
@@ -116,12 +111,10 @@ class InformacionContactoController
             $informacionContacto= DB::transaction(function () use ($request) {
                 // Obtener el usuario autenticado
                 $user = $request->user();
-
+                
+                $informacionContacto = InformacionContacto::where('user_id', $user->id)->firstOrFail();
+                // Verificar si el usuario está autenticado
                 // Buscar el registro de información de contacto por ID
-                $informacionContacto = InformacionContacto::whereHas('documentosInformacionContacto', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })->firstOrFail();
-
                 $datosInfomacionContactoActualizar = $request->validated();
 
                 // Actualizar solo los campos que se envían en la solicitud
@@ -131,12 +124,11 @@ class InformacionContactoController
                 if ($request->hasFile('archivo')) {
                     $archivo = $request->file('archivo');
                     $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-                    $rutaArchivo = $archivo->storeAs('documentos/Indentificacion', $nombreArchivo, 'public');
+                    $rutaArchivo = $archivo->storeAs('documentos/LibretaMilitar', $nombreArchivo, 'public');
             
                     // Buscar el documento asociado
                     $documento = Documento::where('documentable_id', $informacionContacto->id_informacion_contacto)
                         ->where('documentable_type', InformacionContacto::class)
-                        ->where('user_id', $user->id)
                         ->first();
                     // Si existe, actualizarlo
                     // Si no existe, crear uno nuevo
@@ -148,7 +140,6 @@ class InformacionContactoController
                         ]);
                     } else {
                         Documento::create([
-                            'user_id'          => $user->id,
                             'archivo'          => str_replace('public/', '', $rutaArchivo),
                             'estado'           => 'pendiente',
                             'documentable_id'  => $informacionContacto->id_informacion_contacto,
@@ -163,7 +154,7 @@ class InformacionContactoController
             // Devolver respuesta con la información de contacto actualizada
             return response()->json([
                     'message' => 'Información de contacto actualizada correctamente',
-                    'data'    => $informacionContacto
+                    'data'    => $informacionContacto->fresh() // Obtener la información actualizada
             ], 200);
 
         } catch (\Exception $e) {

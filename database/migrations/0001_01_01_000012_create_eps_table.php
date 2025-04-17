@@ -16,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('eps', function (Blueprint $table) {
             $table->smallIncrements('id_eps');
+            $table->unsignedBigInteger('user_id');
             $table->string('nombre_eps');
             $table->enum('tipo_afiliacion', TipoAfiliacion::all());
             $table->enum('estado_afiliacion',EstadoAfiliacion::all());
@@ -24,6 +25,10 @@ return new class extends Migration
             $table->enum('tipo_afiliado',TipoAfiliado::all());
             $table->string('numero_afiliado')->nullable();
             $table->timestamps();
+            // Relación con la tabla de usuarios
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users'); // Eliminar eps si se elimina el usuario
         });
     }
 

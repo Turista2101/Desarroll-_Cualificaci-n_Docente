@@ -4,7 +4,7 @@ namespace App\Models\Aspirante;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Aspirante\Documento;
-
+use App\Models\Usuario\User;
 
 class Experiencia extends Model
 {
@@ -14,6 +14,7 @@ class Experiencia extends Model
     protected $primaryKey = 'id_experiencia';
 
     protected $fillable = [
+        'user_id',
         'tipo_experiencia',
         'institucion_experiencia',
         'cargo',
@@ -29,6 +30,13 @@ class Experiencia extends Model
     {
         return $this->morphMany(Documento::class, 'documentable');
     }
+    // Relación uno a uno con la tabla usuarios
+    public function usuarioExperiencia()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    
 
 
 

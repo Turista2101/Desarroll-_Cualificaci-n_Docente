@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('informacion_contactos', function (Blueprint $table) {
             $table->smallIncrements('id_informacion_contacto');
+            $table->unsignedBigInteger('user_id');//relacion de muchos a uno con la tabla users
             $table->unsignedSmallInteger('municipio_id');//relacion de muchos a uno con la tabla municipios
             $table->enum('categoria_libreta_militar',CategoriaLibretaMilitar::all())->nullable();
             $table->string('numero_libreta_militar')->nullable();
@@ -30,6 +31,10 @@ return new class extends Migration
             $table->foreign('municipio_id')
                 ->references('id_municipio')
                 ->on('municipios');
+            //llave foranea de la tabla users
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users'); // Eliminar informacion_contactos si se elimina el usuario
         });
     }
 

@@ -22,6 +22,9 @@ class ExperienciaController
                 // Validar los datos de la experiencia
                 $datosExperiencia = $request->validated();
 
+                // Agregar el user_id del usuario autenticado
+                $datosExperiencia['user_id'] = $request->user()->id;
+                
                 //crear experiencia
                 $experiencia = Experiencia::create($datosExperiencia);
 
@@ -33,7 +36,6 @@ class ExperienciaController
 
                     // Guardar el documento relacionado con la experiencia
                     Documento::create([
-                        'user_id'        => $request->user()->id, // Usuario autenticado
                         'archivo'        => str_replace('public/', '', $rutaArchivo),
                         'estado'         => 'pendiente',
                         'documentable_id' => $experiencia->id_experiencia, // Relación polimórfica
@@ -70,13 +72,12 @@ class ExperienciaController
             }
 
             // Obtener solo las experiencias que tienen documentos pertenecientes al usuario autenticado
-            $experiencias = Experiencia::whereHas('documentosExperiencia', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->with(['documentosExperiencia' => function ($query) {
-                $query->select('id_documento', 'documentable_id', 'archivo', 'user_id'); // Relación polimórfica usa documentable_id
-            }])
-            ->orderBy('created_at')
-            ->get();
+            $experiencias = Experiencia::where('user_id', $user->id)
+                ->with(['documentosExperiencia' => function ($query) {
+                    $query->select('id_documento', 'documentable_id', 'archivo', 'estado'); // Relación polimórfica usa documentable_id
+                }])
+                ->orderBy('created_at')
+                ->get();
 
             // Verificar si se encontraron experiencias
             if ($experiencias->isEmpty()) {
@@ -104,7 +105,7 @@ class ExperienciaController
 
     
     // Obtener un registro de experiencia por ID
-    public function obtenerExperienciasPorId(Request $request, $id)
+    public function obtenerExperienciaPorId(Request $request, $id)
     {
         try {
             $user = $request->user(); // Obtiene el usuario autenticado
@@ -116,18 +117,15 @@ class ExperienciaController
 
             // Obtener solo las experiencias que tienen documentos pertenecientes al usuario autenticado
             $experiencia = Experiencia::where('id_experiencia', $id) // Asegurar que use la clave primaria id_experiencia
-            ->whereHas('documentosExperiencia', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-                
-            })->with(['documentosExperiencia' => function ($query) {
-                $query->select('id_documento', 'documentable_id', 'archivo', 'user_id'); // Relación polimórfica usa documentable_id
-            }])
-            ->orderBy('created_at')
-            ->first();
+                ->where('user_id', $user->id)
+                ->with(['documentosExperiencia' => function ($query) {
+                    $query->select('id_documento', 'documentable_id', 'archivo', 'estado'); // Relación polimórfica usa documentable_id
+                }])
+                ->first();
 
             // Verificar si se encontraron experiencias
-            if ($experiencia->isEmpty()) {
-                throw new \Exception ('No se encontraron experiencias', 404);
+            if (!$experiencia) {
+                throw new \Exception ('Experiecnia no encontrada', 404);
             }
 
             // Agregar la URL del archivo a cada documento si existe
@@ -157,9 +155,9 @@ class ExperienciaController
                 $user = $request->user();
 
                 // Buscar la experiencia que tenga documentos del usuario autenticado
-                $experiencia = Experiencia::whereHas('documentosExperiencia', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })->where('id_experiencia', $id)->firstOrFail(); // Asegurar que use la clave primaria id_experiencia
+                $experiencia = Experiencia::where('id_experiencia',$id)
+                    ->where('user_id', $user->id)
+                    ->firstOrFail(); // Asegurar que use la clave primaria id_experiencia
 
                 // Validar solo los campos que se envían en la solicitud
                 $datosExperienciaActualizar = $request->validated();
@@ -176,18 +174,17 @@ class ExperienciaController
                     // Buscar el documento asociado
                     $documento = Documento::where('documentable_id', $experiencia->id_experiencia)
                         ->where('documentable_type', Experiencia::class)
-                        ->where('user_id', $user->id)
                         ->first();
 
                     if ($documento) {
                         Storage::disk('public')->delete($documento->archivo);
+
                         $documento->update([
                             'archivo' => str_replace('public/', '', $rutaArchivo),
                             'estado'  => 'pendiente',
                         ]);
                     } else {
                         Documento::create([
-                            'user_id'        => $user->id,
                             'archivo'        => str_replace('public/', '', $rutaArchivo),
                             'estado'         => 'pendiente',
                             'documentable_id' => $experiencia->id_experiencia,
@@ -221,9 +218,10 @@ class ExperienciaController
             $user = $request->user();
 
             // Buscar la experiencia que tenga documentos del usuario autenticado
-            $experiencia = Experiencia::whereHas('documentosExperiencia', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->where('id_experiencia', $id)->firstOrFail(); // Asegurar que use la clave primaria id_experiencia
+            $experiencia = Experiencia::where('id_experiencia', $id) // Asegurar que use la clave primaria id_experiencia
+                ->where('user_id', $user->id)
+                ->with('documentosExperiencia')
+                ->firstOrFail(); // Asegurar que use la clave primaria id_experiencia
 
             if(!$experiencia) {
                 return response()->json(['message' => 'Experiencia no encontrada'], 404);
@@ -233,11 +231,13 @@ class ExperienciaController
             DB::transaction(function () use ($experiencia){
                 foreach ($experiencia->documentosExperiencia as $documento) {
                     // Eliminar el archivo del almacenamiento si existe
-                    if (!empty($documento->archivo) && Storage::exists('public/' . $documento->archivo)) {
-                        Storage::delete('public/' . $documento->archivo);
+                    if (!empty($documento->archivo) && Storage::disk('public')->exists($documento->archivo)) {
+                        Storage::disk('public')->delete($documento->archivo);
                     }
+
                     $documento->delete(); // Eliminar el documento de la base de datos
                 }
+
                 $experiencia->delete();
             });
 

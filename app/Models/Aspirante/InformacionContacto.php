@@ -23,6 +23,7 @@ class InformacionContacto extends Model
     protected $primaryKey = 'id_informacion_contacto';
     // definimos los campos de la tabla informacion_contactos que se pueden llenar
     protected $fillable = [
+        'user_id',
         'municipio_id',
         'categoria_libreta_militar',
         'numero_libreta_militar',
@@ -45,6 +46,12 @@ class InformacionContacto extends Model
     public function documentosInformacionContacto()
     {
         return $this->morphMany(Documento::class, 'documentable');
+    }
+
+    //relacion uno a uno con la tabla usuarios
+    public function usuarioInformacionContacto(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
     
 
