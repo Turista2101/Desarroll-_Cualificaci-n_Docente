@@ -9,7 +9,10 @@ use App\Http\Controllers\Aspirante\ExperienciaController;
 use App\Http\Controllers\Aspirante\ProduccionAcademicaController;
 use App\Http\Controllers\Aspirante\EstudioController;
 use App\Http\Controllers\Aspirante\RutController;
-
+use App\Http\Controllers\TalentoHumano\ConvocatoriaController;
+use App\Http\Controllers\TalentoHumano\PostulacionController;
+use App\Http\Controllers\Aspirante\FotoPerfilController;
+use App\Http\Controllers\Aspirante\AptitudController;
 
 Route::group([
     'middleware' => 'api', 'auth:api', 'role:Aspirante',
@@ -57,6 +60,26 @@ Route::group([
     Route::get('obtener-estudio/{id}', [EstudioController::class, 'obtenerEstudioPorId']);
     Route::put('actualizar-estudio/{id}', [EstudioController::class, 'actualizarEstudio']);
     Route::delete('eliminar-estudio/{id}', [EstudioController::class, 'eliminarEstudio']);
+
+    //convocatorias y postulaciones
+    Route::get('ver-convocatorias', [ConvocatoriaController::class, 'obtenerConvocatorias']);
+    Route::get('ver-convocatoria/{id}', [ConvocatoriaController::class, 'obtenerConvocatoriaPorId']);
+    Route::post('crear-postulacion/{convocatoriaId}', [PostulacionController::class, 'crearPostulacion']);
+    Route::get('ver-postulaciones', [PostulacionController::class, 'obtenerPostulacionesUsuario']);
+    Route::delete('eliminar-postulacion/{id}', [PostulacionController::class, 'eliminarPostulacionUsuario']);
+
+    // foto de perfil
+    Route::post('crear-foto-perfil', [FotoPerfilController::class, 'crearFotoPerfil']);
+    Route::delete('eliminar-foto-perfil', [FotoPerfilController::class, 'eliminarFotoPerfil']);
+    Route::get('obtener-foto-perfil', [FotoPerfilController::class, 'obtenerFotoPerfil']);
+
+    // Aptitudes
+    Route::post('crear-aptitud', [AptitudController::class, 'crearAptitud']);
+    Route::get('obtener-aptitudes', [AptitudController::class, 'obtenerAptitudes']);
+    Route::get('obtener-aptitud/{id}', [AptitudController::class, 'obtenerAptitudesPorId']);
+    Route::put('actualizar-aptitud/{id}', [AptitudController::class, 'actualizarAptitudPorId']);
+    Route::delete('eliminar-aptitud/{id}', [AptitudController::class, 'eliminarAptitudPorId']);
+    
 
 
     

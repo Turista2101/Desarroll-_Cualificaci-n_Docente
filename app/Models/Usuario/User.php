@@ -6,8 +6,7 @@ namespace App\Models\Usuario;
 // en este modelo se definen las relaciones con otras tablas
 // en este caso la tabla users tiene una relacion de uno a uno con la tabla informacion_contacto
 
- 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Aspirante\Aptitud;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +24,11 @@ use App\Models\Aspirante\Experiencia;
 use App\Models\Aspirante\Documento;
 use App\Models\Aspirante\Estudio;
 use App\Models\Aspirante\ProduccionAcademica;
+use App\Models\Aspirante\FotoPerfil;
+use App\Models\Puntaje;
+use App\Models\TalentoHumano\Contratacion;
+use App\Models\TalentoHumano\Postulacion;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -161,16 +165,40 @@ class User extends Authenticatable implements JWTSubject
 
 
 
-    // // relacion de uno a uno con la tabla documentos
-    // public function documentosUsuario(): HasMany
-    // {
-    //     return $this->hasMany(Documento::class, 'user_id', 'id');
-    // }
-
     //relacion polimorfica con la tabla documentos
-    public function documentosUser()
+    public function documentosUser():MorphMany
     {
         return $this->morphMany(Documento::class, 'documentable');
+    }
+
+    // relacion con la tabla puntajes
+    public function puntajeUsuario():HasOne
+    {
+        return $this->hasOne(Puntaje::class, 'user_id', 'id');
+    }
+
+    // relacion de uno a muchos con la tabla postulaciones
+    public function postulacionesUsuario():HasMany
+    {
+        return $this->hasMany(Postulacion::class, 'user_id', 'id');
+    }
+
+    //relacion de uno a muchos con la tabla contrataciones
+    public function contratacionUsuario():HasMany
+    {
+        return $this->hasMany(Contratacion::class, 'user_id', 'id');
+    }
+
+    //relacion de uno a muchos con la tabla foto_perfils
+    public function fotoPerfilUsuario():HasMany
+    {
+        return $this->hasMany(FotoPerfil::class, 'user_id', 'id');
+    }
+
+    //relacion de uno a muchos con la tabla aptitudes
+    public function aptitudesUsuario():HasMany
+    {
+        return $this->hasMany(Aptitud::class, 'user_id', 'id');
     }
 
    

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Constants\ConstDocente;
+namespace App\Constants\ConstDocumentos;
 
 class EstadoDocumentos
 {

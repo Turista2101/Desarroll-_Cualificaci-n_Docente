@@ -4,6 +4,8 @@ namespace App\Models\Aspirante;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Aspirante\Documento;
 use App\Models\Usuario\User;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Estudio extends Model
 {
@@ -28,13 +30,13 @@ class Estudio extends Model
     ];
 
      // Relación polimórfica con documentos
-     public function documentosEstudio()
+     public function documentosEstudio():MorphMany
      {
          return $this->morphMany(Documento::class, 'documentable');
      }
 
     // relacion de uno a muchos con  usuarios
-    public function usuarioEstudio()
+    public function usuarioEstudio(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }

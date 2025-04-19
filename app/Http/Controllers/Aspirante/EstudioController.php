@@ -189,7 +189,7 @@ class EstudioController
 
             return response()->json([
                 'message' => 'Estudio actualizado correctamente',
-                'data'    => $estudio->refresh(),
+                'data'    => $estudio->refresh()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Usuario\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Aspirante\Documento;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
 
 class Rut extends Model
 {
@@ -27,13 +30,13 @@ class Rut extends Model
     
     
     //relacion polimorfica con la tabla documentos
-    public function documentosRut()
+    public function documentosRut():MorphMany
     {
         return $this->morphMany(Documento::class, 'documentable');
     }
     
     //relacion uno a uno con la tabla usuarios
-    public function user(): BelongsTo
+    public function usuarioRut(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }

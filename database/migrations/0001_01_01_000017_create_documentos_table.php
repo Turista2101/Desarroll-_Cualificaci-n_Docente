@@ -1,6 +1,6 @@
 <?php
 
-use App\Constants\ConstDocente\EstadoDocumentos;
+use App\Constants\ConstDocumentos\EstadoDocumentos;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('documentos', function (Blueprint $table) {
             $table->smallIncrements('id_documento');
             $table->string('archivo'); // Ruta del archivo
-            $table->string('estado', EstadoDocumentos::all()); // Estado como string
+            $table->enum('estado', EstadoDocumentos::all()); // Estado como string
             $table->morphs('documentable'); // Relación polimórfica
             $table->timestamps();
 

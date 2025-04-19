@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Ubicacion\Municipio;
 use App\Models\Usuario\User;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 
 class InformacionContacto extends Model
@@ -43,7 +44,7 @@ class InformacionContacto extends Model
         return $this->belongsTo(Municipio::class, 'municipio_id','id_municipio');
     }
     // relacion polimorfica con documentos
-    public function documentosInformacionContacto()
+    public function documentosInformacionContacto():MorphMany
     {
         return $this->morphMany(Documento::class, 'documentable');
     }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Aspirante\Documento;
 use App\Models\Usuario\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Idioma extends Model
 {
@@ -28,7 +29,7 @@ class Idioma extends Model
         return $this->morphMany(Documento::class, 'documentable');
     }
     // Relación uno a uno con la tabla usuarios
-    public function usuarioIdioma()
+    public function usuarioIdioma(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
