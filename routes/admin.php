@@ -6,7 +6,7 @@ use App\Http\Controllers\Ubicaciones\UbicacionController;
 use App\Http\Controllers\Admin\UserController;
 
 Route::group([
-    'middleware' => 'api', 'auth:api', 'role:Administrador',
+    'middleware' => ['api', 'auth:api', 'role:Administrador'],
     'prefix' => 'admin'
 ], function () {
     // Rutas de roles

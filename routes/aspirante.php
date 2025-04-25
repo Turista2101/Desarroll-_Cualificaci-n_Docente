@@ -15,7 +15,7 @@ use App\Http\Controllers\Aspirante\FotoPerfilController;
 use App\Http\Controllers\Aspirante\AptitudController;
 
 Route::group([
-    'middleware' => 'api', 'auth:api', 'role:Aspirante',
+    'middleware' => ['api', 'auth:api', 'role:Aspirante'],
     'prefix' => 'aspirante'
 ], function () {
     // Rut

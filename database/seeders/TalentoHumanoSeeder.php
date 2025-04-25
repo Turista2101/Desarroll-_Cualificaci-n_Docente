@@ -32,6 +32,6 @@ class TalentoHumanoSeeder extends Seeder
         // Asignar el rol de admin
         $talentoHumano->assignRole('Talento Humano');
 
-        echo "✅ Talento Humano creado con email: talentoHumano@universidad.com y contraseña: talento123\n";
+        echo "Talento Humano creado con email: talentoHumano@universidad.com y contraseña: talento123\n";
     }
 }

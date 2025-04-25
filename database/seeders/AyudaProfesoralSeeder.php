@@ -30,6 +30,6 @@ class AyudaProfesoralSeeder extends Seeder
         ]);
         $ayudaProfesoral->assignRole('Ayuda Profesoral');
 
-        echo "✅ Ayuda Profesoral creado con email: ayudaprofesoral@universidad.com y contraseña: ayudaprofesoral123\n";
+        echo "Ayuda Profesoral creado con email: ayudaprofesoral@universidad.com y contraseña: ayudaprofesoral123\n";
     }
 }

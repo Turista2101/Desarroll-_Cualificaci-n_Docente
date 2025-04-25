@@ -31,6 +31,6 @@ class AdminSeeder extends Seeder
         // Asignar el rol de admin
         $admin->assignRole('Administrador');
 
-        echo "✅ Administrador creado con email: admin@universidad.com y contraseña: admin123\n";
+        echo "Administrador creado con email: admin@universidad.com y contraseña: admin123\n";
     }
 }

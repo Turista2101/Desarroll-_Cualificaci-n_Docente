@@ -25,7 +25,7 @@ use App\Models\Aspirante\Documento;
 use App\Models\Aspirante\Estudio;
 use App\Models\Aspirante\ProduccionAcademica;
 use App\Models\Aspirante\FotoPerfil;
-use App\Models\Puntaje;
+use App\Models\Docente\Puntaje;
 use App\Models\TalentoHumano\Contratacion;
 use App\Models\TalentoHumano\Postulacion;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -189,10 +189,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Contratacion::class, 'user_id', 'id');
     }
 
-    //relacion de uno a muchos con la tabla foto_perfils
-    public function fotoPerfilUsuario():HasMany
+    //relacion de uno a uno con la tabla foto_perfils
+    public function fotoPerfilUsuario():HasOne
     {
-        return $this->hasMany(FotoPerfil::class, 'user_id', 'id');
+        return $this->hasOne(FotoPerfil::class, 'user_id', 'id');
     }
 
     //relacion de uno a muchos con la tabla aptitudes

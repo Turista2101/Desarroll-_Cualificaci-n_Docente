@@ -17,7 +17,7 @@ use App\Http\Controllers\Aspirante\AptitudController;
 
 
 Route::group([
-    'middleware' => 'api', 'auth:api', 'role:Docente',
+    'middleware' => ['api', 'auth:api', 'role:Docente'],
     'prefix' => 'docente'
 ], function () {
     // Rut

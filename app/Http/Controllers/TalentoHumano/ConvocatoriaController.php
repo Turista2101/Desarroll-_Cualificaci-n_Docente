@@ -38,13 +38,13 @@ class ConvocatoriaController
                         'documentable_type' => Convocatoria::class,
                     ]);
                 }
-                // Notificar a usuarios con rol "Usuario" o "aspirante"
-                $usuarios = User::roles(['Aspirante','Docente'])->get();
-                Notification::send($usuarios, new NotificacionGeneral('Nueva convocatoria disponible.'));
+                // // Notificar a usuarios con rol "Usuario" o "aspirante"
+                // $usuarios = User::roles(['Aspirante','Docente'])->get();
+                // Notification::send($usuarios, new NotificacionGeneral('Nueva convocatoria disponible.'));
 
-                // Notificar a Talento Humano (opcional)
-                $talentoHumano = User::role('Talento Humano')->get();
-                Notification::send($talentoHumano, new NotificacionGeneral('Convocatoria registrada exitosamente.'));
+                // // Notificar a Talento Humano (opcional)
+                // $talentoHumano = User::role('Talento Humano')->get();
+                // Notification::send($talentoHumano, new NotificacionGeneral('Convocatoria registrada exitosamente.'));
                 
                 return $convocatoria;
             });
