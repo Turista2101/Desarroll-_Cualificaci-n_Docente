@@ -13,17 +13,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\RequestAuth\ActualizarAuthRequest;
 use App\Http\Requests\RequestAuth\CrearAuthRequest;
-use App\Models\Aspirante\Documento;
-use Illuminate\Support\Facades\Storage;
+use App\Services\ArchivoService;
 
 class AuthController
 {
+    protected $archivoService;
+
+    public function __construct(ArchivoService $archivoService)
+    {
+        $this->archivoService = $archivoService;
+    }
 
     //Registro de usuario
 
     public function registrar(CrearAuthRequest $request)
     {
-        try{
+        try {
             $user = DB::transaction(function () use ($request) {
                 //Validar los datos de entrada
                 $datosUser = $request->validated();
@@ -31,9 +36,8 @@ class AuthController
                 $user = User::create($datosUser);
                 // Asignar el rol "aspirante" al usuario recién creado
                 $user->assignRole('Aspirante');
-                
+
                 return $user;
-            
             });
 
             //Generar un token para el usuario
@@ -45,14 +49,12 @@ class AuthController
                 // 'user'=>$user,
                 'token' => $token
             ], 201);
-        
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al crear el usuario',
                 'error'   => $e->getMessage(),
             ], 500);
         }
-
     }
 
 
@@ -65,97 +67,77 @@ class AuthController
                 'email'    => 'required|string|email',
                 'password' => 'required|string|min:8',
             ]);
-    
+
             // Si la validación falla, devolver un mensaje de error
             if ($validator->fails()) {
                 throw new \Exception($validator->errors()->toJson(), 400);
             }
-    
+
             // Credenciales para autenticar
             $credentials = $request->only('email', 'password');
-    
+
             // Intentar autenticar y generar un token
             if (!$token = JWTAuth::attempt($credentials)) {
                 throw new \Exception('Credenciales incorrectas', 401);
             }
-    
+
             // Obtener el usuario autenticado
             $user = Auth::user();
-    
+
             // Devolver respuesta con el token y el usuario
             return response()->json([
                 'message' => 'Inicio de sesión exitoso',
                 // 'user'    => $user,
                 'token'   => $token
             ], 200);
-    
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al iniciar sesión',
                 'error'   => $e->getMessage()
-            ],$e->getCode() ?: 500);
+            ], $e->getCode() ?: 500);
         }
     }
-    
+
 
     //actualizar la informacion del usuario
-    public function actualizarUsuario( ActualizarAuthRequest $request)
+    public function actualizarUsuario(ActualizarAuthRequest $request)
     {
         try {
             $user = DB::transaction(function () use ($request) {
                 // Obtener el usuario autenticado
                 $user = JWTAuth::user();
-    
+
                 // Validar los datos de entrada
                 $datosAuth = $request->validated();
-    
-                // Actualizar el usuario
+
+                // Actualizar los datos del usuario
                 $user->update($datosAuth);
-    
-                // Manejo del archivo
+
+                // Manejo del archivo (actualizar o crear documento de identificación)
                 if ($request->hasFile('archivo')) {
-                    $archivo = $request->file('archivo');
-                    $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-                    $rutaArchivo = $archivo->storeAs('documentos/Identificacion', $nombreArchivo, 'public');
-    
-                    // Buscar el documento asociado
-                    $documento = Documento::where('documentable_id', $user->id)
-                        ->where('documentable_type', User::class)
-                        ->first();
-    
-                    if ($documento) {
-                        // Eliminar archivo anterior si existe
-                        Storage::disk('public')->delete($documento->archivo);
-                        $documento->update([
-                            'archivo' => str_replace('public/', '', $rutaArchivo),
-                            'estado'  => 'pendiente',
-                        ]);
-                    } else {
-                        // Guardar el documento
-                        Documento::create([
-                            'archivo'           => str_replace('public/', '', $rutaArchivo),
-                            'estado'            => 'pendiente',
-                            'documentable_id'   => $user->id,
-                            'documentable_type' => User::class,
-                        ]);
+                    $this->archivoService->actualizarArchivoDocumento(
+                        $request->file('archivo'),
+                        $user,
+                        'Identificacion' // Carpeta para documentos de usuarios
+                    );
+                }
+
+                return $user->fresh(); // Retornar el usuario actualizado
+            });
+
+            // Agregar la URL del archivo si existe
+            if ($user->documentosUser) {
+                foreach ($user->documentosUser as $documento) {
+                    if (!empty($documento->archivo)) {
+                        $documento->archivo_url = asset('storage/' . $documento->archivo);
                     }
                 }
-    
-                return $user->fresh(); // Retornar el usuario actualizado al finalizar la transacción
-            });
-    
-            // Agregar la URL del archivo a cada documento si existe
-            foreach ($user->documentosUser as $documento) {
-                if (!empty($documento->archivo)) {
-                    $documento->archivo_url = asset('storage/' . $documento->archivo);
-                }
             }
-    
+
             return response()->json([
                 'message' => 'Usuario actualizado exitosamente',
                 'user'    => $user,
             ], 200);
-    
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al actualizar el usuario',
@@ -171,7 +153,7 @@ class AuthController
         try {
             // Invalidar el token actual
             JWTAuth::invalidate(JWTAuth::getToken());
-    
+
             // Devolver respuesta
             return response()->json(['message' => 'Sesión cerrada exitosamente'], 200);
         } catch (\Exception $e) {
@@ -189,21 +171,20 @@ class AuthController
         try {
             // Obtener el usuario autenticado
             $user = JWTAuth::user();
-    
+
             if (!$user) {
                 throw new \Exception('Usuario no autenticado', 401);
             }
-    
+
             // Agregar la URL del archivo a cada documento si existe
             foreach ($user->documentosUser as $documento) {
                 if (!empty($documento->archivo)) {
                     $documento->archivo_url = asset('storage/' . $documento->archivo);
                 }
             }
-    
+
             // Devolver respuesta con el usuario
             return response()->json(['user' => $user], 200);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al obtener el usuario autenticado',
@@ -225,30 +206,29 @@ class AuthController
                 'password' => 'required|string|min:8',
                 'new_password' => 'required|string|min:8',
             ]);
-    
+
             if ($validator->fails()) {
                 throw new \Exception('error', 400);
             }
-    
+
             // Obtener el usuario autenticado
             $user = JWTAuth::user();
-    
+
             // Verificar la contraseña actual
             if (!Hash::check($request->password, $user->password)) {
                 throw new \Exception('Contraseña incorrecta', 401);
             }
-    
+
             // Actualizar la contraseña
             $user->password = Hash::make($request->new_password);
             $user->save();
-    
-            return response()->json(['message' => 'Contraseña actualizada exitosamente'], 200);
 
+            return response()->json(['message' => 'Contraseña actualizada exitosamente'], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al actualizar la contraseña.',
                 'error' => $e->getMessage()
-            ],$e->getCode() ?: 500);
+            ], $e->getCode() ?: 500);
         }
     }
 

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('area', AreasContratacion::all());
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
-            $table->decimal('valor_contrato');
+            $table->decimal('valor_contrato', 12, 0);
             $table->text('observaciones')->nullable();
             $table->timestamps();
             

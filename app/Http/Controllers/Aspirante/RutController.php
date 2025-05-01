@@ -5,151 +5,119 @@ namespace App\Http\Controllers\Aspirante;
 use App\Http\Requests\RequestAspirante\RequestRut\ActualizarRutRequest;
 use Illuminate\Http\Request;
 use App\Models\Aspirante\Rut;
-use App\Models\Aspirante\Documento;
-use Illuminate\Support\Facades\Storage;
+use App\Services\ArchivoService;
 use App\Http\Requests\RequestAspirante\RequestRut\CrearRutRequest;
 use Illuminate\Support\Facades\DB;
 
 
 class RutController
 {
-    //Crear un nuevo registro de rut
+    protected $archivoService;
+
+    public function __construct(ArchivoService $archivoService)
+    {
+        $this->archivoService = $archivoService;
+    }
+
     public function crearRut(CrearRutRequest $request)
     {
         try {
+            $usuarioId = $request->user()->id;
+            
+            $rutExistente = Rut::where('user_id', $usuarioId)->first();
+
+            if ($rutExistente) {
+                return response()->json([
+                    'message' => 'Ya tienes un RUT registrado. No puedes crear otro.',
+                ], 409);
+            }
+            
             $rut = DB::transaction(function () use ($request) {
-                $datosRut = $request->validated();
+                $datos = $request->validated();
+                $datos['user_id'] = $request->user()->id;
 
-                // Agregar el user_id del usuario autenticado
-                $datosRut['user_id'] = $request->user()->id;
+                $rut = Rut::create($datos);
 
-                $rut = Rut::create($datosRut);
-
-                // Verificar si se envió un archivo
                 if ($request->hasFile('archivo')) {
-                    $archivo = $request->file('archivo');
-                    $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-                    $rutaArchivo = $archivo->storeAs('documentos/Rut', $nombreArchivo, 'public');
-
-                // Guardar el documento relacionado con el rut
-                    Documento::create([
-                        'archivo'   => str_replace('public/', '', $rutaArchivo),
-                        'estado'    => 'pendiente',
-                        'documentable_id' => $rut->id_rut,
-                        'documentable_type' => Rut::class,
-
-                    ]);
+                    $this->archivoService->guardarArchivoDocumento($request->file('archivo'), $rut, 'Rut');
                 }
+
                 return $rut;
             });
 
             return response()->json([
-                'message' => 'Rut creado exitosamente',
-                'data'     => $rut,
+                'message' => 'RUT creado exitosamente',
+                'data' => $rut,
             ], 201);
-
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error al crear la EPS o subir el archivo.',
-                'error'   => $e->getMessage()
+                'message' => 'Error al crear el RUT',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
-
-
-    //obtener estudios del usuario autenticado
     public function obtenerRut(Request $request)
     {
-        try{
-            $user = $request->user();
+        try {
+            $rut = Rut::where('user_id', $request->user()->id)
+                ->with(['documentosRut:id_documento,documentable_id,archivo,estado'])
+                ->firstOrFail();
 
-            if (!$user) {
-                throw new \Exception('Usuario no autenticado', 401);
+            foreach ($rut->documentosRut as $documento) {
+                $documento->archivo_url = asset('storage/' . $documento->archivo);
             }
 
-            // Obtener solo los estudios que tienen documentos pertenecientes al usuario autenticado
-            $ruts = Rut:: where('user_id', $user->id)
-               ->with(['documentosRut' => function ($query) {
-                    $query->select('id_documento', 'documentable_id', 'archivo', 'estado');
-               }])
-               ->first();
-
-            if (!$ruts) {
-                throw new \Exception('No se encontró información de RUT', 404);
-            }
-            
-            //Agregar la URL del archivo a cada documento si existe
-            foreach ($ruts->documentosRut as $documento) {
-                if (!empty($documento->archivo)) {
-                    $documento->archivo_url = asset('storage/' . $documento->archivo);
-                }
-            }
-            
-            return response()->json(['ruts' => $ruts], 200);
-
+            return response()->json(['rut' => $rut], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error al obtener la información de RUT',
-                'error'   => $e->getMessage()
+                'message' => 'Error al obtener el RUT',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
-    //actualizar rut
     public function actualizarRut(ActualizarRutRequest $request)
     {
         try {
-            $rut =DB::transaction(function () use ($request) {    
-                $user = $request->user();
+            $rut = DB::transaction(function () use ($request) {
+                $rut = Rut::where('user_id', $request->user()->id)->firstOrFail();
 
-                // Buscar el estudio que tenga documentos del usuario autenticado
-                $rut = Rut::where('user_id', $user->id)->firstOrFail(); // Asegurar que use la clave primaria id_estudio
+                $rut->update($request->validated());
 
-                $datosRutActualizar = $request->validated();
-                $rut->update($datosRutActualizar);
-                // Validar solo los campos que se envían en la solicitud
-
-                // Manejo del archivo
                 if ($request->hasFile('archivo')) {
-                    $archivo = $request->file('archivo');
-                    $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-                    $rutaArchivo = $archivo->storeAs('documentos/Rut', $nombreArchivo, 'public');
-
-                    // Buscar el documento asociado
-                    $documento = Documento::where('documentable_id', $rut->id_rut)
-                        ->where('documentable_type', Rut::class)
-                        ->first();
-                        
-                    if ($documento) {
-                        Storage::disk('public')->delete($documento->archivo);
-                        $documento->update([
-                            'archivo' => str_replace('public/', '', $rutaArchivo),
-                            'estado'  => 'pendiente',
-                        ]);
-                    } else {
-                        Documento::create([
-                            'archivo'        => str_replace('public/', '', $rutaArchivo),
-                            'estado'         => 'pendiente',
-                            'documentable_id' => $rut->id_rut,
-                            'documentable_type' => Rut::class,
-                        ]);
-                    }
+                    $this->archivoService->actualizarArchivoDocumento($request->file('archivo'), $rut, 'Rut');
                 }
+
                 return $rut;
             });
-            return response()->json([
-                'message' => 'Rut actualizado correctamente',
-                'data'    => $rut->fresh()
-            ], 200);
 
+            return response()->json([
+                'message' => 'RUT actualizado exitosamente',
+                'data' => $rut->fresh(),
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al actualizar el RUT',
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
+    public function eliminarRut(Request $request)
+    {
+        try {
+            $rut = Rut::where('user_id', $request->user()->id)->firstOrFail();
 
+            $this->archivoService->eliminarArchivoDocumento($rut);
+            $rut->delete();
+
+            return response()->json(['message' => 'RUT eliminado correctamente'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al eliminar el RUT',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

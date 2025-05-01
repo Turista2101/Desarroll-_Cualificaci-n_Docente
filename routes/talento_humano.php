@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TalentoHumano\PostulacionController;
 
 Route::group([
-    'middleware' => ['api', 'auth:api', 'role:Talento Humano'],
+    'middleware' =>['api', 'auth:api', 'role:Talento Humano'],
     'prefix' => 'talentoHumano'
 ], function () {
     // convocatorias
@@ -19,11 +19,9 @@ Route::group([
     //postulaciones
     Route::get('obtener-postulaciones',[PostulacionController::class, 'obtenerPostulaciones']);
     Route::get('obtener-postulaciones-convocatoria/{idConvocatoria}',[PostulacionController::class, 'obtenerPorConvocatoria']);
-    // Route::get('documentos-por-usuario-y-convocatoria/{idConvocatoria}/{idUsuario}',[PostulacionController::class, 'documentosPorUsuarioYConvocatoria']);
     Route::delete('eliminar-postulacion/{idPostulacion}',[PostulacionController::class, 'eliminarPostulacion']);
     Route::put('actualizar-postulacion/{idPostulacion}',[PostulacionController::class, 'actualizarEstadoPostulacion']);
     Route::get('hoja-de-vida-pdf/{idConvocatoria}/{idUsuario}', [PostulacionController::class, 'generarHojaDeVidaPDF']);
-
     
     //contrataciones
     Route::post('crear-contratacion/{user_id}',[ContratacionController::class, 'crearContratacion']);

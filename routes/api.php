@@ -7,3 +7,4 @@ require_once __DIR__ . '/admin.php';
 require_once __DIR__ . '/aspirante.php';
 require_once __DIR__ . '/talento_humano.php';
 require_once __DIR__ . '/docente.php';
+require_once __DIR__ . '/evaluador_produccion.php';

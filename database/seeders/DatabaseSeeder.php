@@ -20,8 +20,10 @@ class DatabaseSeeder extends Seeder
         $this->call(AyudaProfesoralSeeder::class);
         $this->call(DocenteSeeder::class);
         $this->call(TalentoHumanoSeeder::class);
+        $this->call(EvaluadorProduccionSeeder::class);
         $this->call(ProductoAcademicoSeeder::class);
         $this->call(AmbitoDivulgacionSeeder::class);
+
 
     }
 }

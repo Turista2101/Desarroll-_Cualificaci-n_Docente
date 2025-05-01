@@ -2,18 +2,28 @@
 
 namespace App\Http\Controllers\TalentoHumano;
 
+use App\Models\Aspirante\Documento;
 use App\Http\Requests\RequestTalentoHumano\RequestContratacion\CrearContratacionRequest;
 use App\Http\Requests\RequestTalentoHumano\RequestContratacion\ActualizarContratacionRequest;
 use App\Models\Usuario\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\TalentoHumano\Contratacion; // Importar la clase Contratacion
-use Illuminate\Support\Facades\Auth; 
-use App\Notifications\NotificacionGeneral;
-
-
+use Illuminate\Support\Facades\Auth;
+use App\Services\AprobarDocumentosService; // Importar el servicio AprobarDocumentosService
+use App\Services\RevertirDocumentosService;
 
 class ContratacionController
 {
+    protected $aprobarDocumentosService;
+    protected $revertirDocumentosService;
+   
+
+    public function __construct(AprobarDocumentosService $aprobarDocumentosService,RevertirDocumentosService $revertirDocumentosService)
+    {
+        $this->aprobarDocumentosService = $aprobarDocumentosService;
+        $this->revertirDocumentosService = $revertirDocumentosService;
+    }
+
     public function crearContratacion(CrearContratacionRequest $request, $user_id)
     {
         try {
@@ -21,16 +31,23 @@ class ContratacionController
                 $datosContratacion = $request->validated();
                 $datosContratacion['user_id'] = $user_id; // Asignar el user_id a los datos de contratación
 
+                // Verificar si ya existe una contratación para el usuario
+                $existeContratacion = Contratacion::where('user_id', $user_id)->exists();
+                if ($existeContratacion) {
+                    throw new \Exception('El usuario ya tiene una contratación existente.', 409);
+                }
+
                 // Verificamos que el usuario exista
                 $usuario = User::findOrFail($user_id);
 
-                // Creamos la contratación
+                // Crear la contratación
                 $contratacion = Contratacion::create($datosContratacion);
 
                 // Cambiar el rol a 'docente'
                 $usuario->syncRoles(['Docente']);
-                 // Enviar notificación a todos los usuarios con el rol 'aspirante'
-                $usuario->notify(new NotificacionGeneral("Has sido contratado. ¡Felicitaciones!"));
+
+                // Aprobar documentos del usuario
+                $this->aprobarDocumentosService->aprobarDocumentosDeUsuario($usuario);
 
                 return $contratacion;
             });
@@ -38,12 +55,12 @@ class ContratacionController
             return response()->json([
                 'message' => 'Contratación creada y rol actualizado a docente.',
                 'contratacion' => $contratacion
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Ocurrió un error al crear la contratación.',
+                'message' => 'Ocurrió un error',
                 'error' => $e->getMessage()
-            ], 500);
+            ], is_numeric($e->getCode()) ? (int) $e->getCode() : 500);
         }
     }
 
@@ -52,15 +69,15 @@ class ContratacionController
         try {
             $contratacion = DB::transaction(function () use ($request, $id_contratacion) {
                 $contratacion = Contratacion::findOrFail($id_contratacion);
-    
+
                 $datosActualizarContratacion = $request->validated();
-    
+
                 // Actualizar la contratación
                 $contratacion->update($datosActualizarContratacion);
-    
+
                 return $contratacion;
             });
-    
+
             return response()->json([
                 'message' => 'Contratación actualizada correctamente.',
                 'contratacion' => $contratacion
@@ -79,16 +96,19 @@ class ContratacionController
             DB::transaction(function () use ($id) {
                 $contratacion = Contratacion::findOrFail($id);
                 $usuario = $contratacion->UsuarioContratacion;
-    
+
                 // Eliminar contratación
                 $contratacion->delete();
-    
+
                 // Cambiar el rol a 'aspirante'
                 if ($usuario) {
-                    $usuario->syncRoles(['aspirante']);
+                    $usuario->syncRoles(['Aspirante']);
+
+                    // Revertir documentos del usuario
+                    $this->revertirDocumentosService->revertirDocumentosDeUsuario($usuario);
                 }
             });
-    
+
             return response()->json([
                 'message' => 'Contratación eliminada y rol cambiado a aspirante.'
             ], 200);
@@ -145,13 +165,13 @@ class ContratacionController
     //         $contrataciones = Contratacion::where('user_id', $user_id)
     //             ->orderBy('fecha_inicio', 'desc')
     //             ->get();
-    
+
     //         if ($contrataciones->isEmpty()) {
     //             return response()->json([
     //                 'message' => 'No se encontraron contrataciones para este usuario.'
     //             ], 404);
     //         }
-    
+
     //         return response()->json([
     //             'message' => 'Contrataciones obtenidas correctamente.',
     //             'contrataciones' => $contrataciones
@@ -164,14 +184,14 @@ class ContratacionController
     //     }
     // }
 
-    
+
     public function obtenerContratacionUsuario()
     {
         try {
             $usuario = Auth::user(); // También puedes usar auth()->user();
 
             if (!$usuario) {
-                throw new  \Exception ('No hay usuario autenticado.',401);
+                throw new  \Exception('No hay usuario autenticado.', 401);
             }
 
             $contrataciones = Contratacion::where('user_id', $usuario->id)
@@ -179,7 +199,7 @@ class ContratacionController
                 ->get();
 
             if ($contrataciones->isEmpty()) {
-                throw new  \Exception ('No se encontraron contrataciones para el usuario autenticado.', 404);
+                throw new  \Exception('No se encontraron contrataciones para el usuario autenticado.', 404);
             }
 
             return response()->json([
@@ -190,10 +210,7 @@ class ContratacionController
             return response()->json([
                 'message' => 'Error al obtener las contrataciones del usuario autenticado.',
                 'error' => $e->getMessage()
-            ],$e->getCode() ?: 500);
+            ], $e->getCode() ?: 500);
         }
     }
-    
-
-    
 }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Constants\ConstDocente\EstadoPuntajeDocente;
+use App\Constants\ConstDocente\EstadoEvaluacionDocente;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,15 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('puntajes', function (Blueprint $table) {
-            $table->smallIncrements('id_puntaje');
+        Schema::create('evaluacion_docentes', function (Blueprint $table) {
+            $table->smallIncrements('id_evaluacion_docente');
             $table->unsignedBigInteger('user_id');
-            $table->integer(('puntaje_total'));
+            $table->decimal('promedio_evaluacion_docente', 3, 2);
+            $table->enum('estado_evaluacion_docente',EstadoEvaluacionDocente::all());
             $table->timestamps();
             // Relación con la tabla de usuarios
             $table->foreign('user_id')
-                ->references('id')
-                ->on('users'); // Eliminar puntaje si se elimina el usuario
+            ->references('id')
+            ->on('users');
         });
     }
 
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('puntajes');
+        Schema::dropIfExists('evaluacion_docentes');
     }
 };

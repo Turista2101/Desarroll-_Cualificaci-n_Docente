@@ -2,6 +2,8 @@
 
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Docente\PuntajeController;
+use App\Http\Controllers\Docente\EvaluacionDocenteController;
 use App\Http\Controllers\Aspirante\InformacionContactoController;
 use App\Http\Controllers\Aspirante\EpsController;
 use App\Http\Controllers\Aspirante\IdiomaController;
@@ -17,7 +19,7 @@ use App\Http\Controllers\Aspirante\AptitudController;
 
 
 Route::group([
-    'middleware' => ['api', 'auth:api', 'role:Docente'],
+    'middleware' => 'api', 'auth:api', 'role:Docente',
     'prefix' => 'docente'
 ], function () {
     // Rut
@@ -82,16 +84,16 @@ Route::group([
     Route::put('actualizar-aptitud/{id}', [AptitudController::class, 'actualizarAptitudPorId']);
     Route::delete('eliminar-aptitud/{id}', [AptitudController::class, 'eliminarAptitudPorId']);
       
-
     //contratacion
     Route::get('ver-contratacion', [ContratacionController::class, 'obtenerContratacionUsuario']);
+     
+    //evaluacion docente
+    Route::post('crear-evaluacion', [EvaluacionDocenteController::class, 'crearEvaluacionDocente']);
+    Route::get('ver-evaluaciones', [EvaluacionDocenteController::class, 'verEvaluacionDocente']);
+    Route::put('actualizar-evaluacion', [EvaluacionDocenteController::class, 'actualizarEvaluacionDocente']);
 
     //puntaje
+    Route::get('evaluar-puntaje/{userId}', [PuntajeController::class, 'evaluarYGuardarPuntaje']);
+   
 
-    //Docente
-    //informacionContratacion
-    //facultades:ing Soft,ing Indus
-    // Fecha Inicio:
-    // Fecha Fin:
-    //Tipo Contrato: prestacion servicios, planta
 });

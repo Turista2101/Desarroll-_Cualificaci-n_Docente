@@ -5,82 +5,67 @@ namespace App\Http\Controllers\Aspirante;
 use Illuminate\Http\Request;
 use App\Models\Aspirante\ProduccionAcademica;
 use App\Http\Requests\RequestAspirante\RequestProduccionAcademica\ActualizarProduccionAcademicaRequest;
-use App\Models\Aspirante\Documento; // Asegúrate de importar el modelo Documento
-use Illuminate\Support\Facades\Storage;
+use App\Services\ArchivoService;
 use App\Http\Requests\RequestAspirante\RequestProduccionAcademica\CrearProduccionAcademicaRequest;
 use Illuminate\Support\Facades\DB;
+
 class ProduccionAcademicaController
 {
+   protected $archivoService;
+
+   public function __construct(ArchivoService $archivoService)
+   {
+      $this->archivoService = $archivoService;
+   }
+
+   // Crear una producción académica
    public function crearProduccion(CrearProduccionAcademicaRequest $request)
    {
       try {
-         $produccionAcademica = DB::transaction(function () use ($request){
-            $datosProduccionAcademica = $request->validated();
+         $produccionAcademica = DB::transaction(function () use ($request) {
+            $datos = $request->validated();
+            $datos['user_id'] = $request->user()->id;
 
-            // Agregar el user_id del usuario autenticado
-            $datosProduccionAcademica['user_id'] = $request->user()->id;
+            $produccionAcademica = ProduccionAcademica::create($datos);
 
-            // Crear un nuevo registro de producción académica
-            $produccionAcademica = ProduccionAcademica::create($datosProduccionAcademica);
-
-            // Verificar si se guardó correctamente y si se envió un archivo
             if ($request->hasFile('archivo')) {
-               $archivo = $request->file('archivo');
-               $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-               $rutaArchivo = $archivo->storeAs('documentos/ProduccionAcademica', $nombreArchivo, 'public');
-
-               // Guardar el documento relacionado con la producción académica
-               Documento::create([
-                  'archivo'          => str_replace('public/', '', $rutaArchivo),
-                  'estado'           => 'pendiente',
-                  'documentable_id'  => $produccionAcademica->id_produccion_academica,
-                  'documentable_type' => ProduccionAcademica::class,
-               ]);
+               $this->archivoService->guardarArchivoDocumento($request->file('archivo'), $produccionAcademica, 'ProduccionAcademica');
             }
-             
+
             return $produccionAcademica;
          });
 
          return response()->json([
-            'message'              => 'Producción académica y documento guardados correctamente',
+            'message' => 'Producción académica y documento guardados correctamente',
             'produccion_academica' => $produccionAcademica,
          ], 201);
-
       } catch (\Exception $e) {
          return response()->json([
-            'message' => 'Error al crear la producción académica o subir el archivo.',
-            'error'   => $e->getMessage()
+            'message' => 'Error al crear la producción académica.',
+            'error' => $e->getMessage()
          ], 500);
       }
    }
 
-
-
+   // Obtener todas las producciones académicas
    public function obtenerProducciones(Request $request)
    {
       try {
-         $user = $request->user(); // Obtener el usuario autenticado
+         $user = $request->user();
 
-         // Verificar si el usuario está autenticado
          if (!$user) {
             throw new \Exception('Usuario no autenticado', 401);
          }
 
-         // Obtener solo las producciones académicas que tienen documentos pertenecientes al usuario autenticado
          $producciones = ProduccionAcademica::where('user_id', $user->id)
-            ->with(['documentosProduccionAcademica' => function ($query) {
-               $query->select('id_documento', 'documentable_id', 'archivo', 'estado'); // Relación polimórfica usa documentable_id
-         }])
-         ->orderBy('created_at') 
-         ->get();
-
+            ->with(['documentosProduccionAcademica:id_documento,documentable_id,archivo,estado'])
+            ->orderBy('created_at')
+            ->get();
 
          if ($producciones->isEmpty()) {
             throw new \Exception('No se encontraron producciones', 404);
-        }
+         }
 
-
-         // Agregar la URL del archivo a cada documento si existe
          $producciones->each(function ($produccion) {
             $produccion->documentosProduccionAcademica->each(function ($documento) {
                if (!empty($documento->archivo)) {
@@ -90,160 +75,98 @@ class ProduccionAcademicaController
          });
 
          return response()->json(['producciones' => $producciones], 200);
-
       } catch (\Exception $e) {
          return response()->json([
             'message' => 'Error al obtener las producciones académicas.',
-            'error'   => $e->getMessage()
-         ],$e->getCode() ?: 500);
+            'error' => $e->getMessage()
+         ], $e->getCode() ?: 500);
       }
    }
 
+   // Obtener una producción académica por ID
    public function obtenerProduccionPorId(Request $request, $id)
    {
       try {
-         $user = $request->user(); // Obtener el usuario autenticado
+         $user = $request->user();
 
-         // Verificar si el usuario está autenticado
          if (!$user) {
             throw new \Exception('Usuario no autenticado', 401);
          }
 
-         // Obtener solo las producciones académicas que tienen documentos pertenecientes al usuario autenticado
          $produccion = ProduccionAcademica::where('id_produccion_academica', $id)
             ->where('user_id', $user->id)
-            ->with(['documentosProduccionAcademica' => function ($query) {
-               $query->select('id_documento', 'documentable_id', 'archivo', 'estado'); // Relación polimórfica usa documentable_id
-            }])
-            ->first();
+            ->with(['documentosProduccionAcademica:id_documento,documentable_id,archivo,estado'])
+            ->firstOrFail();
 
-
-         if (!$produccion) {
-            throw new \Exception('Produccion no encontrada', 404);
-         }
-
-
-         // Agregar la URL del archivo a cada documento si existe
          $produccion->documentosProduccionAcademica->each(function ($documento) {
             if (!empty($documento->archivo)) {
-                  $documento->archivo_url = asset('storage/' . $documento->archivo);
+               $documento->archivo_url = asset('storage/' . $documento->archivo);
             }
          });
 
-         return response()->json(['producciones' => $produccion], 200);
-
+         return response()->json(['produccion' => $produccion], 200);
       } catch (\Exception $e) {
          return response()->json([
-            'message' => 'Error al obtener las producciones académicas.',
-            'error'   => $e->getMessage()
-         ],$e->getCode() ?: 500);
+            'message' => 'Error al obtener la producción académica.',
+            'error' => $e->getMessage()
+         ], $e->getCode() ?: 500);
       }
    }
 
-
-   // actualizar una producción académica
+   // Actualizar una producción académica
    public function actualizarProduccion(ActualizarProduccionAcademicaRequest $request, $id)
    {
       try {
          $produccionAcademica = DB::transaction(function () use ($request, $id) {
-            
             $user = $request->user();
 
-            // Buscar la producción académica que tenga documentos del usuario autenticado
             $produccionAcademica = ProduccionAcademica::where('id_produccion_academica', $id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
+               ->where('user_id', $user->id)
+               ->firstOrFail();
 
-            // Validar solo los campos que se envían en la solicitud
-            $datosProduccionAcademicaActualizar = $request->validated();
-            $produccionAcademica->update($datosProduccionAcademicaActualizar);
+            $datos = $request->validated();
+            $produccionAcademica->update($datos);
 
-
-            // Manejo del archivo
             if ($request->hasFile('archivo')) {
-               $archivo = $request->file('archivo');
-               $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-               $rutaArchivo = $archivo->storeAs('documentos/ProduccionAcademica', $nombreArchivo, 'public');
+               $this->archivoService->actualizarArchivoDocumento($request->file('archivo'), $produccionAcademica, 'ProduccionAcademica');
+            }
 
-               // Buscar el documento asociado
-               $documento = Documento::where('documentable_id', $produccionAcademica->id_produccion_academica)
-                     ->where('documentable_type', ProduccionAcademica::class)
-                     ->first();
+            return $produccionAcademica;
+         });
 
-               if ($documento) {
-                     // Eliminar el archivo anterior
-                     Storage::disk('public')->delete($documento->archivo);
-                     
-
-                     // Actualizar el documento
-                     $documento->update([
-                        'archivo' => str_replace('public/', '', $rutaArchivo),
-                        'estado'  => 'pendiente',
-                     ]);
-               } else {
-                     // Crear un nuevo documento si no existe
-                     Documento::create([
-                        'archivo'          => str_replace('public/', '', $rutaArchivo),
-                        'estado'           => 'pendiente',
-                        'documentable_id'  => $produccionAcademica->id_produccion_academica,
-                        'documentable_type' => ProduccionAcademica::class,
-                     ]);
-               }
-           }
-
-         return $produccionAcademica;
-      });
          return response()->json([
-            'message'              => 'Producción académica actualizada correctamente',
-            'data' => $produccionAcademica->refresh(),
+            'message' => 'Producción académica actualizada correctamente',
+            'data' => $produccionAcademica->fresh(),
          ], 200);
-
-      }catch (\Exception $e) {
+      } catch (\Exception $e) {
          return response()->json([
-            'message' => 'Error inesperado al actualizar la producción académica.',
-            'error'   => $e->getMessage()
+            'message' => 'Error al actualizar la producción académica.',
+            'error' => $e->getMessage()
          ], 500);
       }
    }
-
 
    // Eliminar una producción académica
    public function eliminarProduccion(Request $request, $id)
    {
       try {
-         $user = $request->user(); // Usuario autenticado
+         $user = $request->user();
 
-         // Buscar la producción académica que tenga documentos del usuario autenticado
          $produccionAcademica = ProduccionAcademica::where('id_produccion_academica', $id)
             ->where('user_id', $user->id)
-            ->with('documentosProduccionAcademica')
-            ->first();
+            ->firstOrFail();
 
-         if (!$produccionAcademica) {
-            return response()->json(['error' => 'Producción académica no encontrada o no tienes permiso para eliminarla'], 403);
-         }
-
-         DB::transaction(function()use ($produccionAcademica) {
-            // Eliminar los documentos relacionados
-            foreach ($produccionAcademica->documentosProduccionAcademica as $documento) {
-               // Eliminar el archivo del almacenamiento si existe
-               if (!empty($documento->archivo) && Storage::disk('public')->exists($documento->archivo)) {
-                  Storage::disk('public')->delete($documento->archivo);
-               }
-               $documento->delete(); // Eliminar el documento de la base de datos
-            }
-            // Eliminar la producción académica
+         DB::transaction(function () use ($produccionAcademica) {
+            $this->archivoService->eliminarArchivoDocumento($produccionAcademica);
             $produccionAcademica->delete();
          });
 
          return response()->json(['message' => 'Producción académica eliminada correctamente'], 200);
-
       } catch (\Exception $e) {
          return response()->json([
-            'message' => 'Error inesperado al eliminar la producción académica.',
-            'error'   => $e->getMessage()
+            'message' => 'Error al eliminar la producción académica.',
+            'error' => $e->getMessage()
          ], 500);
       }
    }
-   
 }

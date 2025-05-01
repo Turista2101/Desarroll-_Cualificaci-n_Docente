@@ -14,7 +14,6 @@ class Puntaje extends Model
     protected $fillable = [
         'user_id',
         'puntaje_total',
-        'estado_puntaje',
     ];
 
 

@@ -2,7 +2,7 @@
 
 namespace App\Constants\ConstDocente;
 
-class EstadoPuntajeDocente
+class EstadoEvaluacionDocente
 {
     public const PENDIENTE = 'Pendiente';
     public const APROVADO = 'Aprobado';

@@ -6,6 +6,7 @@ namespace App\Models\Usuario;
 // en este modelo se definen las relaciones con otras tablas
 // en este caso la tabla users tiene una relacion de uno a uno con la tabla informacion_contacto
 
+use App\Models\Docente\EvaluacionDocente;
 use App\Models\Aspirante\Aptitud;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -184,9 +185,9 @@ class User extends Authenticatable implements JWTSubject
     }
 
     //relacion de uno a muchos con la tabla contrataciones
-    public function contratacionUsuario():HasMany
+    public function contratacionUsuario():HasOne
     {
-        return $this->hasMany(Contratacion::class, 'user_id', 'id');
+        return $this->hasone(Contratacion::class, 'user_id', 'id');
     }
 
     //relacion de uno a uno con la tabla foto_perfils
@@ -200,7 +201,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Aptitud::class, 'user_id', 'id');
     }
-
+    
+    //relacion de uno a uno con la tabla evaluacion_docentes
+    public function evaluacionDocenteUsuario():HasOne
+    {
+        return $this->hasOne(EvaluacionDocente::class, 'user_id', 'id');
+    }
    
 
    

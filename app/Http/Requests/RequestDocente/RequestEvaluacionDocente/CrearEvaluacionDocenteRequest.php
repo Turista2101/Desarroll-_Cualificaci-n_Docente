@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Requests\RequestTalentoHumano\RequestContratacion;
+namespace App\Http\Requests\RequestDocente\RequestEvaluacionDocente;
 
-use App\Constants\ConstTalentoHumano\AreasContratacion;
-use App\Constants\ConstTalentoHumano\TipoContratacion;
+
+use App\Constants\ConstDocente\EstadoEvaluacionDocente;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CrearContratacionRequest extends FormRequest
+class CrearEvaluacionDocenteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,12 +26,8 @@ class CrearContratacionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tipo_contrato' => 'required|in:' . implode(',', TipoContratacion::all()),
-            'area' => 'required|in:' . implode(',', AreasContratacion::all()),
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'nullable|date',
-            'valor_contrato' => 'required|numeric',
-            'observaciones' => 'nullable|string',
+            'promedio_evaluacion_docente' => 'required|numeric|min:0|max:10',
+            'estado_evaluacion_docente' => 'required|in:' . implode(',', EstadoEvaluacionDocente::all()),
         ];
     }
     protected function failedValidation(Validator $validator)

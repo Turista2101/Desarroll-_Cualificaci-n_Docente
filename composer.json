@@ -16,6 +16,7 @@
         "setasign/fpdi": "^2.6",
         "spatie/laravel-permission": "^6.16",
         "spatie/pdf-to-image": "^1.2",
+        "symfony/process": "^7.2",
         "tecnickcom/tcpdf": "^6.9"
     },
     "require-dev": {
