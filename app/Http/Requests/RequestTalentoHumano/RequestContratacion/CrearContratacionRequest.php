@@ -29,7 +29,7 @@ class CrearContratacionRequest extends FormRequest
             'tipo_contrato' => 'required|in:' . implode(',', TipoContratacion::all()),
             'area' => 'required|in:' . implode(',', AreasContratacion::all()),
             'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'nullable|date',
+            'fecha_fin' => 'required|date',
             'valor_contrato' => 'required|numeric',
             'observaciones' => 'nullable|string',
         ];

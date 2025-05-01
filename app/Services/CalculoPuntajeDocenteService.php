@@ -34,115 +34,102 @@ class CalculoPuntajeDocenteService
 
     public function evaluar(User $user): array
     {
+        $resultado = [
+            'valido' => false,
+            'categoria_lograda' => 'Ninguna',
+            'razon' => '',
+            'puntaje_total' => 0,
+            'faltantes_por_categoria' => [],
+        ];
+
         $contrato = $user->contratacionUsuario;
 
         if (!$contrato || strtolower(trim($contrato->tipo_contrato)) !== 'planta') {
-            return [
-                'valido' => false,
-                'categoria_lograda' => 'Ninguna',
-                'razon' => 'Solo aplica para docentes de planta.',
-                'puntaje_total' => 0,
-                'faltantes_por_categoria' => [],
-            ];
+            $resultado['razon'] = 'Solo aplica para docentes de planta.';
+            return $resultado;
         }
 
         $anios = $this->calcularAniosPlanta($user);
         $puntaje = $this->calcularPuntaje($user);
 
-        $faltantesPorCategoria = [];
-
-        // Verificar si tiene doctorado aprobado
+        // Verificar doctorado
         $tieneDoctorado = $user->estudiosUsuario->contains(
             fn($e) =>
             $e->documentosEstudio->contains('estado', 'aprobado') &&
                 $e->tipo_estudio === 'Doctorado'
         );
 
-        // Evaluar si puede ser Titular (debe cumplir todos los requisitos)
+        // Evaluar Titular
         $titular = self::CATEGORIAS['Titular'];
-        $formacionOk = $tieneDoctorado;
-        $inglesOk = $user->idiomasUsuario->contains(
-            fn($i) =>
-            $i->documentosIdioma->contains('estado', 'aprobado') &&
-                $i->nivel === $titular['ingles']
-        );
-        $evaluacionOk = optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $titular['evaluacion'];
-        $puntajeOk = $puntaje >= $titular['puntaje'];
-        $aniosOk = $anios >= $titular['años'];
-
         $cumpleTitular = [
-            'años' => $aniosOk,
-            'formacion' => $formacionOk,
-            'ingles' => $inglesOk,
-            'evaluacion' => $evaluacionOk,
-            'puntaje' => $puntajeOk,
+            'formacion' => $tieneDoctorado,
+            'ingles' => $user->idiomasUsuario->contains(
+                fn($i) =>
+                $i->documentosIdioma->contains('estado', 'aprobado') &&
+                    $i->nivel === $titular['ingles']
+            ),
+            'evaluacion' => optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $titular['evaluacion'],
+            'puntaje' => $puntaje >= $titular['puntaje'],
+            'años' => $anios >= $titular['años'],
         ];
 
         if (collect($cumpleTitular)->every(fn($v) => $v)) {
-            return [
+            $resultado = [
                 'valido' => true,
                 'categoria_lograda' => 'Titular',
                 'razon' => 'Cumple todos los requisitos para Titular.',
                 'puntaje_total' => $puntaje,
                 'faltantes_por_categoria' => [],
             ];
-        }
-
-        // Si tiene doctorado, asignarlo como Asociado directamente
-        if ($tieneDoctorado) {
+        } elseif ($tieneDoctorado) {
             $faltantes = collect($cumpleTitular)->filter(fn($v) => !$v)->keys()->toArray();
-            return [
+            $resultado = [
                 'valido' => true,
                 'categoria_lograda' => 'Asociado',
                 'razon' => 'Tiene Doctorado aprobado. Clasificado como Asociado. Para ascender a Titular le faltan: ' . implode(', ', $faltantes),
                 'puntaje_total' => $puntaje,
                 'faltantes_por_categoria' => ['Titular' => $faltantes],
             ];
-        }
-
-        // Si no tiene doctorado, evaluar Asistente
-        $asistente = self::CATEGORIAS['Asistente'];
-        $formacionOk = $user->estudiosUsuario->contains(
-            fn($e) =>
-            $e->documentosEstudio->contains('estado', 'aprobado') &&
-                $e->tipo_estudio === $asistente['formacion']
-        );
-        $inglesOk = $user->idiomasUsuario->contains(
-            fn($i) =>
-            $i->documentosIdioma->contains('estado', 'aprobado') &&
-                $i->nivel === $asistente['ingles']
-        );
-        $evaluacionOk = optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $asistente['evaluacion'];
-        $puntajeOk = $puntaje >= $asistente['puntaje'];
-        $aniosOk = $anios >= $asistente['años'];
-
-        $cumpleAsistente = [
-            'años' => $aniosOk,
-            'formacion' => $formacionOk,
-            'ingles' => $inglesOk,
-            'evaluacion' => $evaluacionOk,
-            'puntaje' => $puntajeOk,
-        ];
-
-        if (collect($cumpleAsistente)->every(fn($v) => $v)) {
-            return [
-                'valido' => true,
-                'categoria_lograda' => 'Asistente',
-                'razon' => 'Cumple todos los requisitos para Asistente.',
-                'puntaje_total' => $puntaje,
-                'faltantes_por_categoria' => [],
+        } else {
+            // Evaluar Asistente
+            $asistente = self::CATEGORIAS['Asistente'];
+            $cumpleAsistente = [
+                'formacion' => $user->estudiosUsuario->contains(
+                    fn($e) =>
+                    $e->documentosEstudio->contains('estado', 'aprobado') &&
+                        $e->tipo_estudio === $asistente['formacion']
+                ),
+                'ingles' => $user->idiomasUsuario->contains(
+                    fn($i) =>
+                    $i->documentosIdioma->contains('estado', 'aprobado') &&
+                        $i->nivel === $asistente['ingles']
+                ),
+                'evaluacion' => optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $asistente['evaluacion'],
+                'puntaje' => $puntaje >= $asistente['puntaje'],
+                'años' => $anios >= $asistente['años'],
             ];
+
+            if (collect($cumpleAsistente)->every(fn($v) => $v)) {
+                $resultado = [
+                    'valido' => true,
+                    'categoria_lograda' => 'Asistente',
+                    'razon' => 'Cumple todos los requisitos para Asistente.',
+                    'puntaje_total' => $puntaje,
+                    'faltantes_por_categoria' => [],
+                ];
+            } else {
+                $faltantesAsistente = collect($cumpleAsistente)->filter(fn($v) => !$v)->keys()->toArray();
+                $resultado = [
+                    'valido' => true,
+                    'categoria_lograda' => 'Auxiliar',
+                    'razon' => 'No cumple requisitos para categorías superiores. Le faltan para Asistente: ' . implode(', ', $faltantesAsistente),
+                    'puntaje_total' => $puntaje,
+                    'faltantes_por_categoria' => ['Asistente' => $faltantesAsistente],
+                ];
+            }
         }
 
-        $faltantesAsistente = collect($cumpleAsistente)->filter(fn($v) => !$v)->keys()->toArray();
-
-        return [
-            'valido' => true,
-            'categoria_lograda' => 'Auxiliar',
-            'razon' => 'No cumple requisitos para categorías superiores. Le faltan para Asistente: ' . implode(', ', $faltantesAsistente),
-            'puntaje_total' => $puntaje,
-            'faltantes_por_categoria' => ['Asistente' => $faltantesAsistente],
-        ];
+        return $resultado;
     }
 
     public function calcularPuntaje(User $user): int

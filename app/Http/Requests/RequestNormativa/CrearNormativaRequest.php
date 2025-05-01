@@ -1,14 +1,12 @@
 <?php
 
-namespace App\Http\Requests\RequestTalentoHumano\RequestContratacion;
+namespace App\Http\Requests\RequestNormativa;
 
-use App\Constants\ConstTalentoHumano\TipoContratacion;
-use App\Constants\ConstTalentoHumano\AreasContratacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ActualizarContratacionRequest extends FormRequest
+class CrearNormativaRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,19 +24,20 @@ class ActualizarContratacionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tipo_contrato' => 'required|in' . implode(',', TipoContratacion::all()),
-            'area' => 'sometimes|required|json' . implode(',', AreasContratacion::all()),
-            'fecha_inicio' => 'sometimes1required|date',
-            'fecha_fin' => 'sometimes|required|date',
-            'valor_contrato' => 'sometimes|required|numeric',
-            'observaciones' => 'sometimes|nullable|string',
-
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'tipo' => 'required|string|max:50',
+            'archivo' => 'required|file|mimes:pdf,doc,docx|max:2048', // Validación para el archivo
         ];
     }
+
+    /**
+     * Handle a failed validation attempt.
+     */
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
-           response()->json([
+            response()->json([
                 'success' => false,
                 'message' => 'Error en el formulario',
                 'errors' => $validator->errors(),

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('normativas', function (Blueprint $table) {
-            $table->id();
+            $table->smallIncrements('id_normativa');
             $table->string('nombre')->unique();
             $table->string('descripcion')->nullable();
             $table->string('tipo')->nullable();

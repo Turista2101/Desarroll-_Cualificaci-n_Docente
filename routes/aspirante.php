@@ -13,6 +13,7 @@ use App\Http\Controllers\TalentoHumano\ConvocatoriaController;
 use App\Http\Controllers\TalentoHumano\PostulacionController;
 use App\Http\Controllers\Aspirante\FotoPerfilController;
 use App\Http\Controllers\Aspirante\AptitudController;
+use App\Http\Controllers\Aspirante\NormativaController;
 
 Route::group([
     'middleware' => ['api', 'auth:api', 'role:Aspirante'],
@@ -80,6 +81,11 @@ Route::group([
     Route::put('actualizar-aptitud/{id}', [AptitudController::class, 'actualizarAptitudPorId']);
     Route::delete('eliminar-aptitud/{id}', [AptitudController::class, 'eliminarAptitudPorId']);
     
+
+    //normativas
+    Route::get('obtener-normativas', [NormativaController::class, 'obtenerNormativas']);
+    Route::get('obtener-normativa/{id}', [NormativaController::class, 'obtenerNormativaPorId']);
+
 
 
     

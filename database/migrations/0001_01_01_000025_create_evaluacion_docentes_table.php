@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::create('evaluacion_docentes', function (Blueprint $table) {
             $table->smallIncrements('id_evaluacion_docente');
             $table->unsignedBigInteger('user_id');
-            $table->decimal('promedio_evaluacion_docente', 3, 2);
-            $table->enum('estado_evaluacion_docente',EstadoEvaluacionDocente::all());
+            $table->decimal('promedio_evaluacion_docente', 3, 1);
+            $table->enum('estado_evaluacion_docente',EstadoEvaluacionDocente::all())->default('Pendiente');
             $table->timestamps();
             // Relación con la tabla de usuarios
             $table->foreign('user_id')

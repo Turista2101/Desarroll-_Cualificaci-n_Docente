@@ -16,6 +16,7 @@ use App\Http\Controllers\TalentoHumano\PostulacionController;
 use App\Http\Controllers\TalentoHumano\ContratacionController;
 use App\Http\Controllers\Aspirante\FotoPerfilController;
 use App\Http\Controllers\Aspirante\AptitudController;
+use App\Http\Controllers\Aspirante\NormativaController;
 
 
 Route::group([
@@ -94,6 +95,10 @@ Route::group([
 
     //puntaje
     Route::get('evaluar-puntaje/{userId}', [PuntajeController::class, 'evaluarYGuardarPuntaje']);
+
+    //normativas
+    Route::get('obtener-normativas', [NormativaController::class, 'obtenerNormativas']);
+    Route::get('obtener-normativa/{id}', [NormativaController::class, 'obtenerNormativaPorId']);
    
 
 });

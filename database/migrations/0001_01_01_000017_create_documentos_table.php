@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('documentos', function (Blueprint $table) {
             $table->smallIncrements('id_documento');
             $table->string('archivo'); // Ruta del archivo
-            $table->enum('estado', EstadoDocumentos::all()); // Estado como string
+            $table->enum('estado', EstadoDocumentos::all())->default('pendiente'); // Estado del documento
             $table->morphs('documentable'); // Relación polimórfica
             $table->timestamps();
 

@@ -9,6 +9,7 @@ class MostrarTiposController
 {
 
     
+  //metodo para obtener productos academicos
   public function obtenerProductosAcademicos()
    {
    return response()->json(ProductoAcademico::all(), 200);
@@ -18,6 +19,13 @@ class MostrarTiposController
   public function obtenerAmbitoDivulgacion()
     {
         return response()->json(AmbitoDivulgacion::all(), 200);
+    }
+  
+    //obtener ambito de divulgacion por producto academico
+  public function obtenerAmbitoDivulgacionPorProductoAcademico($id_producto_academico)
+    {
+        $ambitos = AmbitoDivulgacion::where('producto_academico_id', $id_producto_academico)->get();
+        return response()->json($ambitos, 200);
     }
 
 

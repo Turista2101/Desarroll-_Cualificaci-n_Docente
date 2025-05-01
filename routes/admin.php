@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Ubicaciones\UbicacionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Aspirante\NormativaController;
 
 Route::group([
     'middleware' => ['api', 'auth:api', 'role:Administrador'],
@@ -23,6 +24,13 @@ Route::group([
     Route::get('listar-usuarios', [UserController::class, 'listarUsuarios']);
     Route::put('editar-usuario/{id}', [UserController::class, 'editarUsuario']);
     Route::delete('eliminar-usuario/{id}', [UserController::class, 'eliminarUsuario']);
+
+    //normativas
+    Route::post('crear-normativa', [NormativaController::class, 'crearNormativa']);
+    Route::get('obtener-normativas', [NormativaController::class, 'obtenerNormativas']);
+    Route::get('obtener-normativa/{id}', [NormativaController::class, 'obtenerNormativaPorId']);
+    Route::put('actualizar-normativa/{id}', [NormativaController::class, 'actualizarNormativa']);
+    Route::delete('eliminar-normativa/{id}', [NormativaController::class, 'eliminarNormativa']);
 
     
     
