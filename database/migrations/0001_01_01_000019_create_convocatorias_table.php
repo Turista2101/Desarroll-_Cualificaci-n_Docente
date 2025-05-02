@@ -21,7 +21,11 @@ return new class extends Migration
             $table->text('descripcion');
             $table->enum('estado_convocatoria', EstadoConvocatoria::all());
             $table->timestamps();
+
+            
         });
+
+        
     }
 
     /**

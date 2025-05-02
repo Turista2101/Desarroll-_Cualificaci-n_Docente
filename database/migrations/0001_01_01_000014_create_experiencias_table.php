@@ -34,7 +34,7 @@ return new class extends Migration
                 ->references('id')
                 ->on('users'); // Eliminar experiencias si se elimina el usuario
             
-            $table->unique(['user_id','tipo_experiencia','institucion_experiencia','cargo','fecha_inicio']);
+            $table->unique(['user_id','tipo_experiencia','institucion_experiencia','cargo','fecha_inicio'],'experiencias_unique_constraint');
         });
     }
 

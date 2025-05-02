@@ -23,7 +23,7 @@ return new class extends Migration
                 ->on('users');
 
            //clave unica para evitar duplicados
-           $table->unique(['user_id', 'nombre_aptitud']);
+           $table->unique(['user_id', 'nombre_aptitud'], 'aptitudes_unique_constraint');
 
         });
     }

@@ -29,7 +29,7 @@ return new class extends Migration
                 ->references('id')
                 ->on('users'); // Eliminar postulacion si se elimina el usuario
 
-            $table->unique(['user_id', 'convocatoria_id']);
+           
         });
     }
 

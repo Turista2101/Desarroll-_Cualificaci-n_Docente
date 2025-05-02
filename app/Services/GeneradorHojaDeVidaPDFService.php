@@ -275,7 +275,7 @@ class GeneradorHojaDeVidaPDFService
                     $pdf->useTemplate($tplIdx, 10, 10, 190);
                 }
 
-                
+
                 if (realpath($pdfConvertido) !== realpath($pdfPath)) {
                     @unlink($pdfConvertido);
                 }

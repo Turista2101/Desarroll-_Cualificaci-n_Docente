@@ -32,7 +32,7 @@ return new class extends Migration
                 ->on('users'); // Eliminar produccion_academica si se elimina el usuario
 
             // clave unica para evitar duplicados
-            $table->unique(['user_id', 'titulo']);
+            $table->unique(['user_id', 'titulo'], 'produccion_academicas_unique_constraint');
         });
     }
 

@@ -37,7 +37,7 @@ return new class extends Migration
                 ->references('id')
                 ->on('users');
             
-            $table->unique(['user_id', 'tipo_estudio', 'titulo_estudio', 'institucion']);
+            $table->unique(['user_id', 'tipo_estudio', 'titulo_estudio', 'institucion'], 'estudios_unique_constraint');
         });
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\TalentoHumano;
-
+// Importaciones necesarias para usar constantes, modelos y servicios
 use App\Constants\ConstTalentoHumano\EstadoPostulacion;
 use App\Models\TalentoHumano\Postulacion;
 use App\Models\TalentoHumano\Convocatoria;
@@ -12,6 +12,7 @@ use App\Services\GeneradorHojaDeVidaPDFService;
 
 class PostulacionController
 {
+    // Servicio para generar PDF de hoja de vida
     protected $generadorHojaDeVidaPDFService;
 
     public function __construct(GeneradorHojaDeVidaPDFService $generadorHojaDeVidaPDFService)
