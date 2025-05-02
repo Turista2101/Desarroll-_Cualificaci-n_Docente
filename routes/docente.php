@@ -94,7 +94,7 @@ Route::group([
     Route::put('actualizar-evaluacion', [EvaluacionDocenteController::class, 'actualizarEvaluacionDocente']);
 
     //puntaje
-    Route::get('evaluar-puntaje/{userId}', [PuntajeController::class, 'evaluarYGuardarPuntaje']);
+    Route::get('evaluar-puntaje', [PuntajeController::class, 'evaluarYGuardarPuntaje']);
 
     //normativas
     Route::get('obtener-normativas', [NormativaController::class, 'obtenerNormativas']);

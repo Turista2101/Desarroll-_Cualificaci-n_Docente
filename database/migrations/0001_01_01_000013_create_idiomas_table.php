@@ -24,7 +24,8 @@ return new class extends Migration
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users'); // Eliminar idiomas si se elimina el usuario
-
+        
+            $table->unique(['user_id','idioma','institucion_idioma','fecha_certificado']);
         });
     }
 

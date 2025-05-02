@@ -27,7 +27,7 @@ class CrearEvaluacionDocenteRequest extends FormRequest
     {
         return [
             'promedio_evaluacion_docente' => 'required|numeric|min:0|max:10',
-            'estado_evaluacion_docente' => 'required|in:' . implode(',', EstadoEvaluacionDocente::all()),
+            'estado_evaluacion_docente' => 'nullable|in:' . implode(',', EstadoEvaluacionDocente::all()),
         ];
     }
     protected function failedValidation(Validator $validator)

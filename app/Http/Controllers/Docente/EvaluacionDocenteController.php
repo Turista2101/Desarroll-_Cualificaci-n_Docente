@@ -28,6 +28,9 @@ class EvaluacionDocenteController
                
                 $datosEvaluacion = $request->validated();
                 $datosEvaluacion['user_id'] = $request->user()->id;
+
+                // Asignar automáticamente estado 'pendiente'
+                $datosEvaluacion['estado_evaluacion_docente'] = 'Pendiente';
     
                 return EvaluacionDocente::create($datosEvaluacion);
             });

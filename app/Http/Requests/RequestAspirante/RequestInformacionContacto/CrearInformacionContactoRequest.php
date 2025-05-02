@@ -34,7 +34,7 @@ class CrearInformacionContactoRequest extends FormRequest
             'telefono_movil'                        => 'required|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
             'celular_alternativo'                   => 'nullable|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
             'correo_alterno'                        => 'nullable|string|email|max:100|unique:users,email',
-            'archivo'                               => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                               => 'nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ];
     }
     protected function failedValidation(Validator $validator)

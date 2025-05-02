@@ -26,7 +26,7 @@ class ActualizarContratacionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tipo_contrato' => 'required|in' . implode(',', TipoContratacion::all()),
+            'tipo_contrato' => 'sometimes|required|in' . implode(',', TipoContratacion::all()),
             'area' => 'sometimes|required|json' . implode(',', AreasContratacion::all()),
             'fecha_inicio' => 'sometimes1required|date',
             'fecha_fin' => 'sometimes|required|date',

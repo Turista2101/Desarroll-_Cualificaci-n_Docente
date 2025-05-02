@@ -34,7 +34,7 @@ class ActualizarInformacionContactoRequest extends FormRequest
             'telefono_movil'                        => 'sometimes|required|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
             'celular_alternativo'                   => 'sometimes|nullable|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
             'correo_alterno'                        => 'sometimes|nullable|string|email|max:100|unique:users,email',
-            'archivo'                               => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                               => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ];
     }
     protected function failedValidation(Validator $validator)

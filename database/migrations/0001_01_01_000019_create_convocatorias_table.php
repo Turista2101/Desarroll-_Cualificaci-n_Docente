@@ -14,11 +14,11 @@ return new class extends Migration
     {
         Schema::create('convocatorias', function (Blueprint $table) {
             $table->smallIncrements('id_convocatoria');
-            $table->string('nombre_convocatoria');
+            $table->string('nombre_convocatoria')->unique();
             $table->string('tipo');
             $table->date('fecha_publicacion');
             $table->date('fecha_cierre');
-            $table->string('descripcion');
+            $table->text('descripcion');
             $table->enum('estado_convocatoria', EstadoConvocatoria::all());
             $table->timestamps();
         });

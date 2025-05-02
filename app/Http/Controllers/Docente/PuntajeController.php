@@ -3,21 +3,28 @@
 namespace App\Http\Controllers\Docente;
 
 use App\Services\CalculoPuntajeDocenteService;
-use App\Models\Usuario\User;
+use Illuminate\Http\Request;
 
 class PuntajeController
 {
-    public function evaluarYGuardarPuntaje($userId, CalculoPuntajeDocenteService $servicio)
+    public function evaluarYGuardarPuntaje(Request $request, CalculoPuntajeDocenteService $servicio)
     {
-        // Cargar usuario con relaciones necesarias
-        $user = User::with([
+        // Obtener el usuario autenticado
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['mensaje' => 'Usuario no autenticado.'], 401);
+        }
+
+        // Cargar el usuario con las relaciones necesarias
+        $user->load([
             'contratacionUsuario',
             'estudiosUsuario.documentosEstudio',
             'idiomasUsuario.documentosIdioma',
             'experienciasUsuario.documentosExperiencia',
             'produccionAcademicaUsuario.documentosProduccionAcademica',
             'evaluacionDocenteUsuario',
-        ])->findOrFail($userId);
+        ]);
 
         // Evaluar categoría
         $resultado = $servicio->evaluar($user);

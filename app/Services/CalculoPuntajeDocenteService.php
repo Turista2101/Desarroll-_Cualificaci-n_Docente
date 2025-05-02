@@ -32,6 +32,15 @@ class CalculoPuntajeDocenteService
         ],
     ];
 
+    const NIVELES_INGLES = [
+        'A1' => 1,
+        'A2' => 2,
+        'B1' => 3,
+        'B2' => 4,
+        'C1' => 5,
+        'C2' => 6,
+    ];
+
     public function evaluar(User $user): array
     {
         $resultado = [
@@ -52,25 +61,24 @@ class CalculoPuntajeDocenteService
         $anios = $this->calcularAniosPlanta($user);
         $puntaje = $this->calcularPuntaje($user);
 
-        // Verificar doctorado
+        $tieneProduccion = $user->produccionAcademicaUsuario->flatMap(function ($produccion) {
+            return $produccion->documentosProduccionAcademica->where('estado', 'aprobado');
+        })->isNotEmpty();
+
         $tieneDoctorado = $user->estudiosUsuario->contains(
             fn($e) =>
             $e->documentosEstudio->contains('estado', 'aprobado') &&
-                $e->tipo_estudio === 'Doctorado'
+            strtoupper(trim($e->tipo_estudio)) === 'DOCTORADO'
         );
 
-        // Evaluar Titular
         $titular = self::CATEGORIAS['Titular'];
         $cumpleTitular = [
             'formacion' => $tieneDoctorado,
-            'ingles' => $user->idiomasUsuario->contains(
-                fn($i) =>
-                $i->documentosIdioma->contains('estado', 'aprobado') &&
-                    $i->nivel === $titular['ingles']
-            ),
+            'ingles' => $this->validarNivelIngles($user, $titular['ingles']),
             'evaluacion' => optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $titular['evaluacion'],
             'puntaje' => $puntaje >= $titular['puntaje'],
             'años' => $anios >= $titular['años'],
+            'produccion_academica' => $tieneProduccion,
         ];
 
         if (collect($cumpleTitular)->every(fn($v) => $v)) {
@@ -91,22 +99,18 @@ class CalculoPuntajeDocenteService
                 'faltantes_por_categoria' => ['Titular' => $faltantes],
             ];
         } else {
-            // Evaluar Asistente
             $asistente = self::CATEGORIAS['Asistente'];
             $cumpleAsistente = [
                 'formacion' => $user->estudiosUsuario->contains(
                     fn($e) =>
                     $e->documentosEstudio->contains('estado', 'aprobado') &&
-                        $e->tipo_estudio === $asistente['formacion']
+                    strtoupper(trim($e->tipo_estudio)) === strtoupper(trim($asistente['formacion']))
                 ),
-                'ingles' => $user->idiomasUsuario->contains(
-                    fn($i) =>
-                    $i->documentosIdioma->contains('estado', 'aprobado') &&
-                        $i->nivel === $asistente['ingles']
-                ),
+                'ingles' => $this->validarNivelIngles($user, $asistente['ingles']),
                 'evaluacion' => optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $asistente['evaluacion'],
                 'puntaje' => $puntaje >= $asistente['puntaje'],
                 'años' => $anios >= $asistente['años'],
+                'produccion_academica' => $tieneProduccion,
             ];
 
             if (collect($cumpleAsistente)->every(fn($v) => $v)) {
@@ -132,6 +136,25 @@ class CalculoPuntajeDocenteService
         return $resultado;
     }
 
+    protected function validarNivelIngles(User $user, string $nivelRequerido): bool
+    {
+        foreach ($user->idiomasUsuario as $idioma) {
+            if (
+                $idioma->documentosIdioma->contains('estado', 'aprobado') &&
+                isset(self::NIVELES_INGLES[strtoupper(trim($idioma->nivel))]) &&
+                isset(self::NIVELES_INGLES[strtoupper(trim($nivelRequerido))])
+            ) {
+                $nivelUsuario = self::NIVELES_INGLES[strtoupper(trim($idioma->nivel))];
+                $nivelNecesario = self::NIVELES_INGLES[strtoupper(trim($nivelRequerido))];
+                if ($nivelUsuario >= $nivelNecesario) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function calcularPuntaje(User $user): int
     {
         $total = 0;
@@ -153,16 +176,6 @@ class CalculoPuntajeDocenteService
                         default => 0,
                     };
                 }
-            }
-        }
-
-        foreach ($user->experienciasUsuario as $exp) {
-            if (
-                $exp->documentosExperiencia->contains('estado', 'aprobado') &&
-                strtoupper(trim($exp->institucion_experiencia)) === 'UNIVERSIDAD UNIAUTONOMA DEL CAUCA'
-            ) {
-                $total += Carbon::parse($exp->fecha_inicio)
-                    ->diffInYears(Carbon::parse($exp->fecha_fin));
             }
         }
 

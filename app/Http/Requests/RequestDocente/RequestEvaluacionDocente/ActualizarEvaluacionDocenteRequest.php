@@ -24,7 +24,7 @@ class ActualizarEvaluacionDocenteRequest extends FormRequest
     {
         return [
             'promedio_evaluacion_docente' => 'sometimes|required|numeric|min:0|max:10',
-            'estado_evaluacion_docente' => 'sometimes|required|in:' . implode(',', EstadoEvaluacionDocente::all()),
+            'estado_evaluacion_docente' => 'sometimes|nullable|in:' . implode(',', EstadoEvaluacionDocente::all()),
         ];
     }
 

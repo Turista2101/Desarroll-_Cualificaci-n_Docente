@@ -31,6 +31,8 @@ return new class extends Migration
                 ->references('id')
                 ->on('users'); // Eliminar produccion_academica si se elimina el usuario
 
+            // clave unica para evitar duplicados
+            $table->unique(['user_id', 'titulo']);
         });
     }
 

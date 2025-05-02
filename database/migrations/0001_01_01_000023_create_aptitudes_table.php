@@ -21,6 +21,10 @@ return new class extends Migration
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users');
+
+           //clave unica para evitar duplicados
+           $table->unique(['user_id', 'nombre_aptitud']);
+
         });
     }
 
