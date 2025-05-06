@@ -68,7 +68,14 @@ class RutController
             // Busca el RUT asociado al usuario actual y carga sus documentos relacionados
             $rut = Rut::where('user_id', $request->user()->id)
                 ->with(['documentosRut:id_documento,documentable_id,archivo,estado'])
-                ->firstOrFail();// Si no se encuentra, lanza una excepción
+                ->first();// Si no se encuentra, lanza una excepción
+            if (!$rut) {
+                return response()->json([
+                    'message' => 'No tienes RUT registrada aún.',
+                    'rut' => null
+                ], 200); // No es error, simplemente no tiene Rut aún
+            }
+                
         // Por cada documento asociado, se genera la URL pública del archivo
             foreach ($rut->documentosRut as $documento) {
                 $documento->archivo_url = asset('storage/' . $documento->archivo);

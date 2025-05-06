@@ -81,7 +81,15 @@ class EpsController
              // Buscar EPS con documentos asociados
             $eps = Eps::where('user_id', $user->id)
                 ->with(['documentosEps:id_documento,documentable_id,archivo,estado'])
-                ->firstOrFail();//error si no existe 
+                ->first();//error si no existe 
+
+            if (!$eps) {
+                return response()->json([
+                    'message' => 'No tienes EPS registrada aún.',
+                    'eps' => null
+                ], 200); // No es error, simplemente no tiene EPS aún
+            }
+            
              // Generar URL accesible para cada archivo
             foreach ($eps->documentosEps as $documento) {
                 if (!empty($documento->archivo)) {

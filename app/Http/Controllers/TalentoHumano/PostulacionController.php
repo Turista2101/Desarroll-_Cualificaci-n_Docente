@@ -19,21 +19,25 @@ class PostulacionController
     {
         $this->generadorHojaDeVidaPDFService = $generadorHojaDeVidaPDFService;
     }
-    //no dejar postular a convocatorias que ya han sido cerradas
+ /**
+     * Crea una nueva postulación para una convocatoria.
+     * Valida que la convocatoria no esté cerrada y que el usuario no se haya postulado previamente.
+     */
     public function crearPostulacion(Request $request, $convocatoriaId)
     {
         try {
             $postulacion = DB::transaction(function () use ($request, $convocatoriaId) {
                 $user = $request->user();
 
-                // Verificar si la convocatoria está cerrada
+                // Buscar la convocatoria
                 $convocatoria = Convocatoria::findOrFail($convocatoriaId);
+                // Validar si está cerrada
 
                 if ($convocatoria->estado_convocatoria === 'Cerrada') {
                     throw new \Exception('Esta convocatoria está cerrada y no admite más postulaciones.', 403);
                 }
 
-                // Verificar si ya se ha postulado
+                // Verificar si ya está postulado
                 $existe = Postulacion::where('user_id', $user->id)
                     ->where('convocatoria_id', $convocatoriaId)
                     ->exists();
@@ -42,7 +46,7 @@ class PostulacionController
                     throw new \Exception('Ya te has postulado a esta convocatoria', 409);
                 }
 
-                // Crear la postulación
+                // Crear postulación
                 return Postulacion::create([
                     'user_id' => $user->id,
                     'convocatoria_id' => $convocatoriaId,
@@ -61,6 +65,9 @@ class PostulacionController
             ], $e->getCode() ?: 500);
         }
     }
+     /**
+     * Obtiene todas las postulaciones con sus relaciones de usuario y convocatoria.
+     */
     public function obtenerPostulaciones()
     {
         try {
@@ -74,7 +81,9 @@ class PostulacionController
             ], 500);
         }
     }
-
+/**
+     * Obtiene las postulaciones hechas por el usuario autenticado.
+     */
     public function obtenerPostulacionesUsuario(Request $request)
     {
         try {
@@ -90,7 +99,9 @@ class PostulacionController
             ], 500);
         }
     }
-
+ /**
+     * Genera el PDF de la hoja de vida de un usuario para una convocatoria específica.
+     */
 
     public function generarHojaDeVidaPDF($idConvocatoria, $idUsuario)
     {
@@ -115,11 +126,14 @@ class PostulacionController
             ], 500);
         }
     }
-
+ /**
+     * Actualiza el estado de una postulación específica.
+     */
 
     public function actualizarEstadoPostulacion(Request $request, $idPostulacion)
     {
         try {
+        // Validar que el estado sea válido
             $request->validate([
                 'estado_postulacion' => 'required|in:' . implode(',', EstadoPostulacion::all()),
             ]);
@@ -140,7 +154,7 @@ class PostulacionController
                 // $talentoHumano = User::role('Talento Humano')->get();
                 // Notification::send($talentoHumano, new NotificacionGeneral('Postulacion actualizada'));
 
-
+// Aquí se podrían enviar notificaciones si se desea
                 return $postulacion;
             });
 
@@ -154,7 +168,9 @@ class PostulacionController
                 'error' => $e->getMessage()
             ], $e->getCode() ?: 500);
         }
-    }
+    }/**
+     * Elimina una postulación por ID.
+     */
 
     public function eliminarPostulacion($idPostulacion)
     {
@@ -179,7 +195,9 @@ class PostulacionController
             ], $e->getCode() ?: 500);
         }
     }
-
+ /**
+     * Permite a un usuario eliminar su propia postulación.
+     */
     public function eliminarPostulacionUsuario(Request $request, $id)
     {
         try {

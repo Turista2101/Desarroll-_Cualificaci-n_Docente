@@ -6,15 +6,17 @@ use App\Models\Usuario\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+// clase que se encarga de calcular el puntaje y categoría de un docente
 class CalculoPuntajeDocenteService
 {
+    // Constante que define los requisitos para cada categoría docente
     const CATEGORIAS = [
         'Asistente' => [
-            'formacion' => 'Maestría',
-            'ingles' => 'B1',
-            'evaluacion' => 4.0,
-            'puntaje' => 20,
-            'años' => 4
+            'formacion' => 'Maestría', // Formación mínima: Maestría
+            'ingles' => 'B1',          // Nivel mínimo de inglés: B1
+            'evaluacion' => 4.0,       // Evaluación docente mínima: 4.0
+            'puntaje' => 20,           // Puntaje mínimo de producción académica
+            'años' => 4                // Años mínimos en categoría anterior
         ],
         'Asociado' => [
             'formacion' => 'Doctorado',
@@ -32,6 +34,7 @@ class CalculoPuntajeDocenteService
         ],
     ];
 
+    // Constante que asigna un valor numérico a cada nivel de inglés para comparar niveles
     const NIVELES_INGLES = [
         'A1' => 1,
         'A2' => 2,
@@ -41,8 +44,10 @@ class CalculoPuntajeDocenteService
         'C2' => 6,
     ];
 
+    // Método principal que evalúa el perfil de un usuario (docente)
     public function evaluar(User $user): array
     {
+        // Resultado inicial por defecto
         $resultado = [
             'valido' => false,
             'categoria_lograda' => 'Ninguna',
@@ -51,26 +56,32 @@ class CalculoPuntajeDocenteService
             'faltantes_por_categoria' => [],
         ];
 
+        // Obtener la contratación del docente
         $contrato = $user->contratacionUsuario;
 
+        // Si no tiene contrato de planta, no aplica evaluación
         if (!$contrato || strtolower(trim($contrato->tipo_contrato)) !== 'planta') {
             $resultado['razon'] = 'Solo aplica para docentes de planta.';
             return $resultado;
         }
 
+        // Calcular los años de contratación y el puntaje de producción académica
         $anios = $this->calcularAniosPlanta($user);
         $puntaje = $this->calcularPuntaje($user);
 
+        // Verificar si el docente tiene producción académica aprobada
         $tieneProduccion = $user->produccionAcademicaUsuario->flatMap(function ($produccion) {
             return $produccion->documentosProduccionAcademica->where('estado', 'aprobado');
         })->isNotEmpty();
 
+        // Verificar si tiene un Doctorado aprobado
         $tieneDoctorado = $user->estudiosUsuario->contains(
             fn($e) =>
             $e->documentosEstudio->contains('estado', 'aprobado') &&
             strtoupper(trim($e->tipo_estudio)) === 'DOCTORADO'
         );
 
+        // Requisitos para ser Titular
         $titular = self::CATEGORIAS['Titular'];
         $cumpleTitular = [
             'formacion' => $tieneDoctorado,
@@ -81,6 +92,7 @@ class CalculoPuntajeDocenteService
             'produccion_academica' => $tieneProduccion,
         ];
 
+        // Si cumple todos los requisitos de Titular
         if (collect($cumpleTitular)->every(fn($v) => $v)) {
             $resultado = [
                 'valido' => true,
@@ -89,6 +101,7 @@ class CalculoPuntajeDocenteService
                 'puntaje_total' => $puntaje,
                 'faltantes_por_categoria' => [],
             ];
+        // Si tiene Doctorado pero no cumple reuqisiatos para Titular, es Asociado
         } elseif ($tieneDoctorado) {
             $faltantes = collect($cumpleTitular)->filter(fn($v) => !$v)->keys()->toArray();
             $resultado = [
@@ -98,6 +111,7 @@ class CalculoPuntajeDocenteService
                 'puntaje_total' => $puntaje,
                 'faltantes_por_categoria' => ['Titular' => $faltantes],
             ];
+        // Si no tiene doctorado, se evalúa para Asistente o Auxiliar
         } else {
             $asistente = self::CATEGORIAS['Asistente'];
             $cumpleAsistente = [
@@ -113,6 +127,7 @@ class CalculoPuntajeDocenteService
                 'produccion_academica' => $tieneProduccion,
             ];
 
+            // Si cumple requisitos para ser Asistente
             if (collect($cumpleAsistente)->every(fn($v) => $v)) {
                 $resultado = [
                     'valido' => true,
@@ -121,6 +136,7 @@ class CalculoPuntajeDocenteService
                     'puntaje_total' => $puntaje,
                     'faltantes_por_categoria' => [],
                 ];
+            // Si no cumple requisitos, queda en Auxiliar
             } else {
                 $faltantesAsistente = collect($cumpleAsistente)->filter(fn($v) => !$v)->keys()->toArray();
                 $resultado = [
@@ -133,9 +149,10 @@ class CalculoPuntajeDocenteService
             }
         }
 
-        return $resultado;
+        return $resultado; // Devolver la evaluación completa
     }
 
+    // Valida que el nivel de inglés del usuario cumpla o supere el requerido
     protected function validarNivelIngles(User $user, string $nivelRequerido): bool
     {
         foreach ($user->idiomasUsuario as $idioma) {
@@ -155,6 +172,7 @@ class CalculoPuntajeDocenteService
         return false;
     }
 
+    // Calcula el puntaje total de producción académica del usuario
     public function calcularPuntaje(User $user): int
     {
         $total = 0;
@@ -169,6 +187,7 @@ class CalculoPuntajeDocenteService
                 if ($ambitoId !== null) {
                     $clasificacion = $this->clasificacionPorAmbito($ambitoId);
 
+                    // Asigna puntos dependiendo de la clasificación del ámbito de publicación
                     $total += match ($clasificacion) {
                         'top' => 10,
                         'a' => 6,
@@ -182,6 +201,7 @@ class CalculoPuntajeDocenteService
         return $total;
     }
 
+    // Calcula cuántos años lleva el usuario contratado en planta
     protected function calcularAniosPlanta(User $user): int
     {
         $contrato = $user->contratacionUsuario;
@@ -193,16 +213,17 @@ class CalculoPuntajeDocenteService
         $inicio = Carbon::parse($contrato->fecha_inicio);
         $fin = $contrato->fecha_fin ? Carbon::parse($contrato->fecha_fin) : now();
 
-        return $inicio->diffInYears($fin);
+        return $inicio->diffInYears($fin); // Diferencia en años
     }
 
+    // Clasifica el ámbito de divulgación para asignar puntajes
     protected function clasificacionPorAmbito(int $ambitoId): string
     {
         return match ($ambitoId) {
             1, 20, 21, 25, 27, 29, 34, 46, 50, 54, 62, 65 => 'top',
             2, 12, 15, 26, 28, 30, 35, 38, 47, 51, 55, 63, 66, 73, 45 => 'a',
             3, 13, 16, 19, 31, 36, 39, 48, 52, 56, 64, 41, 42 => 'b',
-            default => 'ninguna'
+            default => 'ninguna' // Si no coincide, no asigna puntaje
         };
     }
 }

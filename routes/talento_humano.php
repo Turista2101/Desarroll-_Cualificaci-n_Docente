@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TalentoHumano\PostulacionController;
 
 Route::group([
-    'middleware' =>['api', 'auth:api', 'role:Talento Humano'],
+    'middleware' =>'api', 'auth:api', 'role:Talento Humano',
     'prefix' => 'talentoHumano'
 ], function () {
     // convocatorias
@@ -30,11 +30,6 @@ Route::group([
     Route::get('obtener-contratacion/{id_contratacion}',[ContratacionController::class, 'obtenerContratacionPorId']);
     Route::get('obtener-contrataciones',[ContratacionController::class, 'obtenerTodasLasContrataciones']);
     
-
-
-
-     
-
 
 
 });

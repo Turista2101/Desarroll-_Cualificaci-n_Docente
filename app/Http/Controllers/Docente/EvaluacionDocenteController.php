@@ -1,31 +1,44 @@
 <?php
-
+    // Indica que el archivo es código PHP
 namespace App\Http\Controllers\Docente;
-
+// Define el espacio de nombres donde está ubicado este controlador.
+// Es útil para organizar mejor el código y evitar conflictos entre clases con el mismo nombre.
 use App\Http\Requests\RequestDocente\RequestEvaluacionDocente\ActualizarEvaluacionDocenteRequest;
 use App\Http\Requests\RequestDocente\RequestEvaluacionDocente\CrearEvaluacionDocenteRequest;
+// Importa las clases que validan los datos entrantes para crear o actualizar evaluaciones docentes.
 use App\Models\Docente\EvaluacionDocente;
+// Importa el modelo EvaluacionDocente para interactuar con la tabla de evaluaciones docentes.
+
 use Illuminate\Support\Facades\DB;
+// Importa la fachada DB para ejecutar transacciones y consultas a la base de datos.
 
 
 class EvaluacionDocenteController
+// Declara la clase EvaluacionDocenteController.
+// Esta clase contendrá los métodos que manejarán las solicitudes HTTP relacionadas con evaluaciones docentes.
 {
     // Crear una evaluación
     public function crearEvaluacionDocente(CrearEvaluacionDocenteRequest $request)
+     // Método público para crear una evaluación docente.
+    // Recibe un request que ya ha sido validado por CrearEvaluacionDocenteRequest.
     {
         try {
+            // Intenta ejecutar el bloque de código. Si hay un error, pasa al catch.
             $usuarioId = $request->user()->id;
 
             // Verificar si ya tiene una evaluación docente
             $evaluacionExistente = EvaluacionDocente::where('user_id', $usuarioId)->first();
+            // Consulta si ya existe una evaluación registrada para ese usuario.
 
             if ($evaluacionExistente) {
+          // Si ya existe, devuelve una respuesta con código 409 (conflicto) e impide crear otra.
+
                 return response()->json([
                     'message' => 'Ya tienes una evaluación docente registrada. No puedes crear otra.',
                 ], 409);
             }
             $evaluacion = DB::transaction(function () use ($request) {
-               
+             // Inicia una transacción de base de datos para asegurar que todo se ejecute correctamente.     
                 $datosEvaluacion = $request->validated();
                 $datosEvaluacion['user_id'] = $request->user()->id;
 

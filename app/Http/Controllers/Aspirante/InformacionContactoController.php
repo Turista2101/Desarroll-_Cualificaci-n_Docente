@@ -77,7 +77,14 @@ class InformacionContactoController
         // Se obtiene la información de contacto del usuario junto con los documentos relacionados
             $informacionContacto = InformacionContacto::where('user_id', $user->id)
                 ->with(['documentosInformacionContacto:id_documento,documentable_id,archivo,estado'])
-                ->firstOrFail();
+                ->first();
+            if (!$informacionContacto) {
+                return response()->json([
+                    'message' => 'No tienes EPS registrada aún.',
+                    'informacionContacto' => null
+                ], 200); // No es error, simplemente no tiene InformacionContacto aún
+            }
+                
             // Se genera la URL completa de cada archivo si existe
             foreach ($informacionContacto->documentosInformacionContacto as $documento) {
                 if (!empty($documento->archivo)) {
