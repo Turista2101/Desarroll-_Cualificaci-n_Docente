@@ -27,13 +27,13 @@ class CrearEpsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_eps'                    => 'required|string|min:7|max:100',
+            'nombre_eps'                    => 'required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'tipo_afiliacion'               => 'required|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
             'estado_afiliacion'             => 'required|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
             'fecha_afiliacion_efectiva'     => 'required|date',
             'fecha_finalizacion_afiliacion' => 'nullable|date',
             'tipo_afiliado'                 => 'required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
-            'numero_afiliado'               => 'nullable|string|max:100',
+            'numero_afiliado'               => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'archivo'                       => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ];
     }

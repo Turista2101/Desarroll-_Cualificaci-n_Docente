@@ -24,8 +24,8 @@ class ActualizarAptitudRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_aptitud' => 'sometimes|required|string|max:255',
-            'descripcion_aptitud'    => 'sometimes|required|string',
+            'nombre_aptitud' => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
+            'descripcion_aptitud'    => 'sometimes|required|string|regex:/^[\pL\pN\s\-]+$/u',
         ];
     }
 

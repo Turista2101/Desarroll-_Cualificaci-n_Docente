@@ -26,9 +26,9 @@ class CrearProduccionAcademicaRequest extends FormRequest
     {
         return [
          'ambito_divulgacion_id' => 'required|integer|exists:ambito_divulgacions,id_ambito_divulgacion',
-         'titulo' => 'required|string|max:255',
+         'titulo' => 'required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
          'numero_autores' => 'required|integer',
-         'medio_divulgacion' => 'required|string|max:255',
+         'medio_divulgacion' => 'required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
          'fecha_divulgacion' => 'required|date',// volver este campo a requerido
          'archivo' => 'required|file|mimes:pdf,doc,docx|max:2048',
         ];

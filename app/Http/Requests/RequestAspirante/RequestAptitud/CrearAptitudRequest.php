@@ -24,8 +24,8 @@ class CrearAptitudRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_aptitud' => 'required|string|max:255',
-            'descripcion_aptitud'    => 'required|string',
+            'nombre_aptitud' => 'required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
+            'descripcion_aptitud'    => 'required|string|regex:/^[\pL\pN\s\-]+$/u',
         ];
     }
     protected function failedValidation(Validator $validator)

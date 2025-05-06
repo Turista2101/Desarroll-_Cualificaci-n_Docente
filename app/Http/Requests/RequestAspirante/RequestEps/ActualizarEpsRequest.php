@@ -28,14 +28,14 @@ class ActualizarEpsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_eps'                    => 'sometimes|required|string|min:7|max:100',
+            'nombre_eps'                    => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'tipo_afiliacion'               => 'sometimes|required|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
             'estado_afiliacion'             => 'sometimes|required|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
             'fecha_afiliacion_efectiva'     => 'sometimes|required|date',
             'fecha_finalizacion_afiliacion' => 'sometimes|nullable|date',
             'tipo_afiliado'                 => 'sometimes|required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
-            'numero_afiliado'               => 'sometimes|nullable|string|max:100',
-            'archivo'                       => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'numero_afiliado'               => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'archivo'                       => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ];
     }
     protected function failedValidation(Validator $validator)

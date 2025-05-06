@@ -26,8 +26,8 @@ class CrearIdiomaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'idioma'             => 'required|string|max:255',
-            'institucion_idioma' => 'required|string|max:255',
+            'idioma'             => 'required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
+            'institucion_idioma' => 'required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_certificado'  => 'required|date',//poner este campo otra ves a requerido
             'nivel'              => 'required|in:' . implode(',', NivelIdioma::all()),
             'archivo'            => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación de archivo

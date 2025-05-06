@@ -27,7 +27,7 @@ class ActualizarNormativaRequest extends FormRequest
             'nombre' => 'sometimes|required|string|max:255',
             'descripcion' => 'nullable|string',
             'tipo' => 'sometimes|required|string|max:50',
-            'archivo' => 'sometimes|required|file|mimes:pdf,doc,docx|max:2048', // Validación del archivo
+            'archivo' => 'sometimes|nullable|file|mimes:pdf,doc,docx|max:2048', // Validación del archivo
         ];
     }
 

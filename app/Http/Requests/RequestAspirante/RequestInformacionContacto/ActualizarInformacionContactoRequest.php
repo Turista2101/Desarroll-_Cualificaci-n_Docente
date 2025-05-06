@@ -27,10 +27,10 @@ class ActualizarInformacionContactoRequest extends FormRequest
         return [
             'municipio_id'                          => 'sometimes|required|exists:municipios,id_municipio',
             'categoria_libreta_militar'             => 'sometimes|nullable|in:' . implode(',', CategoriaLibretaMilitar::all()),//llamo a la constante categoria libreta militar para obtener los tipos de libreta militar
-            'numero_libreta_militar'                => 'sometimes|nullable|string|max:50',
-            'numero_distrito_militar'               => 'sometimes|nullable|string|max:50',
-            'direccion_residencia'                  => 'sometimes|nullable|string|max:100',
-            'barrio'                                => 'sometimes|nullable|string|max:100',
+            'numero_libreta_militar'                => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
+            'numero_distrito_militar'               => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
+            'direccion_residencia'                  => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'barrio'                                => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'telefono_movil'                        => 'sometimes|required|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
             'celular_alternativo'                   => 'sometimes|nullable|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
             'correo_alterno'                        => 'sometimes|nullable|string|email|max:100|unique:users,email',

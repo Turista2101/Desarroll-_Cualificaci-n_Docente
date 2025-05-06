@@ -26,12 +26,12 @@ class ActualizarRutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_rut'                    => 'sometimes|required|string|min:7|max:100',
-            'razon_social'                  => 'sometimes|required|string|min:7|max:100',
+            'numero_rut'                    => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'razon_social'                  => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'tipo_persona'                  => 'sometimes|required|in:' . implode(',', TipoPersona::all()),
             'codigo_ciiu'                   => 'sometimes|required|in:' . implode(',', CodigoCiiu::all()),
             'responsabilidades_tributarias' => 'sometimes|required|string|min:7|max:100',
-            'archivo'                       => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                       => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ];
     }
     

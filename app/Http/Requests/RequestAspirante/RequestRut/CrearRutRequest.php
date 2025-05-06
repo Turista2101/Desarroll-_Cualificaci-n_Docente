@@ -26,8 +26,8 @@ class CrearRutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_rut'                    => 'required|string|min:7|max:100',
-            'razon_social'                  => 'required|string|min:7|max:100',
+            'numero_rut'                    => 'required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'razon_social'                  => 'required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'tipo_persona'                  => 'required|in:' . implode(',', TipoPersona::all()),
             'codigo_ciiu'                   => 'required|in:' . implode(',', CodigoCiiu::all()),
             'responsabilidades_tributarias' => 'required|string|min:7|max:100',

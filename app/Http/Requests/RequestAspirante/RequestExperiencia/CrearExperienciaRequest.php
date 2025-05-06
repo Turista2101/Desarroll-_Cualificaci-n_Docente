@@ -29,8 +29,8 @@ class CrearExperienciaRequest extends FormRequest
     {
         return [
             'tipo_experiencia'             => 'required|string|in:' . implode(',', TiposExperiencia::all()),
-            'institucion_experiencia'      => 'required|string|min:3|max:100',
-            'cargo'                        => 'required|string|min:3|max:100',
+            'institucion_experiencia'      => 'required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'cargo'                        => 'required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'trabajo_actual'               => 'required|in:' . implode(',', TrabajoActual::all()),
             'intensidad_horaria'           => 'nullable|integer|min:1|max:168',
             'fecha_inicio'                 => 'required|date', // volver este campo a requerido

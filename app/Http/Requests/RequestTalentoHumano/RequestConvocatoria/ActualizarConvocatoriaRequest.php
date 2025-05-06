@@ -25,13 +25,13 @@ class ActualizarConvocatoriaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_convocatoria'   => 'sometimes|required|string|max:255',
-            'tipo'                  => 'sometimes|required|string|max:255',
+            'nombre_convocatoria'   => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
+            'tipo'                  => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_publicacion'     => 'sometimes|required|date',
             'fecha_cierre'          => 'sometimes|required|date|after:fecha_publicacion',
-            'descripcion'           => 'sometimes|required|string|max:1000',
+            'descripcion'           => 'sometimes|required|string|max:1000|regex:/^[\pL\pN\s\-]+$/u',
             'estado_convocatoria'   => 'sometimes|required|in:' . implode(',', EstadoConvocatoria::all()),
-            'archivo'               => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048',
+            'archivo'               => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048',
         ];
     }
     protected function failedValidation(Validator $validator)

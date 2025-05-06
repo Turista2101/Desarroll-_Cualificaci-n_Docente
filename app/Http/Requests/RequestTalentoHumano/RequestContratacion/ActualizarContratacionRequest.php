@@ -31,7 +31,7 @@ class ActualizarContratacionRequest extends FormRequest
             'fecha_inicio' => 'sometimes1required|date',
             'fecha_fin' => 'sometimes|required|date',
             'valor_contrato' => 'sometimes|required|numeric',
-            'observaciones' => 'sometimes|nullable|string',
+            'observaciones' => 'sometimes|nullable|string|regex:/^[\pL\pN\s\-]+$/u',
 
         ];
     }

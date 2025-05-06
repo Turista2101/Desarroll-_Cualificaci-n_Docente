@@ -31,7 +31,7 @@ class CrearContratacionRequest extends FormRequest
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date',
             'valor_contrato' => 'required|numeric',
-            'observaciones' => 'nullable|string',
+            'observaciones' => 'nullable|string|regex:/^[\pL\pN\s\-]+$/u',
         ];
     }
     protected function failedValidation(Validator $validator)

@@ -30,13 +30,13 @@ class CrearEstudioRequest extends FormRequest
         return [
             'tipo_estudio'              => 'required|in:' . implode(',', TiposEstudio::all()),
             'graduado'                  => 'required|in:' . implode(',', Graduado::all()),
-            'institucion'               => 'required|string|min:7|max:100',
+            'institucion'               => 'required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_graduacion'          => 'nullable|date',
             'titulo_convalidado'        => 'required|in:' . implode(',', TituloConvalidado::all()),
             'fecha_convalidacion'       => 'nullable|date',
-            'resolucion_convalidacion'  => 'nullable|string|min:7|max:100',
+            'resolucion_convalidacion'  => 'nullable|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'posible_fecha_graduacion'  => 'nullable|date',
-            'titulo_estudio'            => 'nullable|string|min:7|max:100',
+            'titulo_estudio'            => 'nullable|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_inicio'              => 'required|date',
             'fecha_fin'                 => 'nullable|date',
             'archivo'                   => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo

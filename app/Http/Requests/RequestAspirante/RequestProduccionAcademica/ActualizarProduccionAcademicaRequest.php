@@ -25,11 +25,11 @@ class ActualizarProduccionAcademicaRequest extends FormRequest
     {
         return [
             'ambito_divulgacion_id' => 'sometimes|required|integer|exists:ambito_divulgacions,id_ambito_divulgacion',
-            'titulo' => 'sometimes|required|string|max:255',
+            'titulo' => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
             'numero_autores' => 'sometimes|required|integer',
-            'medio_divulgacion' => 'sometimes|required|string|max:255',
+            'medio_divulgacion' => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_divulgacion' => 'sometimes|nullable|date',// volver este campo a requerido
-            'archivo' => 'sometimes|required|file|mimes:pdf,doc,docx|max:2048',
+            'archivo' => 'sometimes|nullable|file|mimes:pdf,doc,docx|max:2048',
         ];
     }
     protected function failedValidation(Validator $validator)

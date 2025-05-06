@@ -32,10 +32,10 @@ class ActualizarAuthRequest extends FormRequest
             'tipo_identificacion'    => 'sometimes|required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
             'numero_identificacion'  => 'sometimes|required|string|max:50',
             'genero'                 => 'sometimes|nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
-            'primer_nombre'          => 'sometimes|required|string|max:100',
-            'segundo_nombre'         => 'sometimes|nullable|string|max:100',
-            'primer_apellido'        => 'sometimes|required|string|max:50',
-            'segundo_apellido'       => 'sometimes|nullable|string|max:50',
+            'primer_nombre'          => 'sometimes|required|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'segundo_nombre'         => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'primer_apellido'        => 'sometimes|required|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
+            'segundo_apellido'       => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_nacimiento'       => 'sometimes|required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
             'estado_civil'           => 'sometimes|nullable|in:' . implode(',', EstadoCivil::all()),//llamo a la constante estadocivil para obtener los tipos de estado civil
             'archivo'                => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo

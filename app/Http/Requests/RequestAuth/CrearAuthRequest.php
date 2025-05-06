@@ -34,10 +34,10 @@ class CrearAuthRequest extends FormRequest
             'tipo_identificacion'    => 'required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
             'numero_identificacion'  => 'required|string|max:50',
             'genero'                 => 'nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
-            'primer_nombre'          => 'required|string|max:100',
-            'segundo_nombre'         => 'nullable|string|max:100',
-            'primer_apellido'        => 'required|string|max:50',
-            'segundo_apellido'       => 'nullable|string|max:50',
+            'primer_nombre'          => 'required|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'segundo_nombre'         => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'primer_apellido'        => 'required|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
+            'segundo_apellido'       => 'nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_nacimiento'       => 'required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
             'estado_civil'           => 'nullable|in:' . implode(',', EstadoCivil::all()),//llamo a la constante estadocivil para obtener los tipos de estado civil
             'archivo'                => 'nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo

@@ -25,11 +25,11 @@ class CrearConvocatoriaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_convocatoria'   => 'required|string|max:255',
-            'tipo'                  => 'required|string|max:255',
+            'nombre_convocatoria'   => 'required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
+            'tipo'                  => 'required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_publicacion'     => 'required|date',
             'fecha_cierre'          => 'required|date|after:fecha_publicacion',
-            'descripcion'           => 'required|string|max:1000',
+            'descripcion'           => 'required|string|max:1000|regex:/^[\pL\pN\s\-]+$/u',
             'estado_convocatoria'   => 'required|in:' . implode(',', EstadoConvocatoria::all()),
             'archivo'               => 'required|file|mimes:pdf,jpg,png|max:2048',
 

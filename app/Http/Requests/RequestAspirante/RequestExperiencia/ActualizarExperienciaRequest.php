@@ -28,14 +28,14 @@ class ActualizarExperienciaRequest extends FormRequest
         return [
 
             'tipo_experiencia'             => 'sometimes|required|string|in:' . implode(',', TiposExperiencia::all()),
-            'institucion_experiencia'      => 'sometimes|required|string|min:3|max:100',
-            'cargo'                        => 'sometimes|required|string|min:3|max:100',
+            'institucion_experiencia'      => 'sometimes|required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'cargo'                        => 'sometimes|required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'trabajo_actual'               => 'sometimes|required|in:' . implode(',', TrabajoActual::all()),
             'intensidad_horaria'           => 'sometimes|nullable|integer|min:1|max:168',
             'fecha_inicio'                 => 'sometimes|required|date', // volver este campo a requerido
             'fecha_finalizacion'           => 'sometimes|nullable|date|after_or_equal:fecha_inicio',
             'fecha_expedicion_certificado' => 'sometimes|nullable|date',
-            'archivo'                      => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                      => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ];
     }
     protected function failedValidation(Validator $validator)

@@ -30,16 +30,16 @@ class ActualizarEstudioRequest extends FormRequest
             
             'tipo_estudio'              => 'sometimes|required|in:' . implode(',', TiposEstudio::all()),
             'graduado'                  => 'sometimes|required|in:' . implode(',', Graduado::all()),
-            'institucion'               => 'sometimes|required|string|min:7|max:100',
+            'institucion'               => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_graduacion'          => 'sometimes|nullable|date',
             'titulo_convalidado'        => 'sometimes|required|in:' . implode(',', TituloConvalidado::all()),
             'fecha_convalidacion'       => 'sometimes|nullable|date',
-            'resolucion_convalidacion'  => 'sometimes|nullable|string|min:7|max:100',
+            'resolucion_convalidacion'  => 'sometimes|nullable|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'posible_fecha_graduacion'  => 'sometimes|nullable|date',
-            'titulo_estudio'            => 'sometimes|nullable|string|min:7|max:100',
+            'titulo_estudio'            => 'sometimes|nullable|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_inicio'              => 'sometimes|required|date', // volver este campo a requerido
             'fecha_fin'                 => 'sometimes|nullable|date',
-            'archivo'                   => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                   => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
         ];
     }
     protected function failedValidation(Validator $validator)

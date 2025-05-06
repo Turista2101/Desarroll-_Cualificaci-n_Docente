@@ -26,11 +26,11 @@ class ActualizarIdiomaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'idioma'             => 'sometimes|required|string|max:255',
-            'institucion_idioma' => 'sometimes|required|string|max:255',
+            'idioma'             => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
+            'institucion_idioma' => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_certificado'  => 'sometimes|nullable|date',//poner este campo otra ves a requerido
             'nivel'              => 'sometimes|required|in:' . implode(',', NivelIdioma::all()),
-            'archivo'            => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048', // Validación de archivo
+            'archivo'            => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación de archivo
         ];
     }
     protected function failedValidation(Validator $validator)
