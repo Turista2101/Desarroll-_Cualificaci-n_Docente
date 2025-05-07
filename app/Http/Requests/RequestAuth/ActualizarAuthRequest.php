@@ -38,7 +38,7 @@ class ActualizarAuthRequest extends FormRequest
             'segundo_apellido'       => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_nacimiento'       => 'sometimes|required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
             'estado_civil'           => 'sometimes|nullable|in:' . implode(',', EstadoCivil::all()),//llamo a la constante estadocivil para obtener los tipos de estado civil
-            'archivo'                => 'sometimes|nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                => 'sometimes|nullable|file|mimes:pdf|max:2048', // Validación del archivo
         ];
     }
     protected function failedValidation(Validator $validator)

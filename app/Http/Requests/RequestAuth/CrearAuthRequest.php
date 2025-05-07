@@ -40,7 +40,7 @@ class CrearAuthRequest extends FormRequest
             'segundo_apellido'       => 'nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_nacimiento'       => 'required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
             'estado_civil'           => 'nullable|in:' . implode(',', EstadoCivil::all()),//llamo a la constante estadocivil para obtener los tipos de estado civil
-            'archivo'                => 'nullable|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                => 'nullable|file|mimes:pdf|max:2048', // Validación del archivo
             'email'                  => 'required|string|email|max:100|unique:users',
             'password'               => 'required|string|min:8',
         ];

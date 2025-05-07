@@ -34,7 +34,7 @@ class CrearEpsRequest extends FormRequest
             'fecha_finalizacion_afiliacion' => 'nullable|date',
             'tipo_afiliado'                 => 'required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
             'numero_afiliado'               => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
-            'archivo'                       => 'required|file|mimes:pdf,jpg,png|max:2048', // Validación del archivo
+            'archivo'                       => 'required|file|mimes:pdf|max:2048', // Validación del archivo
         ];
     }
     protected function failedValidation(Validator $validator)
