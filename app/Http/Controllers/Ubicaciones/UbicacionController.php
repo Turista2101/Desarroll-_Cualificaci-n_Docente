@@ -131,4 +131,24 @@ class UbicacionController
         // Devolver respuesta
         return response()->json($municipios, 200);
     }
+
+    // Obtener información completa de ubicación por municipio_id
+    public function obtenerUbicacionPorMunicipio($municipio_id)
+    {
+        // Buscar el municipio con su departamento y país
+        $municipio = Municipio::with('departamentoMunicipio.paisDepartamento')->find($municipio_id);
+
+        if (!$municipio) {
+            return response()->json(['error' => 'Municipio no encontrado'], 404);
+        }
+
+        return response()->json([
+            'municipio_id' => $municipio->id_municipio,
+            'municipio_nombre' => $municipio->nombre,
+            'departamento_id' => $municipio->departamentoMunicipio?->id_departamento,
+            'departamento_nombre' => $municipio->departamentoMunicipio?->nombre,
+            'pais_id' => $municipio->departamentoMunicipio?->paisDepartamento?->id_pais,
+            'pais_nombre' => $municipio->departamentoMunicipio?->paisDepartamento?->nombre,
+        ], 200);
+    }
 }
