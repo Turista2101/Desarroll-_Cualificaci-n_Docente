@@ -39,11 +39,11 @@ class ActualizarAptitudRequest extends FormRequest
 
     {
         return [
-            'nombre_aptitud' => 'sometimes|required|string|max:255|regex:/^[\pL\pN\s\-]+$/u',
+            'nombre_aptitud' => 'sometimes|required|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
              // Valida que `nombre_aptitud` sea opcional (`sometimes`), requerido si está presente, de tipo `string`,
-            // con un máximo de 255 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
+            // con un máximo de 50 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
 
-            'descripcion_aptitud'    => 'sometimes|required|string|regex:/^[\pL\pN\s\-]+$/u',
+            'descripcion_aptitud'    => 'sometimes|required|string|max:500|regex:/^[\pL\pN\s\-]+$/u',
         ];
     }
 
