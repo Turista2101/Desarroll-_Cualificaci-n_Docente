@@ -71,7 +71,10 @@ class EstudioController
                 ->get();
             // Verifica si hay estudios registrados
             if ($estudios->isEmpty()) {
-                throw new \Exception('No se encontraron estudios', 404);
+                return response()->json([
+                    'mesaje'=>'No se encontraron estudios',
+                    'estudios'=> null
+                ], 200);
             }
              // Agrega URL completa del archivo a cada documento
             $estudios->each(function ($estudio) {

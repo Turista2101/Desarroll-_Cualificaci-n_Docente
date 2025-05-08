@@ -84,7 +84,10 @@ class ExperienciaController
             // Si no hay experiencias, se lanza una excepción.
 
             if ($experiencias->isEmpty()) {
-                throw new \Exception('No se encontraron experiencias', 404);
+                return response()->json([
+                    'mensaje'=>'No se encontraron experiencias',
+                    'experiencias' => null
+                ], 200);
             }
             // Se recorre cada experiencia para agregar la URL del archivo si existe.
 

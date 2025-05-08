@@ -69,9 +69,13 @@ class ProduccionAcademicaController
             ->with(['documentosProduccionAcademica:id_documento,documentable_id,archivo,estado'])
             ->orderBy('created_at')
             ->get();
+            
          // Verifica si hay resultados
          if ($producciones->isEmpty()) {
-            throw new \Exception('No se encontraron producciones', 404);
+            return response()->json([
+               'mensaje'=>'No se encontraron producciones',
+               'producciones'=> null
+            ], 200);
          }
          // Para cada producción, genera la URL pública del archivo
          $producciones->each(function ($produccion) {

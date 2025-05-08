@@ -72,7 +72,10 @@ class NormativaController
 
             // Verifica si hay normativas registradas
             if ($normativas->isEmpty()) {
-                throw new \Exception('No se encontraron normativas', 404);
+                return response()->json([
+                    'mensaje'=>'No se encontraron normativas',
+                    'normativas'=> null
+                ], 200);
             }
 
             // Agrega URL completa del archivo a cada documento

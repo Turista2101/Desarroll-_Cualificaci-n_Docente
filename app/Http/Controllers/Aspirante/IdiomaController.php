@@ -76,7 +76,10 @@ class IdiomaController
                 ->get();
 
             if ($idiomas->isEmpty()) {
-                throw new \Exception('No se encontraron idiomas', 404);
+                return response()->json([
+                    'mensaje'=> 'No se encontraron idiomas para el usuario.',
+                    'idiomas'=> null
+                ], 200);
             }
             // Agrega la URL completa al archivo en cada documento
             $idiomas->each(function ($idioma) {

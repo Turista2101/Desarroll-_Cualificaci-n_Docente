@@ -88,7 +88,10 @@ class FotoPerfilController
             // Si no existe una foto, retorna error 404
 
             if (!$fotoPerfil) {
-                return response()->json(['mensaje' => 'No se encontró una foto de perfil para este usuario.'], 404);
+                return response()->json([
+                    'mensaje' => 'No se encontró una foto de perfil para este usuario.',
+                    'fotoPerfil' => null
+                ], 200);
             }
 
             // Usar el servicio para eliminar el documento y el archivo
@@ -127,7 +130,10 @@ class FotoPerfilController
             // Si no se encuentra ninguna foto, lanza excepción
 
             if (!$fotoPerfil) {
-                throw new \Exception('No se encontró foto de perfil para este usuario', 404);
+                return response()->json([
+                    'mensaje' => 'No tienes foto de perfil registrada aún.',
+                    'fotoPerfil' => null
+                ], 200); // No es error, simplemente no tiene foto de perfil aún
             }
             // Agrega la URL completa del archivo para cada documento asociado
 
