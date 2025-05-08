@@ -4,10 +4,11 @@ namespace App\Http\Controllers\ApoyoProfesoral;
 use App\Models\Aspirante\Documento;
 use App\Models\Aspirante\Estudio;
 
-use Illuminate\Http\Request;
-
 class DocumentoController
 {
+
+
+    // esto es secretaria aun no se hace
     public function filtrarPorTipoEstudio($tipo)
 {
     // Obtener los IDs de los estudios que coincidan con el tipo solicitado
