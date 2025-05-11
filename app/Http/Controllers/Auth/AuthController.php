@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+
 use Illuminate\Http\Request;
 use App\Models\Usuario\User;
 use Illuminate\Support\Facades\Hash;
@@ -10,10 +11,10 @@ use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\RequestAuth\ActualizarAuthRequest;
 use App\Http\Requests\RequestAuth\CrearAuthRequest;
 use App\Services\ArchivoService;
+
 
 class AuthController
 {
@@ -80,11 +81,16 @@ class AuthController
                 throw new \Exception('Credenciales incorrectas', 401);
             }
 
+            // Obtener el usuario autenticado
+            $user = JWTAuth::user();
+            $rol = $user->getRoleNames()->first(); // Obtener el primer rol del usuario
+
 
             // Devolver respuesta con el token y el usuario
             return response()->json([
                 'message' => 'Inicio de sesión exitoso',
-                'token'   => $token
+                'token'   => $token,
+                'rol'     => $rol
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
