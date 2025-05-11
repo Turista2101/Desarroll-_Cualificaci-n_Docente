@@ -26,6 +26,8 @@ Route::group([
     Route::put('editar-usuario/{id}', [UserController::class, 'editarUsuario']);
     Route::delete('eliminar-usuario/{id}', [UserController::class, 'eliminarUsuario']);
 
+
+    // Rutas funcionales y que sirven
     //normativas
     Route::post('crear-normativa', [NormativaController::class, 'crearNormativa']);
     Route::get('obtener-normativas', [NormativaController::class, 'obtenerNormativas']);

@@ -198,7 +198,6 @@ class AuthController
 
 
 
-
     //Actualizar la contraseña
 
     public function actualizarContrasena(Request $request)
@@ -219,7 +218,7 @@ class AuthController
 
             // Verificar la contraseña actual
             if (!Hash::check($request->password, $user->password)) {
-                throw new \Exception('Contraseña incorrecta', 401);
+                throw new \Exception('Contraseña incorrecta', 422);
             }
 
             // Actualizar la contraseña
@@ -234,7 +233,6 @@ class AuthController
             ], $e->getCode() ?: 500);
         }
     }
-
 
 
     //Restablecer la contraseña
