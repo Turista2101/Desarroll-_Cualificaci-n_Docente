@@ -33,9 +33,9 @@ class CrearNormativaRequest extends FormRequest
             // El campo `descripcion` es opcional (`nullable`), pero si está presente, debe ser una cadena (`string`).
             'tipo' => 'required|string|max:50',
             // El campo `tipo` es obligatorio (`required`), debe ser una cadena con un máximo de 50 caracteres.
-            'archivo' => 'required|file|mimes:pdf|max:2048',
+            'archivo' => 'required|file|mimes:pdf|max:4096',
               // El campo `archivo` es obligatorio (`required`), debe ser un archivo (`file`) con extensiones permitidas
-            // (`pdf`, `doc`, `docx`) y su tamaño no debe exceder los 2048 KB.
+            // (`pdf`, `doc`, `docx`) y su tamaño no debe exceder los 4096 KB.
     
         ];
     }

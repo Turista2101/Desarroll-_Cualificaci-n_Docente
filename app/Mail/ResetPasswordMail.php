@@ -28,16 +28,27 @@ class ResetPasswordMail extends Mailable
     }
 
     public function build()
-        // Método que construye el correo electrónico.
+    // Método que construye el correo electrónico.
     {
         return $this->subject('Restablecimiento de Contraseña')
-            // Establece el asunto del correo como "Restablecimiento de Contraseña".
-                    ->html("
-                        <p>Hola, {$this->user->name}</p>
-                        <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
-                        <p><a href='{$this->resetLink}'>Haz clic aquí para restablecer tu contraseña</a></p>
-                        <p>Si no solicitaste este cambio, ignora este mensaje.</p>
-                        <p>Gracias,<br>" . config('app.name') . "</p>
-                    ");
+            ->html("
+                <div style='font-family: Arial, sans-serif; color: #333; padding: 20px;'>
+                    <h1 style='color: #3498db;'>UniDoc</h1>
+                    <h2 style='color: #2c3e50;'>Hola, {$this->user->primer_nombre}</h2>
+                    <p>Recibimos una solicitud para <strong>restablecer tu contraseña</strong>.</p>
+                    <p>
+                        <a href='{$this->resetLink}' style='
+                            background-color: #3498db;
+                            color: white;
+                            padding: 10px 20px;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            display: inline-block;
+                        '>Haz clic aquí para restablecer tu contraseña</a>
+                    </p>
+                    <p style='margin-top: 30px;'>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+                    <p>Gracias</p>
+                </div>
+        ");
     }
 }

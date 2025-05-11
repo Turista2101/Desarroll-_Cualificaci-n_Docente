@@ -12,6 +12,7 @@
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "maatwebsite/excel": "^3.1",
         "php-open-source-saver/jwt-auth": "*",
         "setasign/fpdi": "^2.6",
         "spatie/laravel-permission": "^6.16",

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Ubicaciones\UbicacionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Aspirante\NormativaController;
+use App\Http\Controllers\Admin\ReporteController;
 
 Route::group([
     'middleware' => ['api', 'auth:api', 'role:Administrador'],
@@ -31,6 +32,8 @@ Route::group([
     Route::get('obtener-normativa/{id}', [NormativaController::class, 'obtenerNormativaPorId']);
     Route::put('actualizar-normativa/{id}', [NormativaController::class, 'actualizarNormativa']);
     Route::delete('eliminar-normativa/{id}', [NormativaController::class, 'eliminarNormativa']);
+
+    Route::get('usuarios-excel', [ReporteController::class, 'usuariosExcel']);
 
     
     

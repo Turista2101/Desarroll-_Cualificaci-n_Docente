@@ -42,7 +42,7 @@ class EpsController
             $eps = DB::transaction(function () use ($request) {
                  // Obtener datos validados del request
                 $datos = $request->validated();
-                 // Asociar la EPS al usuario autenticado   
+                 // Asociar la EPS al usuario autenticado
                 $datos['user_id'] = $request->user()->id;
 
                 $eps = Eps::create($datos);
@@ -53,12 +53,11 @@ class EpsController
 
                 return $eps;
             });
-              // Respuesta si llega hacer todo exitoso
-
+            // Respuesta si llega hacer  exitoso
             return response()->json([
                 'message' => 'EPS y documento creado exitosamente',
                 'data'    => $eps
-            ], 201);// Código 201: es igual a que esta creado 
+            ], 201);// Código 201: es igual a que esta creado
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al crear la EPS o subir el archivo.',
@@ -81,7 +80,7 @@ class EpsController
              // Buscar EPS con documentos asociados
             $eps = Eps::where('user_id', $user->id)
                 ->with(['documentosEps:id_documento,documentable_id,archivo,estado'])
-                ->first();//error si no existe 
+                ->first();//error si no existe
 
             if (!$eps) {
                 return response()->json([
@@ -135,7 +134,7 @@ class EpsController
             ], 200);
 
         } catch (\Exception $e) {
-            //manejo de errores 
+            //manejo de errores
             return response()->json([
                 'message' => 'Error al actualizar el EPS',
                 'error'   => $e->getMessage()

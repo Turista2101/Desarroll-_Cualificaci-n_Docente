@@ -32,7 +32,7 @@ class CrearAuthRequest extends FormRequest
         return [
             'municipio_id'           => 'required|exists:municipios,id_municipio',
             'tipo_identificacion'    => 'required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
-            'numero_identificacion'  => 'required|string|max:50',
+            'numero_identificacion'  => 'required|string|max:50|unique:users',
             'genero'                 => 'nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
             'primer_nombre'          => 'required|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'segundo_nombre'         => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',

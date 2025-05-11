@@ -16,7 +16,6 @@ Route::group([
     Route::get('ambitos-divulgacion', [MostrarTiposController::class, 'obtenerAmbitoDivulgacion']);
     // Ruta para obtener los ámbitos de divulgación asociados a un producto académico específico
     Route::get('ambitos_divulgacion/{id_producto_academico}', [MostrarTiposController::class, 'obtenerAmbitoDivulgacionPorProductoAcademico']);
-    
     // Ruta para obtener la informacion comleta de un ambito de divulgacion
     Route::get('ambito-divulgacion-completo/{id_ambito_divulgacion}', [MostrarTiposController::class, 'obterProduccionPorAmbitoDivulgacion']);
 

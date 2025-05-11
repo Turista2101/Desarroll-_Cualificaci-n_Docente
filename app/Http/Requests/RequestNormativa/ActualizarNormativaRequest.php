@@ -35,9 +35,9 @@ class ActualizarNormativaRequest extends FormRequest
             'tipo' => 'sometimes|required|string|max:50',
              // El campo `tipo` es opcional, pero si está presente, es obligatorio.
             // Debe ser una cadena con un máximo de 50 caracteres.
-            'archivo' => 'sometimes|nullable|file|mimes:pdf|max:2048', // Validación del archivo
+            'archivo' => 'sometimes|nullable|file|mimes:pdf|max:4096', // Validación del archivo
              // El campo `archivo` es opcional, pero si está presente, debe ser un archivo (`file`) con extensiones permitidas
-            // (`pdf`, `doc`, `docx`) y su tamaño no debe exceder los 2048 KB.
+            // (`pdf`, `doc`, `docx`) y su tamaño no debe exceder los 4096 KB.
         ];
     }
 

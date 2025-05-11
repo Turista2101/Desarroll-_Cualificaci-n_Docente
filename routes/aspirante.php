@@ -65,7 +65,7 @@ Route::group([
     Route::delete('eliminar-estudio/{id}', [EstudioController::class, 'eliminarEstudio']);
 
     // Rutas relacionadas con convocatorias y postulaciones
-        Route::get('ver-convocatorias', [ConvocatoriaController::class, 'obtenerConvocatorias']);
+    Route::get('ver-convocatorias', [ConvocatoriaController::class, 'obtenerConvocatorias']);
     Route::get('ver-convocatoria/{id}', [ConvocatoriaController::class, 'obtenerConvocatoriaPorId']);
     Route::post('crear-postulacion/{convocatoriaId}', [PostulacionController::class, 'crearPostulacion']);
     Route::get('ver-postulaciones', [PostulacionController::class, 'obtenerPostulacionesUsuario']);

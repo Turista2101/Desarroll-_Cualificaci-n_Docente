@@ -7,7 +7,7 @@ Route::group([
     // Aplica los middlewares 'api', 'auth:api' y 'role:Apoyo Profesoral' para proteger las rutas
     'middleware' => ['api', 'auth:api', 'role:Apoyo Profesoral'],
     // Establece un prefijo 'aspirante' para las rutas dentro de este grupo
-    'prefix' => 'aspirante'
+    'prefix' => 'apoyoProfesoral',
 ], function () {
 // Aquí se definirán las rutas específicas para este grupo
     

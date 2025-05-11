@@ -19,7 +19,7 @@ class PostulacionController
     {
         $this->generadorHojaDeVidaPDFService = $generadorHojaDeVidaPDFService;
     }
- /**
+    /**
      * Crea una nueva postulación para una convocatoria.
      * Valida que la convocatoria no esté cerrada y que el usuario no se haya postulado previamente.
      */
@@ -65,7 +65,7 @@ class PostulacionController
             ], $e->getCode() ?: 500);
         }
     }
-     /**
+    /**
      * Obtiene todas las postulaciones con sus relaciones de usuario y convocatoria.
      */
     public function obtenerPostulaciones()
@@ -81,7 +81,7 @@ class PostulacionController
             ], 500);
         }
     }
-/**
+    /**
      * Obtiene las postulaciones hechas por el usuario autenticado.
      */
     public function obtenerPostulacionesUsuario(Request $request)
@@ -99,7 +99,7 @@ class PostulacionController
             ], 500);
         }
     }
- /**
+    /**
      * Genera el PDF de la hoja de vida de un usuario para una convocatoria específica.
      */
 
@@ -126,14 +126,14 @@ class PostulacionController
             ], 500);
         }
     }
- /**
+    /**
      * Actualiza el estado de una postulación específica.
      */
 
     public function actualizarEstadoPostulacion(Request $request, $idPostulacion)
     {
         try {
-        // Validar que el estado sea válido
+            // Validar que el estado sea válido
             $request->validate([
                 'estado_postulacion' => 'required|in:' . implode(',', EstadoPostulacion::all()),
             ]);
@@ -148,13 +148,6 @@ class PostulacionController
                 $postulacion->estado_postulacion = $request->estado_postulacion;
                 $postulacion->save();
 
-                // $talentoHumano = User::roles(['Docente', 'Aspirante'])->get();
-                // Notification::send($talentoHumano, new NotificacionGeneral('Postulacion actualizada'));
-
-                // $talentoHumano = User::role('Talento Humano')->get();
-                // Notification::send($talentoHumano, new NotificacionGeneral('Postulacion actualizada'));
-
-// Aquí se podrían enviar notificaciones si se desea
                 return $postulacion;
             });
 
@@ -168,7 +161,8 @@ class PostulacionController
                 'error' => $e->getMessage()
             ], $e->getCode() ?: 500);
         }
-    }/**
+    }
+    /**
      * Elimina una postulación por ID.
      */
 
@@ -195,7 +189,7 @@ class PostulacionController
             ], $e->getCode() ?: 500);
         }
     }
- /**
+    /**
      * Permite a un usuario eliminar su propia postulación.
      */
     public function eliminarPostulacionUsuario(Request $request, $id)
@@ -221,6 +215,24 @@ class PostulacionController
                 'message' => 'Ocurrió un error al eliminar la postulación del usuario.',
                 'error' => $e->getMessage()
             ], $e->getCode() ?: 500);
+        }
+    }
+    /**
+     * Obtiene las postulaciones de una convocatoria específica.
+     */
+    public function obtenerPorConvocatoria($idConvocatoria)
+    {
+        try {
+            $postulaciones = Postulacion::where('convocatoria_id', $idConvocatoria)
+                ->with('usuarioPostulacion')
+                ->get();
+
+            return response()->json(['postulaciones' => $postulaciones], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al obtener las postulaciones por convocatoria.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

@@ -31,13 +31,13 @@ class ActualizarContratacionRequest extends FormRequest
     // Método que define las reglas de validación para los datos enviados en la solicitud.
     {
         return [
-            'tipo_contrato' => 'sometimes|required|in' . implode(',', TipoContratacion::all()),
+            'tipo_contrato' => 'sometimes|required|in:' . implode(',', TipoContratacion::all()),
               // El campo `tipo_contrato` es opcional (`sometimes`), pero si está presente, es obligatorio (`required`).
             // Su valor debe estar dentro de los valores definidos en `TipoContratacion::all()`.
-            'area' => 'sometimes|required|json' . implode(',', AreasContratacion::all()),
+            'area' => 'sometimes|required|in:' . implode(',', AreasContratacion::all()),
              // El campo `area` es opcional, pero si está presente, es obligatorio.
             // Su valor debe estar dentro de los valores definidos en `AreasContratacion::all()`.
-            'fecha_inicio' => 'sometimes1required|date',
+            'fecha_inicio' => 'sometimes|required|date',
              // El campo `fecha_inicio` tiene un error tipográfico (`sometimes1` en lugar de `sometimes`).
             // Si se corrige, sería opcional, pero si está presente, debe ser una fecha válida (`date`).
             'fecha_fin' => 'sometimes|required|date',

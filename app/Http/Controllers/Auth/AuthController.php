@@ -46,7 +46,6 @@ class AuthController
             //Devolver respuesat con el token y el usuario
             return response()->json([
                 'menssage' => 'Usuario creado exitosamente',
-                // 'user'=>$user,
                 'token' => $token
             ], 201);
         } catch (\Exception $e) {
@@ -81,13 +80,10 @@ class AuthController
                 throw new \Exception('Credenciales incorrectas', 401);
             }
 
-            // Obtener el usuario autenticado
-            $user = Auth::user();
 
             // Devolver respuesta con el token y el usuario
             return response()->json([
                 'message' => 'Inicio de sesión exitoso',
-                // 'user'    => $user,
                 'token'   => $token
             ], 200);
         } catch (\Exception $e) {
@@ -145,6 +141,7 @@ class AuthController
             ], 500);
         }
     }
+
 
 
     //Cerrar sesión

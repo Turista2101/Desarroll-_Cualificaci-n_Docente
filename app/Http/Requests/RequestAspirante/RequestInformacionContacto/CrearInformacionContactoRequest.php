@@ -38,7 +38,7 @@ class CrearInformacionContactoRequest extends FormRequest
             'numero_distrito_militar'               => 'nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
              // El campo `numero_distrito_militar` es opcional, pero si está presente, debe cumplir las mismas reglas
             // que `numero_libreta_militar`.
-            'direccion_residencia'                  => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'direccion_residencia'                  => 'nullable|string|max:100|regex:/^[\pL\pN\s\-,#]+$/u',
               // El campo `direccion_residencia` es opcional, pero si está presente, debe ser una cadena con un máximo
             // de 100 caracteres y cumplir con un patrón regex que permite letras, números, espacios y guiones.
             'barrio'                                => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',

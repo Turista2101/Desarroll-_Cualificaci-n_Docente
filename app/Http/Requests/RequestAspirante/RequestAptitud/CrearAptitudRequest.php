@@ -31,7 +31,7 @@ class CrearAptitudRequest extends FormRequest
             // tiene un máximo de 50 caracteres (`max:50`) y debe coincidir con un patrón regex que permite letras,
             // números, espacios y guiones.
 
-            'descripcion_aptitud'    => 'required|string|max:500|regex:/^[\pL\pN\s\-]+$/u',
+            'descripcion_aptitud'    => 'required|string|max:500|regex:/^[\pL\pN\s\-,]+$/u',
              // La regla para `descripcion_aptitud` es similar, pero no tiene un límite de longitud.
             // También es obligatorio, debe ser una cadena y cumplir con el mismo patrón regex.
       

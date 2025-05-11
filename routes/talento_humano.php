@@ -7,10 +7,11 @@ use App\Http\Controllers\TalentoHumano\PostulacionController;
 // Define un grupo de rutas con configuraciones específicas para el rol "Talento Humano"
 Route::group([
     // Aplica los middlewares 'api', 'auth:api' y 'role:Talento Humano' para proteger las rutas
-    'middleware' =>'api', 'auth:api', 'role:Talento Humano',
+    'middleware' =>['api', 'auth:api', 'role:Talento Humano'],
     // Establece un prefijo 'talentoHumano' para las rutas dentro de este grupo
     'prefix' => 'talentoHumano'
 ], function () {
+    
     // Rutas relacionadas con convocatorias
     Route::get('obtener-convocatorias',[ConvocatoriaController::class, 'obtenerConvocatorias']);
     Route::get('obtener-convocatoria/{id}',[ConvocatoriaController::class, 'obtenerConvocatoriaPorId']);

@@ -43,7 +43,7 @@ class ActualizarAptitudRequest extends FormRequest
              // Valida que `nombre_aptitud` sea opcional (`sometimes`), requerido si está presente, de tipo `string`,
             // con un máximo de 50 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
 
-            'descripcion_aptitud'    => 'sometimes|required|string|max:500|regex:/^[\pL\pN\s\-]+$/u',
+            'descripcion_aptitud'    => 'sometimes|required|string|max:500|regex:/^[\pL\pN\s\-,]+$/u',
         ];
     }
 
