@@ -21,6 +21,7 @@ class TipoAfiliado
     public const DESPLAZADO = 'Desplazado';
     // Persona afiliada al sistema de salud mediante un tratado internacional.
     public const AFILIADO_POR_CONVENIO_INTERNACIONAL = 'Afiliado por convenio internacional';
+    
     // Método que devuelve todos los tipos de afiliado como un arreglo.
     public static function all(): array
     {

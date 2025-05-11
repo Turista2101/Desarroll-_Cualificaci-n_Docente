@@ -31,10 +31,10 @@ class IdiomaController
     public function crearIdioma(CrearIdiomaRequest $request)
     {
         try {
-        // Se ejecuta dentro de una transacción para asegurar consistencia
+            // Se ejecuta dentro de una transacción para asegurar consistencia
             $idioma = DB::transaction(function () use ($request) {
                 $datos = $request->validated();
-        // Se añade el ID del usuario autenticado
+            // Se añade el ID del usuario autenticado
                 $datos['user_id'] = $request->user()->id;
                 // Crea el registro del idioma en la base de datos
                 $idioma = Idioma::create($datos);

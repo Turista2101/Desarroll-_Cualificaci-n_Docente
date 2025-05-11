@@ -39,7 +39,7 @@ class FotoPerfilController
                 'archivo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             ]);
             
-            // Ejecuta todo dentro de una transacción para garantizar consistencia
+            // Ejecuta  dentro de una transaccion para garantizar consistencia
 
             $fotoPerfil = DB::transaction(function () use ($request) {
                 $userId = $request->user()->id;

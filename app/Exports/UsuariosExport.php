@@ -19,6 +19,16 @@ use Maatwebsite\Excel\Events\AfterSheet;
 class UsuariosExport implements FromCollection, WithHeadings, WithTitle, ShouldAutoSize, WithStyles, WithEvents
 {
     /**
+     * Construye la colección de datos que será exportada a Excel.
+     *
+     * Esta función obtiene todos los usuarios registrados con el rol "Aspirante".
+     * Luego, aplica un `map()` para transformar los datos en un
+     * arreglo de filas compatibles con el formato de exportación.
+     *
+     * Se incluyen campos como nombre completo, tipo de identificación, estado civil,
+     * género, fecha de nacimiento y correo electrónico. Esta información será mostrada
+     * en la hoja de Excel titulada "Usuarios".
+     *
      * @return \Illuminate\Support\Collection
      */
     public function collection()
@@ -65,11 +75,25 @@ class UsuariosExport implements FromCollection, WithHeadings, WithTitle, ShouldA
         ];
     }
 
+    /**
+     * Define el título de la hoja de Excel.
+     *
+     * @return string
+     */
     public function title(): string
     {
         return 'Usuarios';
     }
 
+    /**
+     * Define los estilos de la hoja de Excel.
+     *
+     * Este método aplica estilos a la hoja de Excel, como el formato de la primera fila
+     * (encabezados) y el congelamiento del panel superior.
+     *
+     * @param Worksheet $sheet
+     * @return array
+     */
     public function registerEvents(): array
     {
         return [
@@ -79,10 +103,20 @@ class UsuariosExport implements FromCollection, WithHeadings, WithTitle, ShouldA
         ];
     }
 
+    /**
+     * Define los estilos que se aplicarán a la hoja de Excel.
+     *
+     * Este método aplica estilos a la primera fila de la hoja, que contiene los encabezados
+     * de las columnas. Se establece un fondo azul, texto en negrita y centrado,
+     * y bordes alrededor de cada celda.
+     *
+     * @param Worksheet $sheet
+     * @return array
+     */
     public function styles(Worksheet $sheet)
     {
         // Rango de la primera fila (A1 hasta la última columna)
-        $lastColumn = $sheet->getHighestColumn(); // Ej: "M"
+        $lastColumn = $sheet->getHighestColumn();
         $headerRange = "A1:{$lastColumn}1";
 
         // Aplica estilos
@@ -93,7 +127,7 @@ class UsuariosExport implements FromCollection, WithHeadings, WithTitle, ShouldA
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4F81BD'], // azul profesional
+                'startColor' => ['rgb' => '4F81BD'],
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,

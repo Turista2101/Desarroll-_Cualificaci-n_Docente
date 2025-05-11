@@ -47,9 +47,8 @@ class CodigoCiiu
     public const SECCION_T = 'Actividades de los hogares como empleadores; actividades de los hogares como productores de bienes y servicios para uso propio';
     // Sección U: Actividades realizadas por organismos internacionales y extraterritoriales.
     public const SECCION_U = 'Organizaciones y organismos extraterritoriales';
-    // Retorna todas las secciones definidas anteriormente como un arreglo.
 
-    
+    // Retorna todas las secciones definidas anteriormente como un arreglo.
     public static function all(): array
     {
         return [
@@ -76,7 +75,4 @@ class CodigoCiiu
             self::SECCION_U,
         ];
     }
-
-    
-
 }

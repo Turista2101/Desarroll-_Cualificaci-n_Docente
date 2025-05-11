@@ -23,12 +23,7 @@ class Documento extends Model
 
     ];
 
-    // Relación uno a uno con la tabla users
-    // public function usuarioDocumento():BelongsTo
-    // {
-    //     return $this->belongsTo(User::class,'user_id','id');
-    // }
-
+    // Definimos las relaciones
     public function documentable(): MorphTo
     {
         return $this->morphTo();

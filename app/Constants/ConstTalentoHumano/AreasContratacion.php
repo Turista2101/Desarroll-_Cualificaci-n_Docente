@@ -15,8 +15,8 @@ class AreasContratacion
     public const FACULTAD_DE_EDUCACION = 'Facultad de Educacion';
     // Facultad de Ingeniería
     public const FACULTAD_DE_INGENIERIA = 'Facultad de Ingenieria';
-    // Retorna todas las áreas disponibles como un arreglo
 
+    // Retorna todas las áreas disponibles como un arreglo
     public static function all(): array
     {
         return [

@@ -18,6 +18,16 @@ use Maatwebsite\Excel\Events\AfterSheet;
 class EstudiosUsuarioExport implements FromCollection, WithHeadings, WithTitle, ShouldAutoSize, WithStyles, WithEvents
 {
     /**
+     * Construye la colección de datos que será exportada a Excel.
+     *
+     * Esta función obtiene todos los estudios registrados por usuarios con el rol "Aspirante".
+     * Utiliza la relación `usuarioEstudio` para acceder a la información personal del usuario
+     * asociado a cada estudio. Luego, aplica un `map()` para transformar los datos en un
+     * arreglo de filas compatibles con el formato de exportación.
+     *
+     * Se incluyen campos como nombre completo, tipo de estudio, institución, fechas de inicio y fin,
+     * convalidación, y más. Esta información será mostrada en la hoja de Excel titulada "Estudios".
+     *
      * @return \Illuminate\Support\Collection
      */
 
@@ -70,11 +80,28 @@ class EstudiosUsuarioExport implements FromCollection, WithHeadings, WithTitle, 
         ];
     }
 
+    /**
+     * Define el título de la hoja de Excel.
+     *
+     * Este método establece el título de la hoja que se generará en el archivo Excel.
+     * En este caso, se define como "Estudios".
+     *
+     * @return string
+     */
     public function title(): string
     {
         return 'Estudios';
     }
 
+    /**
+     * Define los eventos que se ejecutarán después de la creación de la hoja.
+     *
+     * En este caso, se utiliza el evento AfterSheet para congelar la primera fila
+     * de la hoja de Excel, lo que permite que los encabezados permanezcan visibles
+     * mientras se desplaza por el resto de los datos.
+     *
+     * @return array
+     */
     public function registerEvents(): array
     {
         return [
@@ -84,10 +111,19 @@ class EstudiosUsuarioExport implements FromCollection, WithHeadings, WithTitle, 
         ];
     }
 
+    /**
+     * Aplica estilos a la hoja de Excel.
+     *
+     * Esta función aplica estilos a la primera fila de la hoja de Excel, que contiene los encabezados.
+     * Se establece un fondo azul, texto en negrita y color blanco, alineación centrada y bordes delgados.
+     *
+     * @param Worksheet $sheet
+     * @return array
+     */
     public function styles(Worksheet $sheet)
     {
         // Rango de la primera fila (A1 hasta la última columna)
-        $lastColumn = $sheet->getHighestColumn(); // Ej: "M"
+        $lastColumn = $sheet->getHighestColumn();
         $headerRange = "A1:{$lastColumn}1";
 
         // Aplica estilos
@@ -98,7 +134,7 @@ class EstudiosUsuarioExport implements FromCollection, WithHeadings, WithTitle, 
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4F81BD'], // azul profesional
+                'startColor' => ['rgb' => '4F81BD'],
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,

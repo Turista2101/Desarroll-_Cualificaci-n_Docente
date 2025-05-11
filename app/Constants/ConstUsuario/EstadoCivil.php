@@ -12,6 +12,7 @@ class EstadoCivil
     public const DIVORCIADO = 'Divorciado';
     // Estado civil "Viudo", cuando la persona ha quedado sin pareja debido al fallecimiento de su cónyuge
     public const VIUDO = 'Viudo';
+    
     // Retorna todos los tipos de estados civiles
     public static function all(): array
     {

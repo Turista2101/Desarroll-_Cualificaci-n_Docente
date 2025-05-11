@@ -2,7 +2,7 @@
 
 namespace App\Constants\ConstAgregarExperiencia;
 
-// Esta clase define constantes para representar los diferentes tipos de **experiencia laboral o profesional** 
+// Esta clase define constantes para representar los diferentes tipos de **experiencia laboral o profesional**
 // que un aspirante puede registrar, especialmente en el contexto académico o educativo.
 class TiposExperiencia
 {
@@ -17,7 +17,7 @@ class TiposExperiencia
     // Constante para experiencia en **dirección académica** (como coordinador, director de programa, decano, etc.)
     public const DIRECCION_ACADEMICA = 'Dirección académica';
 
-     // Método estático que retorna un array con todos los tipos de experiencia definidos anteriormente.
+    // Método estático que retorna un array con todos los tipos de experiencia definidos anteriormente.
     // Este método facilita cargar estas opciones en listas desplegables o validaciones.
     public static function all(): array
     {
@@ -29,5 +29,4 @@ class TiposExperiencia
             self::DIRECCION_ACADEMICA
         ];
     }
-
 }

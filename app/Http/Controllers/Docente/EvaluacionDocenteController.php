@@ -38,7 +38,7 @@ class EvaluacionDocenteController
                 ], 409);
             }
             $evaluacion = DB::transaction(function () use ($request) {
-             // Inicia una transacción de base de datos para asegurar que todo se ejecute correctamente.     
+             // Inicia una transacción de base para asegurar que se ejecute correctamente.
                 $datosEvaluacion = $request->validated();
                 $datosEvaluacion['user_id'] = $request->user()->id;
 

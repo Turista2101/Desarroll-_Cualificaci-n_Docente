@@ -12,7 +12,7 @@ class CrearInformacionContactoRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool 
+    public function authorize(): bool
         // Método que determina si el usuario está autorizado para realizar esta solicitud.
 
     {
@@ -46,9 +46,9 @@ class CrearInformacionContactoRequest extends FormRequest
             'telefono_movil'                        => 'required|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
              // El campo `telefono_movil` es obligatorio (`required`), debe ser una cadena con un mínimo de 7 caracteres
             // y un máximo de 20, y cumplir con un patrón regex que permite números, signos de más, guiones, espacios y paréntesis.
-            'celular_alternativo'                   => 'nullable|string|min:7|max:20|regex:/^[0-9+\-\s()]+$/',
+            'celular_alternativo'                   => 'nullable|string|max:20|regex:/^[0-9+\-\s()]+$/',
             // El campo `celular_alternativo` es opcional, pero si está presente, debe cumplir las mismas reglas que `telefono_movil`.
-            'correo_alterno'                        => 'nullable|string|email|max:100|unique:users,email',
+            'correo_alterno'                        => 'nullable|string|max:100|unique:users,email',
              // El campo `correo_alterno` es opcional, pero si está presente, debe ser una cadena válida de correo electrónico,
             // con un máximo de 100 caracteres y debe ser único en la tabla `users` en la columna `email`.
             'archivo'                               => 'nullable|file|mimes:pdf|max:2048',

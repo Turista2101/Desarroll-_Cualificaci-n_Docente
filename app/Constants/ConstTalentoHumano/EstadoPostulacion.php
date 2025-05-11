@@ -10,8 +10,8 @@ class EstadoPostulacion
     public const ACEPTADA = 'Aceptada';
     // Estado cuando la postulación ha sido rechazada y el postulante no continúa en el proceso
     public const RECHAZADA  = 'Rechazada';
-    // Retorna todos los estados de postulación disponibles como un arreglo
 
+    // Retorna todos los estados de postulación disponibles como un arreglo
     public static function all(): array
     {
         return [

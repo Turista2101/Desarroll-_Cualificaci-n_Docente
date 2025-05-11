@@ -9,7 +9,6 @@ class TituloConvalidado
 {
     // Constante que indica que el título **sí fue convalidado**
     const SI = 'Si';
-
     // Constante que indica que el título **no fue convalidado**
     const NO = 'No';
 

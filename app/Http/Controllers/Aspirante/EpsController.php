@@ -1,86 +1,99 @@
 <?php
-// Este controlador maneja la creación, obtención y actualización de registros EPS para aspirantes.
+
 namespace App\Http\Controllers\Aspirante;
-// Importación de clases necesarias
-use App\Http\Requests\RequestAspirante\RequestEps\ActualizarEpsRequest;// Request para validar actualización de EPS
-use Illuminate\Http\Request;// Clase para manejar solicitudes HTTP
-use App\Models\Aspirante\Eps;// Modelo Eps
-use App\Services\ArchivoService;// Servicio para manejar archivos
-use Illuminate\Support\Facades\DB;// Facade para trabajar con transacciones de base de datos
-use App\Http\Requests\RequestAspirante\RequestEps\CrearEpsRequest;// Request para validar creación de EPS
 
+use App\Http\Requests\RequestAspirante\RequestEps\ActualizarEpsRequest;
+use Illuminate\Http\Request;
+use App\Models\Aspirante\Eps;
+use App\Services\ArchivoService;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\RequestAspirante\RequestEps\CrearEpsRequest;
 
-// Definición del controlador EpsController
+// Este controlador maneja las operaciones relacionadas con la EPS (Entidad Promotora de Salud)
+// de los aspirantes. Permite crear, obtener y actualizar la EPS asociada a un usuario autenticado.
 class EpsController
 {
-   // Servicio de archivos que se usará para guardar o actualizar documentos
+
     protected $archivoService;
-    // Constructor: inyecta el servicio de archivos
-    public function __construct(ArchivoService $archivoService)
+
+    /**
+     * Constructor del controlador.
+     *
+     * Inyecta una instancia del servicio ArchivoService mediante inyección de dependencias,
+     * permitiendo gestionar la carga, almacenamiento o eliminación de archivos en los métodos del controlador.
+     *
+     * @param ArchivoService $archivoService Instancia del servicio de gestión de archivos.
+     */
+    public function __construct(ArchivoService $archivoService) // Constructor: inyecta el servicio de archivos
     {
         $this->archivoService = $archivoService;
     }
 
-      /**
-     * Crear un nuevo registro de EPS y subir un archivo si se proporciona.
+    /**
+     * Registrar una nueva EPS para el usuario autenticado.
+     *
+     * Este método permite al usuario registrar una única EPS. Verifica si ya tiene una registrada y,
+     * en caso afirmativo, retorna un error 409 (conflicto). Si no existe una EPS previa, se crea una
+     * nueva dentro de una transacción de base de datos para asegurar la consistencia, y opcionalmente
+     * se asocia un archivo (como soporte o certificado). Se utiliza el servicio `ArchivoService` para
+     * gestionar la carga del archivo.
+     *
+     * @param CrearEpsRequest $request Solicitud validada que contiene los datos de la EPS y el archivo opcional.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o error.
      */
     public function crearEps(CrearEpsRequest $request)
     {
         try {
-            // Obtener el ID del usuario autenticado
-            $usuarioId = $request->user()->id;
+            $usuarioId = $request->user()->id; // Obtener el ID del usuario autenticado
+            $epsExistente = Eps::where('user_id', $usuarioId)->first(); // Verificar si el usuario ya tiene una EPS registrada
 
-            // Verificar si el usuario ya tiene una EPS registrada
-            $epsExistente = Eps::where('user_id', $usuarioId)->first();
-              // Si ya existe una EPS para este usuario, retornar error 409 (conflicto)
-            if ($epsExistente) {
+            if ($epsExistente) { // Si ya existe una EPS para este usuario, retornar error 409 (conflicto)
                 return response()->json([
                     'message' => 'Ya tienes una EPS registrada. No puedes crear otra.',
                 ], 409);
             }
-            // Ejecutar la creación dentro de una transacción para asegurar consistencia
-            $eps = DB::transaction(function () use ($request) {
-                 // Obtener datos validados del request
-                $datos = $request->validated();
-                 // Asociar la EPS al usuario autenticado
-                $datos['user_id'] = $request->user()->id;
 
+            DB::transaction(function () use ($request) { // Ejecutar la creación dentro de una transacción para asegurar consistencia
+
+                $datos = $request->validated(); // Obtener datos validados del request
+                $datos['user_id'] = $request->user()->id; // Asociar la EPS al usuario autenticado
                 $eps = Eps::create($datos);
-                 // Si hay archivo, guardarlo
-                if ($request->hasFile('archivo')) {
+
+                if ($request->hasFile('archivo')) { // Si hay archivo, guardarlo
                     $this->archivoService->guardarArchivoDocumento($request->file('archivo'), $eps, 'Eps');
                 }
-
-                return $eps;
             });
-            // Respuesta si llega hacer  exitoso
-            return response()->json([
+
+            return response()->json([ // Respuesta si llega hacer  exitoso
                 'message' => 'EPS y documento creado exitosamente',
-                'data'    => $eps
-            ], 201);// Código 201: es igual a que esta creado
+            ], 201); // Código 201: es igual a que esta creado
+
         } catch (\Exception $e) {
-            return response()->json([
+            return response()->json([ // Manejo de errores
                 'message' => 'Error al crear la EPS o subir el archivo.',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
- /**
-     * Obtener los datos de la EPS y su documento asociado del usuario autenticado.
+
+    /**
+     * Obtener la información de EPS registrada por el usuario autenticado.
+     *
+     * Este método recupera la EPS asociada al usuario actual, incluyendo sus documentos relacionados.
+     * Si no existe ninguna EPS registrada, retorna una respuesta exitosa con valor nulo. Además,
+     * genera una URL accesible para cada archivo adjunto en los documentos asociados a la EPS.
+     * En caso de excepción, se captura y se retorna un mensaje de error con el código HTTP correspondiente.
+     *
+     * @param Request $request Solicitud HTTP con el usuario autenticado.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con la información de la EPS o mensaje de error.
      */
     public function obtenerEps(Request $request)
     {
         try {
-            $user = $request->user();//obtener el usuario autenticado
-
-            if (!$user) {
-                throw new \Exception('Usuario no autenticado', 401);// Este error da  si no está logueado 
-            }
-
-             // Buscar EPS con documentos asociados
-            $eps = Eps::where('user_id', $user->id)
+            $user = $request->user(); //obtener el usuario autenticado
+            $eps = Eps::where('user_id', $user->id) // Buscar EPS con documentos asociados
                 ->with(['documentosEps:id_documento,documentable_id,archivo,estado'])
-                ->first();//error si no existe
+                ->first(); //error si no existe
 
             if (!$eps) {
                 return response()->json([
@@ -88,17 +101,15 @@ class EpsController
                     'eps' => null
                 ], 200); // No es error, simplemente no tiene EPS aún
             }
-            
-             // Generar URL accesible para cada archivo
-            foreach ($eps->documentosEps as $documento) {
+
+            foreach ($eps->documentosEps as $documento) { // Generar URL accesible para cada archivo
                 if (!empty($documento->archivo)) {
                     $documento->archivo_url = asset('storage/' . $documento->archivo);
                 }
             }
-            // Retornar información de EPS
-            return response()->json(['eps' => $eps], 200);
-        } catch (\Exception $e) {
-            // Manejo de errores
+            return response()->json(['eps' => $eps], 200); // Retornar información de EPS
+
+        } catch (\Exception $e) { // Manejo de errores
             return response()->json([
                 'message' => 'Error al obtener la información de EPS',
                 'error'   => $e->getMessage()
@@ -106,36 +117,37 @@ class EpsController
         }
     }
 
-        /**
-     * Actualizar los datos de la EPS del usuario autenticado, y actualizar archivo si se proporciona.
+    /**
+     * Actualizar la EPS del usuario autenticado.
+     *
+     * Este método permite modificar la información de la EPS previamente registrada por el usuario.
+     * Utiliza una transacción para asegurar que tanto los datos como el archivo (si se proporciona)
+     * se actualicen de forma consistente. Si se envía un nuevo archivo, se reemplaza mediante el
+     * servicio `ArchivoService`. En caso de que no exista una EPS, se lanza una excepción.
+     *
+     * @param ActualizarEpsRequest $request Solicitud validada que contiene los nuevos datos y el archivo opcional.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
      */
     public function actualizarEps(ActualizarEpsRequest $request)
     {
         try {
-            // Iniciar transacción para actualizar EPS
-            $eps = DB::transaction(function () use ($request) {
-                $user = $request->user();// Obtener usuario autenticado
-            // Buscar EPS actual
-                $eps = Eps::where('user_id', $user->id)->firstOrFail();
 
-                $datos = $request->validated();// Validar datos nuevos
-                $eps->update($datos);// Actualizar EPS
-                  // Si hay archivo nuevo, actualizarlo
-                if ($request->hasFile('archivo')) {
+            DB::transaction(function () use ($request) { // Iniciar transacción para actualizar EPS
+                $user = $request->user(); // Obtener usuario autenticado
+                $eps = Eps::where('user_id', $user->id)->firstOrFail(); // Buscar EPS actual
+                $datos = $request->validated(); // Validar datos nuevos
+                $eps->update($datos); // Actualizar EPS
+
+                if ($request->hasFile('archivo')) { // Si hay archivo nuevo, actualizarlo
                     $this->archivoService->actualizarArchivoDocumento($request->file('archivo'), $eps, 'Eps');
                 }
-
-                return $eps;
             });
             // Respuesta con datos actualizados
             return response()->json([
                 'message' => 'EPS actualizado exitosamente',
-                'data'    => $eps->fresh()
             ], 200);
-
         } catch (\Exception $e) {
-            //manejo de errores
-            return response()->json([
+            return response()->json([ //manejo de errores
                 'message' => 'Error al actualizar el EPS',
                 'error'   => $e->getMessage()
             ], 500);

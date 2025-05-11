@@ -6,8 +6,7 @@ namespace App\Constants\ConstEps;
 
 class TipoAfiliacion
 {
-        // Afiliación contributiva: para personas que realizan aportes económicos al sistema.
-
+    // Afiliación contributiva: para personas que realizan aportes económicos al sistema.
     public const CONTRIBUTIVO = 'Contributivo';
     // Afiliación subsidiada: para personas de bajos recursos, el Estado cubre el costo.
     public const SUBSIDIADO = 'Subsidiado';
@@ -17,6 +16,7 @@ class TipoAfiliacion
     public const ESPECIAL = 'Especial';
     // Afiliación por excepción: cubre casos particulares como ciertos regímenes de excepción.
     public const EXCEPCION = 'Excepción';
+    
     // Retorna todos los tipos de afiliacion
     public static function all(): array
     {

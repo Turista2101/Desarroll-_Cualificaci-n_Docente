@@ -1,9 +1,6 @@
 <?php
-// Se define el namespace para organizar el código en carpetas y evitar conflictos de nombres.
 
 namespace App\Http\Controllers\Aspirante;
-
-// Importación de clases necesarias para el funcionamiento del controlador.
 
 use App\Http\Requests\RequestAspirante\RequestExperiencia\ActualizarExperienciaRequest;
 use Illuminate\Http\Request;
@@ -11,214 +8,218 @@ use App\Models\Aspirante\Experiencia;
 use App\Services\ArchivoService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\RequestAspirante\RequestExperiencia\CrearExperienciaRequest;
-// Definición del controlador de experiencias.
 
+// Controlador para manejar las experiencias de los aspirantes.
+// Este controlador permite crear, obtener, actualizar y eliminar experiencias de un aspirante.
 class ExperienciaController
 {
-    // Se declara una propiedad para usar el servicio de archivos.
-
     protected $archivoService;
 
-        // Constructor que recibe el servicio de archivos y lo asigna a la propiedad del controlador.
-
+    /**
+     * Constructor del controlador.
+     *
+     * Inyecta el servicio `ArchivoService`, que se encarga de gestionar las operaciones relacionadas 
+     * con archivos adjuntos (guardar, actualizar y eliminar) en los estudios académicos u otras entidades.
+     *
+     * @param ArchivoService $archivoService Servicio responsable de la gestión de archivos.
+     */
     public function __construct(ArchivoService $archivoService)
     {
         $this->archivoService = $archivoService;
     }
 
-    // Método para crear una nueva experiencia.
+    /**
+     * Registrar una nueva experiencia laboral del usuario autenticado.
+     *
+     * Este método permite crear un nuevo registro de experiencia laboral asociado al usuario autenticado.
+     * Los datos validados se procesan dentro de una transacción para garantizar la integridad de la operación.
+     * Si se adjunta un archivo (como certificado laboral), se guarda mediante el servicio `ArchivoService`.
+     * En caso de error durante la creación del registro o el guardado del archivo, se captura la excepción
+     * y se retorna una respuesta con el mensaje de error correspondiente.
+     *
+     * @param CrearExperienciaRequest $request Solicitud validada con los datos de la experiencia y archivo opcional.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function crearExperiencia(CrearExperienciaRequest $request)
     {
         try {
-            // Se ejecuta una transacción para asegurar que todos los cambios se hagan correctamente.
-
-            $experiencia = DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request) { // Se ejecuta una transacción para asegurar que todos los cambios se hagan correctamente.
                 $datos = $request->validated();
-                // Se asigna el ID del usuario autenticado.
+                $datos['user_id'] = $request->user()->id; // Se asigna el ID del usuario autenticado.
+                $experiencia = Experiencia::create($datos); // Se crea el registro en la base de datos.
 
-                $datos['user_id'] = $request->user()->id;
-                // Se crea el registro en la base de datos.
-
-                $experiencia = Experiencia::create($datos);
-                // Si se sube un archivo, se guarda con el servicio correspondiente.
-
-                if ($request->hasFile('archivo')) {
+                if ($request->hasFile('archivo')) { // Si se sube un archivo, se guarda con el servicio correspondiente.
                     $this->archivoService->guardarArchivoDocumento($request->file('archivo'), $experiencia, 'Experiencias');
                 }
-
-                return $experiencia;
             });
-            // Se retorna una respuesta exitosa con los datos de la experiencia creada.
 
-            return response()->json([
+            return response()->json([ // Se retorna una respuesta exitosa con los datos de la experiencia creada.
                 'message' => 'Experiencia creada exitosamente',
-                'data' => $experiencia
             ], 201);
         } catch (\Exception $e) {
-            // En caso de error, se retorna un mensaje con el detalle.
-            return response()->json([
+            return response()->json([ // En caso de error, se retorna un mensaje con el detalle.
                 'message' => 'Error al crear la experiencia.',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
-    // Método para obtener todas las experiencias del usuario autenticado.
 
+    /**
+     * Obtener las experiencias laborales del usuario autenticado.
+     *
+     * Este método recupera todas las experiencias laborales registradas por el usuario, incluyendo 
+     * los documentos asociados a cada una. Si no existen registros, se retorna una respuesta exitosa
+     * con un mensaje informativo y valor nulo. Para cada documento, se genera una URL accesible al archivo
+     * almacenado. En caso de errores durante la ejecución, se captura la excepción y se retorna un mensaje adecuado.
+     *
+     * @param Request $request Solicitud HTTP con el usuario autenticado.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con la lista de experiencias o mensaje de error.
+     */
     public function obtenerExperiencias(Request $request)
     {
         try {
-            // Se obtiene el usuario autenticado.
-
-            $user = $request->user();
-            // Si no hay usuario, se lanza una excepción.
-
-            if (!$user) {
-                throw new \Exception('Usuario no autenticado', 401);
-            }
-            // Se consultan las experiencias del usuario, incluyendo los documentos asociados.
-
-            $experiencias = Experiencia::where('user_id', $user->id)
+            $user = $request->user(); // Se obtiene el usuario autenticado.
+            $experiencias = Experiencia::where('user_id', $user->id) // Se consultan las experiencias del usuario, incluyendo los documentos asociados.
                 ->with(['documentosExperiencia:id_documento,documentable_id,archivo,estado'])
                 ->orderBy('created_at')
                 ->get();
-            // Si no hay experiencias, se lanza una excepción.
 
-            if ($experiencias->isEmpty()) {
+            if ($experiencias->isEmpty()) { // Si no hay experiencias, se lanza una excepción.
                 return response()->json([
-                    'mensaje'=>'No se encontraron experiencias',
+                    'mensaje' => 'No se encontraron experiencias',
                     'experiencias' => null
                 ], 200);
             }
-            // Se recorre cada experiencia para agregar la URL del archivo si existe.
 
-            $experiencias->each(function ($experiencia) {
+            $experiencias->each(function ($experiencia) { // Se recorre cada experiencia para agregar la URL del archivo si existe.
                 $experiencia->documentosExperiencia->each(function ($documento) {
                     if (!empty($documento->archivo)) {
                         $documento->archivo_url = asset('storage/' . $documento->archivo);
                     }
                 });
             });
-            // Se retorna la lista de experiencias.
 
-            return response()->json(['experiencias' => $experiencias], 200);
+            return response()->json(['experiencias' => $experiencias], 200); // Se retorna la lista de experiencias.
+
         } catch (\Exception $e) {
-            // En caso de error, se retorna una respuesta con el mensaje.
-
-            return response()->json([
+            return response()->json([ // En caso de error, se retorna una respuesta con el mensaje.
                 'message' => 'Error al obtener las experiencias.',
                 'error' => $e->getMessage()
             ], $e->getCode() ?: 500);
         }
     }
 
-    // Método para obtener una experiencia por su ID.
+    /**
+     * Obtener una experiencia laboral específica del usuario autenticado por su ID.
+     *
+     * Este método permite consultar el detalle de una experiencia laboral registrada por el usuario,
+     * identificada por su ID. También incluye los documentos asociados, a los cuales se les genera
+     * una URL accesible si el archivo existe. Si la experiencia no es encontrada o ocurre un error,
+     * se captura la excepción y se retorna una respuesta adecuada con el mensaje correspondiente.
+     *
+     * @param Request $request Solicitud HTTP que contiene la información del usuario autenticado.
+     * @param int $id ID de la experiencia que se desea consultar.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con la experiencia encontrada o mensaje de error.
+     */
     public function obtenerExperienciaPorId(Request $request, $id)
     {
         try {
-            // Se obtiene el usuario autenticado.
 
-            $user = $request->user();
-            // Si no hay usuario, se lanza una excepción.
-
-            if (!$user) {
-                throw new \Exception('Usuario no autenticado', 401);
-            }
-            // Se busca la experiencia por ID y usuario.
-
-            $experiencia = Experiencia::where('id_experiencia', $id)
+            $user = $request->user(); // Se obtiene el usuario autenticado.
+            $experiencia = Experiencia::where('id_experiencia', $id) // Se busca la experiencia por ID y usuario.
                 ->where('user_id', $user->id)
                 ->with(['documentosExperiencia:id_documento,documentable_id,archivo,estado'])
                 ->firstOrFail();
-            // Se agrega la URL de los archivos si existen.
 
-            $experiencia->documentosExperiencia->each(function ($documento) {
+            $experiencia->documentosExperiencia->each(function ($documento) { // Se agrega la URL de los archivos si existen.
                 if (!empty($documento->archivo)) {
                     $documento->archivo_url = asset('storage/' . $documento->archivo);
                 }
             });
-            // Se retorna la experiencia encontrada.
 
-            return response()->json(['experiencia' => $experiencia], 200);
+            return response()->json(['experiencia' => $experiencia], 200); // Se retorna la experiencia encontrada.
+
         } catch (\Exception $e) {
-            // En caso de error, se retorna un mensaje detallado.
-
-            return response()->json([
+            return response()->json([ // En caso de error, se retorna un mensaje detallado.
                 'message' => 'Error al obtener la experiencia.',
                 'error' => $e->getMessage()
             ], $e->getCode() ?: 500);
         }
     }
 
-    // Método para actualizar una experiencia existente.
+
+    /**
+     * Actualizar una experiencia laboral del usuario autenticado.
+     *
+     * Este método permite modificar los datos de una experiencia específica registrada por el usuario,
+     * identificada por su ID. La operación se realiza dentro de una transacción para asegurar la integridad
+     * de los datos. Si se adjunta un nuevo archivo, este se actualiza utilizando el servicio `ArchivoService`.
+     * Si la experiencia no se encuentra o ocurre un error durante el proceso, se captura la excepción y se 
+     * responde con un mensaje de error adecuado.
+     *
+     * @param ActualizarExperienciaRequest $request Solicitud validada con los nuevos datos y archivo opcional.
+     * @param int $id ID de la experiencia que se desea actualizar.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function actualizarExperiencia(ActualizarExperienciaRequest $request, $id)
     {
         try {
-            // Se ejecuta una transacción para asegurar la integridad de los datos.
-
-            $experiencia = DB::transaction(function () use ($request, $id) {
-            // Se obtiene el usuario autenticado.
-
-                $user = $request->user();
-                // Se busca la experiencia por ID y usuario.
-
-                $experiencia = Experiencia::where('id_experiencia', $id)
+            DB::transaction(function () use ($request, $id) { // Se ejecuta una transacción para asegurar la integridad de los datos.
+                $user = $request->user(); // Se obtiene el usuario autenticado.
+                $experiencia = Experiencia::where('id_experiencia', $id) // Se busca la experiencia por ID y usuario.
                     ->where('user_id', $user->id)
                     ->firstOrFail();
-                // Se validan los datos enviados en la solicitud.
 
-                $datos = $request->validated();
-                // Se actualiza la experiencia con los nuevos datos.
+                $datos = $request->validated(); // Se validan los datos enviados en la solicitud.
+                $experiencia->update($datos); // Se actualiza la experiencia con los nuevos datos.
 
-                $experiencia->update($datos);
-                // Si hay un nuevo archivo, se actualiza el documento.
-
-                if ($request->hasFile('archivo')) {
+                if ($request->hasFile('archivo')) { // Si hay un nuevo archivo, se actualiza el documento.
                     $this->archivoService->actualizarArchivoDocumento($request->file('archivo'), $experiencia, 'Experiencias');
                 }
-
-                return $experiencia;
             });
-            // Se retorna la experiencia actualizada y un mensaje de éxito.
 
-            return response()->json([
+            return response()->json([ // Se retorna la experiencia actualizada y un mensaje de éxito.
                 'message' => 'Experiencia actualizada correctamente',
-                'data' => $experiencia->fresh()
             ], 200);
         } catch (\Exception $e) {
-            // En caso de error, se retorna el mensaje correspondiente.
-
-            return response()->json([
+            return response()->json([ // En caso de error, se retorna el mensaje correspondiente.
                 'message' => 'Error al actualizar la experiencia.',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Eliminar un registro de experiencia
+    /**
+     * Eliminar una experiencia laboral del usuario autenticado.
+     *
+     * Este método permite eliminar una experiencia específica registrada por el usuario, identificada por su ID.
+     * Antes de eliminar el registro de la base de datos, también se elimina cualquier archivo asociado utilizando
+     * el servicio `ArchivoService`. Toda la operación se realiza dentro de una transacción para garantizar que
+     * los cambios se apliquen de manera atómica. En caso de que la experiencia no exista o se produzca un error,
+     * se captura la excepción y se retorna una respuesta con el mensaje de error correspondiente.
+     *
+     * @param Request $request Solicitud HTTP con la información del usuario autenticado.
+     * @param int $id ID de la experiencia que se desea eliminar.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o de error.
+     */
     public function eliminarExperiencia(Request $request, $id)
     {
         try {
-            // Obtener el usuario autenticado desde la solicitud.
 
-            $user = $request->user();
-            // Buscar la experiencia por su ID y asegurarse de que pertenezca al usuario autenticado.
-            // Si no se encuentra, lanza una excepción automáticamente (firstOrFail).
-      
-            $experiencia = Experiencia::where('id_experiencia', $id)
+            $user = $request->user(); // Obtener el usuario autenticado desde la solicitud.
+            $experiencia = Experiencia::where('id_experiencia', $id) // Buscar la experiencia por su ID y asegurarse de que pertenezca al usuario autenticado.
                 ->where('user_id', $user->id)
                 ->firstOrFail();
-        // Iniciar una transacción para garantizar que las operaciones se realicen de manera atómica.
-            DB::transaction(function () use ($experiencia) {
-            // Eliminar el archivo asociado a la experiencia utilizando el servicio de archivos.
-                $this->archivoService->eliminarArchivoDocumento($experiencia);
-            // Eliminar el registro de la experiencia de la base de datos.
-                $experiencia->delete();
+
+            DB::transaction(function () use ($experiencia) { // Iniciar una transacción para garantizar que las operaciones se realicen de manera atómica.
+                $this->archivoService->eliminarArchivoDocumento($experiencia); // Eliminar el archivo asociado a la experiencia utilizando el servicio de archivos.
+                $experiencia->delete(); // Eliminar el registro de la experiencia de la base de datos.
             });
-        // Retornar una respuesta JSON indicando que la experiencia fue eliminada correctamente.
-            return response()->json(['message' => 'Experiencia eliminada correctamente'], 200);
+
+            return response()->json(['message' => 'Experiencia eliminada correctamente'], 200); // Retornar una respuesta JSON indicando que la experiencia fue eliminada correctamente.
+
         } catch (\Exception $e) {
-        // Manejo de errores: retornar una respuesta JSON con el mensaje de error y el código 500.
-            return response()->json([
+            return response()->json([ // Manejo de errores: retornar una respuesta JSON con el mensaje de error y el código 500.
                 'message' => 'Error al eliminar la experiencia.',
                 'error' => $e->getMessage()
             ], 500);

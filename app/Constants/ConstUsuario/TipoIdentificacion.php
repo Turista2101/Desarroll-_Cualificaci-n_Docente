@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Constants\ConstUsuario;
-
+// Esta clase define los diferentes tipos de identificación que pueden tener los usuarios
+// en el sistema. Cada constante representa un tipo específico de documento de identificación
 class TipoIdentificacion
 {
     // Tipos de identificacion
@@ -15,10 +16,8 @@ class TipoIdentificacion
     public const TARJETA_DE_IDENTIDAD = 'Tarjeta de identidad'; // Documento para menores de edad en Colombia
     public const TARJETA_PROFESIONAL = 'Tarjeta profesional'; // Documento que acredita la profesión
 
- 
-
     // Retorna todos los tipos de identificacion
-    public static function all() : array
+    public static function all(): array
     {
         return [
             self::CEDULA_DE_CIUDADANIA,
@@ -32,5 +31,4 @@ class TipoIdentificacion
             self::TARJETA_PROFESIONAL
         ];
     }
-
 }

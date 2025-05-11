@@ -10,6 +10,7 @@ class TipoPersona
     const NATURAL = 'Natural';
     // Persona jurídica: una entidad (empresa, fundación, etc.) con personalidad legal.
     const JURIDICA = 'Juridica';
+    
     // Retorna todos los tipos de persona disponibles como un arreglo.
     public static function all(): array
     {
@@ -18,5 +19,4 @@ class TipoPersona
             self::JURIDICA,
         ];
     }
-
 }
