@@ -12,7 +12,7 @@ class ApoyoProfesoralSeeder extends Seeder
     public function run(): void
     {
         //Crear usuario ayudaProfesoral por defecto si no existe
-        $ayudaProfesoral = User::firstOrCreate([
+        $apoyoProfesoral = User::firstOrCreate([
             'email' => 'apoyoprofesoral@universidad.com'
         ], [
             'municipio_id'           => 703, // Cambia este valor según el municipio en tu DB
@@ -28,7 +28,7 @@ class ApoyoProfesoralSeeder extends Seeder
             'email'                  => 'apoyoprofesoral@universidad.com',
             'password'               => Hash::make('apoyoprofesoral123'), // Cambia la contraseña si lo deseas
         ]);
-        $ayudaProfesoral->assignRole('Apoyo Profesoral');
+        $apoyoProfesoral->assignRole('Apoyo Profesoral');
 
         echo "Apoyo Profesoral creado con email: apoyoprofesoral@universidad.com y contraseña: apoyoprofesoral123\n";
     }
