@@ -55,6 +55,7 @@ class AuthController
                 $user = User::create($datosUser); // crear un usuario
                 $user->assignRole('Aspirante'); // Asignar el rol "aspirante" al usuario recién creado
 
+                return $user; // Retornar el usuario creado
             });
 
             $token = JWTAuth::fromUser($user); //Generar un token para el usuario
