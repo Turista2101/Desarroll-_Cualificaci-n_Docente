@@ -12,7 +12,7 @@ class AdminSeeder extends Seeder
     {
         // Crear usuario administrador por defecto si no existe
         $admin = User::firstOrCreate([
-            'email' => 'admin@universidad.com'
+            'email' => 'adminunic@universidad.com'
         ], [
             'municipio_id'           => 703, // Cambia este valor según el municipio en tu DB
             'tipo_identificacion'    => 'Cédula de ciudadanía', // Cambia según los valores en TipoIdentificacion::all()
@@ -24,13 +24,11 @@ class AdminSeeder extends Seeder
             'segundo_apellido'       => 'Gestión',
             'fecha_nacimiento'       => '1990-01-01', // Ajusta según necesidad
             'estado_civil'           => 'Soltero', // Cambia según los valores en EstadoCivil::all()
-            'email'                  => 'admin@universidad.com',
-            'password'               => Hash::make('admin123'), // Cambia la contraseña si lo deseas
+            'email'                  => 'adminunidoc@universidad.com',
+            'password'               => Hash::make('Adm!n_9*Qw3z8L#'), // Cambia la contraseña si lo deseas
         ]);
 
         // Asignar el rol de admin
         $admin->assignRole('Administrador');
-
-        echo "Administrador creado con email: admin@universidad.com y contraseña: admin123\n";
     }
 }
