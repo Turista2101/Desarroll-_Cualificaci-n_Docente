@@ -7,6 +7,8 @@ use App\Constants\ConstRut\CodigoCiiu;
 use App\Constants\ConstRut\TipoPersona;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
+
 
 class CrearRutRequest extends FormRequest
 {
@@ -35,16 +37,17 @@ class CrearRutRequest extends FormRequest
             'razon_social'                  => 'required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
              // El campo `razon_social` es obligatorio, debe ser una cadena con un mínimo de 7 caracteres y un máximo de 100,
             // y cumplir con el mismo patrón regex.
-            'tipo_persona'                  => 'required|in:' . implode(',', TipoPersona::all()),
+            'tipo_persona'                  => ['required','string', Rule::in(TipoPersona::all())],
             // El campo `tipo_persona` es obligatorio y su valor debe estar dentro de los valores definidos en `TipoPersona::all()`.
-            'codigo_ciiu'                   => 'required|in:' . implode(',', CodigoCiiu::all()),
+            'codigo_ciiu'                   => ['required','string', Rule::in(CodigoCiiu::all())],
             // El campo `codigo_ciiu` es obligatorio y su valor debe estar dentro de los valores definidos en `CodigoCiiu::all()`.
             'responsabilidades_tributarias' => 'required|string|min:7|max:100',
              // El campo `responsabilidades_tributarias` es obligatorio, debe ser una cadena con un mínimo de 7 caracteres
             // y un máximo de 100.
             'archivo'                       => 'required|file|mimes:pdf|max:2048',
-              // El campo `archivo` es obligatorio, debe ser un archivo (`file`) con extensiones permitidas (`pdf`, `jpg`, `png`)
+            // El campo `archivo` es obligatorio, debe ser un archivo (`file`) con extensiones permitidas (`pdf`, `jpg`, `png`)
             // y su tamaño no debe exceder los 2048 KB.
+            //si, del d
         ];
     }
     protected function failedValidation(Validator $validator)

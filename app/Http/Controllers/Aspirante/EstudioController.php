@@ -21,7 +21,7 @@ class EstudioController
      *
      * Inyecta una instancia del servicio ArchivoService, que se encarga de gestionar
      * las operaciones relacionadas con archivos (guardar, actualizar, eliminar) asociadas
-     * a entidades como EPS u otras del sistema.
+     * a entidades como estudio u otras del sistema.
      *
      * @param ArchivoService $archivoService Instancia del servicio encargado del manejo de archivos.
      */

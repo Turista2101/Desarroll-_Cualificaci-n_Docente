@@ -1,108 +1,121 @@
 <?php
-    // Indica que el archivo es código PHP
+
 namespace App\Http\Controllers\Docente;
-// Define el espacio de nombres donde está ubicado este controlador.
-// Es útil para organizar mejor el código y evitar conflictos entre clases con el mismo nombre.
+
 use App\Http\Requests\RequestDocente\RequestEvaluacionDocente\ActualizarEvaluacionDocenteRequest;
 use App\Http\Requests\RequestDocente\RequestEvaluacionDocente\CrearEvaluacionDocenteRequest;
-// Importa las clases que validan los datos entrantes para crear o actualizar evaluaciones docentes.
 use App\Models\Docente\EvaluacionDocente;
-// Importa el modelo EvaluacionDocente para interactuar con la tabla de evaluaciones docentes.
-
 use Illuminate\Support\Facades\DB;
-// Importa la fachada DB para ejecutar transacciones y consultas a la base de datos.
 
 
+//Este controlador maneja las evaluaciones docentes, permitiendo crear, ver y actualizar evaluaciones.
 class EvaluacionDocenteController
-// Declara la clase EvaluacionDocenteController.
-// Esta clase contendrá los métodos que manejarán las solicitudes HTTP relacionadas con evaluaciones docentes.
 {
-    // Crear una evaluación
+    /**
+     * Crear una evaluación docente para el usuario autenticado.
+     *
+     * Este método permite registrar una única evaluación docente por usuario. Antes de la creación,
+     * se verifica si ya existe una evaluación registrada para evitar duplicados. Si no existe,
+     * se procede a crear el registro dentro de una transacción para asegurar la integridad de los datos,
+     * asignando automáticamente el estado "Pendiente" a la evaluación. En caso de que ya exista una evaluación
+     * o ocurra un error durante el proceso, se retorna una respuesta adecuada con el mensaje correspondiente.
+     *
+     * @param CrearEvaluacionDocenteRequest $request Solicitud validada con los datos de la evaluación docente.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function crearEvaluacionDocente(CrearEvaluacionDocenteRequest $request)
-     // Método público para crear una evaluación docente.
-    // Recibe un request que ya ha sido validado por CrearEvaluacionDocenteRequest.
     {
         try {
-            // Intenta ejecutar el bloque de código. Si hay un error, pasa al catch.
-            $usuarioId = $request->user()->id;
-
-            // Verificar si ya tiene una evaluación docente
-            $evaluacionExistente = EvaluacionDocente::where('user_id', $usuarioId)->first();
-            // Consulta si ya existe una evaluación registrada para ese usuario.
+            $usuarioId = $request->user()->id; // Obtener el ID del usuario autenticado
+            $evaluacionExistente = EvaluacionDocente::where('user_id', $usuarioId)->first(); // Verificar si ya existe una evaluación para el usuario
 
             if ($evaluacionExistente) {
-          // Si ya existe, devuelve una respuesta con código 409 (conflicto) e impide crear otra.
-
-                return response()->json([
+                return response()->json([ // Si ya existe, devuelve una respuesta con código 409 (conflicto) e impide crear otra.
                     'message' => 'Ya tienes una evaluación docente registrada. No puedes crear otra.',
                 ], 409);
             }
-            $evaluacion = DB::transaction(function () use ($request) {
-             // Inicia una transacción de base para asegurar que se ejecute correctamente.
-                $datosEvaluacion = $request->validated();
-                $datosEvaluacion['user_id'] = $request->user()->id;
 
-                // Asignar automáticamente estado 'pendiente'
-                $datosEvaluacion['estado_evaluacion_docente'] = 'Pendiente';
-    
-                return EvaluacionDocente::create($datosEvaluacion);
+            DB::transaction(function () use ($request) { // Inicia una transacción de base para asegurar que se ejecute correctamente.
+
+                $datosEvaluacion = $request->validated(); // Valida los datos de la solicitud
+                $datosEvaluacion['user_id'] = $request->user()->id; // Asigna el ID del usuario autenticado a los datos de la evaluación
+
+                $datosEvaluacion['estado_evaluacion_docente'] = 'Pendiente'; // Asignar automáticamente estado 'pendiente'
+
+                EvaluacionDocente::create($datosEvaluacion); // Crea la evaluación docente en la base de datos
             });
 
             return response()->json([
                 'message' => 'Evaluación docente creada exitosamente.',
-                'data' => $evaluacion,
             ], 201);
         } catch (\Exception $e) {
-            return response()->json([
+            return response()->json([ // Manejo de excepciones
                 'message' => 'Error al crear la evaluación docente.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 
-    // Ver evaluaciones de un usuario
+    /**
+     * Ver la evaluación docente asociada a un usuario por su ID.
+     *
+     * Este método permite consultar una evaluación docente registrada para un usuario específico,
+     * identificada por su ID. Si no se encuentra ninguna evaluación asociada, se devuelve una respuesta
+     * con código 404. En caso de producirse un error durante la consulta, se captura la excepción
+     * y se retorna una respuesta con el mensaje de error.
+     *
+     * @param int $user_id ID del usuario cuya evaluación docente se desea consultar.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con los datos de la evaluación o mensaje de error.
+     */
     public function verEvaluacionDocente($user_id)
     {
         try {
-            // Obtener las evaluacione del usuario
-            $evaluaciones = EvaluacionDocente::where('user_id', $user_id)->first();
+            $evaluaciones = EvaluacionDocente::where('user_id', $user_id)->first(); // Obtener la evaluación docente del usuario autenticado
 
-            if ($evaluaciones->isEmpty()) {
+            if (!$evaluaciones) { // Verificar si no se encontró la evaluación
                 return response()->json([
                     'message' => 'No se encontraro la evaluacion para este usuario.',
                 ], 404);
             }
 
-            return response()->json([
+            return response()->json([ // Devuelve la evaluación docente en formato JSON
                 'data' => $evaluaciones,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
-                'message' => 'Error al obtener  la evaluacion.',
+                'message' => 'No se encontró la evaluación para este usuario.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 
-    // Actualizar una evaluación
+    /**
+     * Actualizar la evaluación docente del usuario autenticado.
+     *
+     * Este método permite modificar una evaluación docente existente, asociada al usuario autenticado.
+     * Los datos se validan y la operación se ejecuta dentro de una transacción para garantizar la integridad
+     * de la información. Si la evaluación no existe o se presenta un error durante la actualización,
+     * se captura una excepción y se retorna una respuesta con el mensaje correspondiente.
+     *
+     * @param ActualizarEvaluacionDocenteRequest $request Solicitud validada con los datos actualizados de la evaluación.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function actualizarEvaluacionDocente(ActualizarEvaluacionDocenteRequest $request)
     {
         try {
-            $evaluacion = DB::transaction(function () use ($request) {
-                $user = $request->user();
-                $evaluacion = EvaluacionDocente::where('user_id', $user->id)->first();
-                $datosEvaluacionActualizar = $request->validated();
-                $evaluacion->update($datosEvaluacionActualizar);
+            DB::transaction(function () use ($request) { // Inicia una transacción de base de datos para asegurar la atomicidad de la operación
 
-                return $evaluacion;
+                $user = $request->user(); // Obtener el usuario autenticado
+                $evaluacion = EvaluacionDocente::where('user_id', $user->id)->first(); // Obtener la evaluación docente del usuario autenticado
+                $datosEvaluacionActualizar = $request->validated(); // Validar los datos de la solicitud
+                $evaluacion->update($datosEvaluacionActualizar); // Actualizar la evaluación docente con los nuevos datos
 
             });
 
-            return response()->json([
+            return response()->json([ // Devuelve una respuesta JSON indicando que la evaluación se actualizó exitosamente
                 'message' => 'Evaluación actualizada exitosamente.',
-                'data' => $evaluacion,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
                 'message' => 'Error al actualizar la evaluación.',
                 'error' => $e->getMessage(),

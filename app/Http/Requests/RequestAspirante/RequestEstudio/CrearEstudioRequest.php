@@ -8,7 +8,7 @@ use App\Constants\ConstAgregarEstudio\TiposEstudio;
 use App\Constants\ConstAgregarEstudio\TituloConvalidado;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 
 class CrearEstudioRequest extends FormRequest
 {
@@ -31,16 +31,16 @@ class CrearEstudioRequest extends FormRequest
     // Método que define las reglas de validación que se aplican a los datos de la solicitud.
     {
         return [
-            'tipo_estudio'              => 'required|in:' . implode(',', TiposEstudio::all()),
+            'tipo_estudio'              => ['required','string', Rule::in(TiposEstudio::all())],
             // Valida que `tipo_estudio` sea requerido y que su valor esté dentro de los valores definidos en `TiposEstudio`.
-            'graduado'                  => 'required|in:' . implode(',', Graduado::all()),
+            'graduado'                  => ['required','string', Rule::in(Graduado::all())],
             // Valida que `graduado` sea requerido y que su valor esté dentro de los valores definidos en `Graduado`.
             'institucion'               => 'required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
              // Valida que `institucion` sea requerido, de tipo `string`, con un mínimo de 7 caracteres, un máximo de 100 caracteres,
             // y que coincida con el patrón de letras, números, espacios y guiones.
             'fecha_graduacion'          => 'nullable|date',
             // Valida que `fecha_graduacion` sea opcional (`nullable`) y de tipo `date`.
-            'titulo_convalidado'        => 'required|in:' . implode(',', TituloConvalidado::all()),
+            'titulo_convalidado'        => ['required','string', Rule::in(TituloConvalidado::all())],
             // Valida que `titulo_convalidado` sea requerido y que su valor esté dentro de los valores definidos en `TituloConvalidado`.
             'fecha_convalidacion'       => 'nullable|date',
             // Valida que `fecha_convalidacion` sea opcional (`nullable`) y de tipo `date`.

@@ -19,10 +19,10 @@ return new class extends Migration
         Schema::create('experiencias', function (Blueprint $table) {
             $table->smallIncrements('id_experiencia');
             $table->unsignedBigInteger('user_id');
-            $table->enum('tipo_experiencia',TiposExperiencia::all());
+            $table->string('tipo_experiencia');
             $table->string('institucion_experiencia');
             $table->string('cargo');
-            $table->enum('trabajo_actual', TrabajoActual::all())->nullable();
+            $table->string('trabajo_actual')->nullable();
             $table->tinyInteger('intensidad_horaria')->nullable();
             $table->date('fecha_inicio');
             $table->date('fecha_finalizacion')->nullable();

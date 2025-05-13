@@ -7,7 +7,7 @@ use App\Constants\ConstTalentoHumano\AreasContratacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 class ActualizarContratacionRequest extends FormRequest
 // Define la clase `ActualizarContratacionRequest`, que extiende `FormRequest` para personalizar la validación de solicitudes HTTP.
 
@@ -31,10 +31,10 @@ class ActualizarContratacionRequest extends FormRequest
     // Método que define las reglas de validación para los datos enviados en la solicitud.
     {
         return [
-            'tipo_contrato' => 'sometimes|required|in:' . implode(',', TipoContratacion::all()),
+            'tipo_contrato' => ['sometimes','required','string', Rule::in(TipoContratacion::all())],
               // El campo `tipo_contrato` es opcional (`sometimes`), pero si está presente, es obligatorio (`required`).
             // Su valor debe estar dentro de los valores definidos en `TipoContratacion::all()`.
-            'area' => 'sometimes|required|in:' . implode(',', AreasContratacion::all()),
+            'area' => ['sometimes','required','string', Rule::in(AreasContratacion::all())],
              // El campo `area` es opcional, pero si está presente, es obligatorio.
             // Su valor debe estar dentro de los valores definidos en `AreasContratacion::all()`.
             'fecha_inicio' => 'sometimes|required|date',

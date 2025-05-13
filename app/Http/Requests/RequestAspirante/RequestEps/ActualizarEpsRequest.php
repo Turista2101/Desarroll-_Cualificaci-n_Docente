@@ -8,7 +8,7 @@ use App\Constants\ConstEps\EstadoAfiliacion;
 use App\Constants\ConstEps\TipoAfiliado;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 
 class ActualizarEpsRequest extends FormRequest
 {
@@ -33,17 +33,19 @@ class ActualizarEpsRequest extends FormRequest
             'nombre_eps'                    => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
              // Valida que `nombre_eps` sea opcional (`sometimes`), requerido si está presente, de tipo `string`,
             // con un mínimo de 7 caracteres, un máximo de 100 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
-            'tipo_afiliacion'               => 'sometimes|required|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
+            'tipo_afiliacion'               => ['sometimes','required','string', Rule::in(TipoAfiliacion::all())],//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
               // Valida que `tipo_afiliacion` sea opcional (`sometimes`), requerido si está presente y que su valor esté
             // dentro de los valores definidos en la constante `TipoAfiliacion`.
-            'estado_afiliacion'             => 'sometimes|required|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
+
+         
+            'estado_afiliacion'             => ['sometimes','required','string', Rule::in(EstadoAfiliacion::all())],//llamo a la constante estado afiliacion para obtener los estados de afiliacion
              // Valida que `estado_afiliacion` sea opcional (`sometimes`), requerido si está presente y que su valor esté
             // dentro de los valores definidos en la constante `EstadoAfiliacion`.
             'fecha_afiliacion_efectiva'     => 'sometimes|required|date',
             // Valida que `fecha_afiliacion_efectiva` sea opcional (`sometimes`), requerido si está presente y de tipo `date`.
             'fecha_finalizacion_afiliacion' => 'sometimes|nullable|date',
             // Valida que `fecha_finalizacion_afiliacion` sea opcional (`sometimes`), puede ser nulo (`nullable`) y de tipo `date`.
-            'tipo_afiliado'                 => 'sometimes|required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
+            'tipo_afiliado'                 => ['sometimes','required','string', Rule::in(TipoAfiliado::all())],//llamo a la constante tipo afiliado para obtener los tipos de afiliado
             // Valida que `tipo_afiliado` sea opcional (`sometimes`), requerido si está presente y que su valor esté
             // dentro de los valores definidos en la constante `TipoAfiliado`.
             'numero_afiliado'               => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',

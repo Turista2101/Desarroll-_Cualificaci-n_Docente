@@ -8,6 +8,9 @@ use App\Models\Usuario\User;
 class UserController
 {
 
+    // de admin aun no hay nada hecho
+    // esto es solo un ejemplo basico de como se haria
+    
     //Listar todos los usuarios
     public function listarUsuarios()
     {

@@ -8,6 +8,7 @@ use App\Constants\ConstAgregarEstudio\Graduado;
 use App\Constants\ConstAgregarEstudio\TituloConvalidado;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ActualizarEstudioRequest extends FormRequest
 {
@@ -30,10 +31,10 @@ class ActualizarEstudioRequest extends FormRequest
     {
         return [
             
-            'tipo_estudio'              => 'sometimes|required|in:' . implode(',', TiposEstudio::all()),
+            'tipo_estudio'              => ['sometimes','required','string', Rule::in( TiposEstudio::all())],
              // Valida que `tipo_estudio` sea opcional (`sometimes`), requerido si está presente y que su valor esté
             // dentro de los valores definidos en la constante `TiposEstudio`.
-            'graduado'                  => 'sometimes|required|in:' . implode(',', Graduado::all()),
+            'graduado'                  => ['sometimes','required','string', Rule::in(Graduado::all())],
              // Valida que `graduado` sea opcional (`sometimes`), requerido si está presente y que su valor esté
             // dentro de los valores definidos en la constante `Graduado`.
             'institucion'               => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
@@ -41,7 +42,7 @@ class ActualizarEstudioRequest extends FormRequest
             // con un mínimo de 7 caracteres, un máximo de 100 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
             'fecha_graduacion'          => 'sometimes|nullable|date',
              // Valida que `fecha_graduacion` sea opcional (`sometimes`), puede ser nulo (`nullable`) y de tipo `date`.
-            'titulo_convalidado'        => 'sometimes|required|in:' . implode(',', TituloConvalidado::all()),
+            'titulo_convalidado'        => ['sometimes','required','string', Rule::in(TituloConvalidado::all())],
              // Valida que `titulo_convalidado` sea opcional (`sometimes`), requerido si está presente y que su valor esté
             // dentro de los valores definidos en la constante `TituloConvalidado`.
             'fecha_convalidacion'       => 'sometimes|nullable|date',

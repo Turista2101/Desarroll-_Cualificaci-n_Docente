@@ -114,6 +114,7 @@ class UbicacionController
         return response()->json(Municipio::all(), 200);
     }
 
+    
     // Obtener departamentos por país
     public function obtenerDepartamentosPorPais($pais_id)
     {
@@ -123,6 +124,7 @@ class UbicacionController
         return response()->json($departamentos, 200);
     }
 
+
     // Obtener municipios por departamento
     public function obtenerMunicipiosPorDepartamento($departamento_id)
     {
@@ -131,6 +133,7 @@ class UbicacionController
         // Devolver respuesta
         return response()->json($municipios, 200);
     }
+
 
     // Obtener información completa de ubicación por municipio_id
     public function obtenerUbicacionPorMunicipio($municipio_id)

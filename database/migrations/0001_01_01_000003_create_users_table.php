@@ -21,15 +21,15 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->unsignedSmallInteger('municipio_id');
-            $table->enum('tipo_identificacion', TipoIdentificacion::all());
+            $table->string('tipo_identificacion');
             $table->string('numero_identificacion')->unique();
-            $table->enum('genero', Genero::all())->nullable();
+            $table->string('genero')->nullable();
             $table->string('primer_nombre');
             $table->string('segundo_nombre')->nullable();
             $table->string('primer_apellido');
             $table->string('segundo_apellido')->nullable();
             $table->date('fecha_nacimiento');
-            $table->enum('estado_civil',EstadoCivil::all())->nullable();
+            $table->string('estado_civil')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -41,6 +41,7 @@ return new class extends Migration
                 ->on('municipios');
 
         });
+        
 
         // tabla para restablecer la contraseña
 

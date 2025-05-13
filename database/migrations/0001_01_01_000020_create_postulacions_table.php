@@ -16,7 +16,7 @@ return new class extends Migration
             $table->smallIncrements('id_postulacion');
             $table->unsignedSmallInteger('convocatoria_id');
             $table->unsignedBigInteger('user_id');
-            $table->enum('estado_postulacion', EstadoPostulacion::all());
+            $table->string('estado_postulacion');
             $table->timestamps();
 
             // Relación con la tabla de convocatorias

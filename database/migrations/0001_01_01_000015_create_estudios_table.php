@@ -19,11 +19,11 @@ return new class extends Migration
         Schema::create('estudios', function (Blueprint $table) {
             $table->smallIncrements('id_estudio');
             $table->unsignedBigInteger('user_id');
-            $table->enum('tipo_estudio', TiposEstudio::all());
-            $table->enum('graduado', Graduado::all());
+            $table->string('tipo_estudio');
+            $table->string('graduado');
             $table->string('institucion');
             $table->date('fecha_graduacion')->nullable();
-            $table->enum('titulo_convalidado', TituloConvalidado::all());
+            $table->string('titulo_convalidado');
             $table->date('fecha_convalidacion')->nullable();
             $table->string('resolucion_convalidacion')->nullable();
             $table->date('posible_fecha_graduacion')->nullable();

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('fecha_publicacion');// Fecha de publicación de la convocatoria
             $table->date('fecha_cierre'); // Fecha de cierre de la convocatoria
             $table->text('descripcion');// Descripción detallada de la convocatoria
-            $table->enum('estado_convocatoria', EstadoConvocatoria::all());
+            $table->string('estado_convocatoria');
             $table->timestamps();// Crea las columnas 'created_at' y 'updated_at' para marcas de tiempo
 
             

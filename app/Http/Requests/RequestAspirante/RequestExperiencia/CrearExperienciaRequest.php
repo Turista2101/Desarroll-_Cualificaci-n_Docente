@@ -7,7 +7,7 @@ use App\Constants\ConstAgregarExperiencia\TiposExperiencia;
 use App\Constants\ConstAgregarExperiencia\TrabajoActual;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
-
+use Illuminate\Validation\Rule;
 
 
 class CrearExperienciaRequest extends FormRequest
@@ -31,7 +31,7 @@ class CrearExperienciaRequest extends FormRequest
     // Método que define las reglas de validación para los datos enviados en la solicitud.
     {
         return [
-            'tipo_experiencia'             => 'required|string|in:' . implode(',', TiposExperiencia::all()),
+            'tipo_experiencia'             => ['required','string', Rule::in(TiposExperiencia::all())],
             // El campo `tipo_experiencia` es obligatorio (`required`), debe ser una cadena (`string`) y su valor
             // debe estar dentro de los valores definidos en `TiposExperiencia::all()`.
             'institucion_experiencia'      => 'required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
@@ -41,7 +41,7 @@ class CrearExperienciaRequest extends FormRequest
             'cargo'                        => 'required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
               // El campo `cargo` es obligatorio, debe ser una cadena con un mínimo de 3 caracteres y un máximo de 100.
             // También debe coincidir con el mismo patrón regex.
-            'trabajo_actual'               => 'required|in:' . implode(',', TrabajoActual::all()),
+            'trabajo_actual'               => ['required','string', Rule::in(TrabajoActual::all())],
             // El campo `trabajo_actual` es obligatorio y su valor debe estar dentro de los valores definidos en `TrabajoActual::all()`.
             'intensidad_horaria'           => 'nullable|integer|min:1|max:168',
               // El campo `intensidad_horaria` es opcional (`nullable`), pero si se proporciona, debe ser un número entero

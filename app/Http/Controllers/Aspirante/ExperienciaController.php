@@ -18,8 +18,8 @@ class ExperienciaController
     /**
      * Constructor del controlador.
      *
-     * Inyecta el servicio `ArchivoService`, que se encarga de gestionar las operaciones relacionadas 
-     * con archivos adjuntos (guardar, actualizar y eliminar) en los estudios académicos u otras entidades.
+     * Inyecta el servicio `ArchivoService`, que se encarga de gestionar las operaciones relacionadas
+     * con archivos adjuntos (guardar, actualizar y eliminar) en los experiencias u otras entidades.
      *
      * @param ArchivoService $archivoService Servicio responsable de la gestión de archivos.
      */

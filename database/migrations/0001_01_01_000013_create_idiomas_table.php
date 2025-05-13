@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('idioma');
             $table->string('institucion_idioma');
             $table->date('fecha_certificado');
-            $table->enum('nivel', NivelIdioma::all());
+            $table->string('nivel');
             $table->timestamps();
             // Relación con la tabla de usuarios
             $table->foreign('user_id')

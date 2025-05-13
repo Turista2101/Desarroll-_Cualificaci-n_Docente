@@ -8,6 +8,7 @@ use App\Constants\ConstEps\EstadoAfiliacion;
 use App\Constants\ConstEps\TipoAfiliado;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class CrearEpsRequest extends FormRequest
 {
@@ -28,11 +29,11 @@ class CrearEpsRequest extends FormRequest
     {
         return [
             'nombre_eps'                    => 'required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
-            'tipo_afiliacion'               => 'required|in:' . implode(',', TipoAfiliacion::all()),//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
-            'estado_afiliacion'             => 'required|in:' . implode(',', EstadoAfiliacion::all()),//llamo a la constante estado afiliacion para obtener los estados de afiliacion
+            'tipo_afiliacion'               => ['required','string', Rule::in(TipoAfiliacion::all())],//llamo a la constante tipo afiliacion para obtener los tipos de afiliacion
+            'estado_afiliacion'             => ['required','string', Rule::in(EstadoAfiliacion::all())],//llamo a la constante estado afiliacion para obtener los estados de afiliacion
             'fecha_afiliacion_efectiva'     => 'required|date',
             'fecha_finalizacion_afiliacion' => 'nullable|date',
-            'tipo_afiliado'                 => 'required|in:' . implode(',', TipoAfiliado::all()),//llamo a la constante tipo afiliado para obtener los tipos de afiliado
+            'tipo_afiliado'                 => ['required','string',  Rule::in(TipoAfiliado::all())],//llamo a la constante tipo afiliado para obtener los tipos de afiliado
             'numero_afiliado'               => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'archivo'                       => 'required|file|mimes:pdf|max:2048', // Validación del archivo
         ];

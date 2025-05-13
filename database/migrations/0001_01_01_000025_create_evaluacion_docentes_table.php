@@ -18,7 +18,7 @@ return new class extends Migration
             $table->smallIncrements('id_evaluacion_docente');// Identificador único de la evaluación docente (pequeño entero autoincremental)
             $table->unsignedBigInteger('user_id');// ID del usuario asociado a la evaluación docente
             $table->decimal('promedio_evaluacion_docente', 3, 1); // Promedio de la evaluación docente con un máximo de 3 dígitos y 1 decimal
-            $table->enum('estado_evaluacion_docente',EstadoEvaluacionDocente::all())->default('Pendiente'); // Crea las columnas 'created_at' y 'updated_at' para marcas de tiempo
+            $table->string('estado_evaluacion_docente')->default('Pendiente'); // Crea las columnas 'created_at' y 'updated_at' para marcas de tiempo
             $table->timestamps();
             // Relación con la tabla de usuarios
             $table->foreign('user_id')// Define una clave foránea para 'user_id'

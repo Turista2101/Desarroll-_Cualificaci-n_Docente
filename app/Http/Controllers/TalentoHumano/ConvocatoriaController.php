@@ -1,170 +1,202 @@
 <?php
 
-namespace App\Http\Controllers\TalentoHumano;// Declaramos el namespace donde se encuentra este controlador
-
-// Importación de clases necesarias para el funcionamiento del controlador
+namespace App\Http\Controllers\TalentoHumano;
 
 
 use App\Http\Requests\RequestTalentoHumano\RequestConvocatoria\ActualizarConvocatoriaRequest;
 use App\Http\Requests\RequestTalentoHumano\RequestConvocatoria\CrearConvocatoriaRequest;
-use App\Models\Aspirante\Documento;
 use App\Models\TalentoHumano\Convocatoria;
-use Illuminate\Support\Facades\DB; // Usado para realizar transacciones de base de datos
-use Illuminate\Support\Facades\Storage;  // Para manejar almacenamiento de archivos
-use App\Notifications\NotificacionGeneral;  // Para enviar notificaciones
-use Illuminate\Support\Facades\Notification;  // Facade de notificaciones
-use App\Models\Usuario\User;  // Para interactuar con el modelo de usuario
-use App\Services\ArchivoService;  // Servicio para gestionar los archivos adjuntos
+use Illuminate\Support\Facades\DB;
+use App\Services\ArchivoService;
 
 
 class ConvocatoriaController
 {
-    protected $archivoService;// Declaramos una propiedad para el servicio de manejo de archivos
+    protected $archivoService;
 
-    // Constructor que inyecta el servicio de manejo de archivos
-
-    public function __construct(ArchivoService $archivoService)// Guardamos el servicio en la propiedad
+    /**
+     * Constructor del controlador de convocatorias.
+     *
+     * Inyecta el servicio `ArchivoService`, utilizado para gestionar operaciones de almacenamiento,
+     * actualización y eliminación de archivos relacionados con las convocatorias.
+     *
+     * @param ArchivoService $archivoService Servicio responsable de la gestión de archivos asociados a las convocatorias.
+     */
+    public function __construct(ArchivoService $archivoService)
     {
         $this->archivoService = $archivoService;
     }
 
-    // Método para crear una convocatoria
+    /**
+     * Crear una nueva convocatoria.
+     *
+     * Este método permite registrar una nueva convocatoria en el sistema.
+     * La operación se ejecuta dentro de una transacción para garantizar la integridad de los datos.
+     * Si se adjunta un archivo (como los términos o reglamentos de la convocatoria), este se almacena
+     * mediante el servicio `ArchivoService` y se asocia al registro de la convocatoria.
+     * En caso de producirse un error durante la operación, se captura la excepción y se retorna
+     * una respuesta con el mensaje correspondiente.
+     *
+     * @param CrearConvocatoriaRequest $request Solicitud validada con los datos de la convocatoria y archivo opcional.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function crearConvocatoria(CrearConvocatoriaRequest $request)
     {
         try {
-             // Inicia una transacción para asegurarse de que todo se ejecute correctamente
-            $convocatoria = DB::transaction(function () use ($request) {
-                // Validamos los datos del request
-                $datosConvocatoria = $request->validated();
-                 // Creamos el registro de convocatoria en la base de datos
-                $convocatoria = Convocatoria::create($datosConvocatoria);
-                // Si el request incluye un archivo, lo guardamos
-                if ($request->hasFile('archivo')) {
-                // Llamamos al servicio de archivos para guardar el archivo
-                    $this->archivoService->guardarArchivoDocumento($request->file('archivo'), $convocatoria, 'Convocatorias');
-                }
+            DB::transaction(function () use ($request) { // Inicio de la transacción
 
-                return $convocatoria;// Devolvemos la convocatoria creada
+                $datosConvocatoria = $request->validated(); // Validamos los datos de la solicitud
+                $convocatoria = Convocatoria::create($datosConvocatoria); // Creamos la convocatoria en la base de datos
+
+                if ($request->hasFile('archivo')) { // Verificamos si se ha subido un archivo
+
+                    $this->archivoService->guardarArchivoDocumento($request->file('archivo'), $convocatoria, 'Convocatorias'); // Guardamos el archivo asociado a la convocatoria
+                }
             });
-        // Retornamos una respuesta JSON con un mensaje de éxito
-            return response()->json([
+
+            return response()->json([ // Retornamos una respuesta JSON
                 'mensaje' => 'Convocatoria creada exitosamente',
-                'data' => $convocatoria// Devolvemos los datos de la convocatoria creada
-            ], 201); // Código de respuesta HTTP 201 (Creado)
-        } catch (\Exception $e) {
-        // Si ocurre algún error, capturamos la excepción y devolvemos un mensaje de error
+            ], 201);
+        } catch (\Exception $e) { // manejamos cualquier excepción que ocurra durante la transacción
             return response()->json([
                 'mensaje' => 'Error al crear la convocatoria',
                 'error' => $e->getMessage()
-            ], 500);// Código de respuesta HTTP 500 (Error interno del servidor)
+            ], 500);
         }
     }
 
-    // Actualizar un registro de convocatoria
+    /**
+     * Actualizar una convocatoria existente.
+     *
+     * Este método permite modificar los datos de una convocatoria previamente registrada, identificada por su ID.
+     * La operación se realiza dentro de una transacción para asegurar la integridad de los datos. 
+     * Si se adjunta un nuevo archivo (como una versión actualizada del documento de convocatoria), 
+     * este se reemplaza utilizando el servicio `ArchivoService`.
+     * En caso de que la convocatoria no exista o se produzca un error durante la operación, 
+     * se captura la excepción y se retorna una respuesta con el mensaje de error correspondiente.
+     *
+     * @param ActualizarConvocatoriaRequest $request Solicitud validada con los nuevos datos de la convocatoria y archivo opcional.
+     * @param int $id ID de la convocatoria que se desea actualizar.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function actualizarConvocatoria(ActualizarConvocatoriaRequest $request, $id)
     {
         try {
-            // Inicia una transacción para asegurarse de que todo se ejecute correctamente
-            $convocatoria = DB::transaction(function () use ($request, $id) {
-                // Buscamos la convocatoria por su ID
-                $convocatoria = Convocatoria::findOrFail($id);
-                // Actualizamos los datos de la convocatoria
-                $convocatoria->update($request->validated());
-                // Si el request incluye un archivo, lo actualizamos
-                if ($request->hasFile('archivo')) {
-                    $this->archivoService->actualizarArchivoDocumento($request->file('archivo'), $convocatoria, 'Convocatorias');
-                }
+            DB::transaction(function () use ($request, $id) { // Inicio de la transacción
+                $convocatoria = Convocatoria::findOrFail($id); // Buscamos la convocatoria por su ID
+                $convocatoria->update($request->validated()); // Actualizamos la convocatoria con los datos validados
 
-                return $convocatoria;// Devolvemos la convocatoria actualizada
+                if ($request->hasFile('archivo')) { // Verificamos si se ha subido un archivo
+                    $this->archivoService->actualizarArchivoDocumento($request->file('archivo'), $convocatoria, 'Convocatorias'); // Actualizamos el archivo asociado a la convocatoria
+                }
             });
- // Retornamos una respuesta JSON con un mensaje de éxito y los datos actualizados
-            return response()->json([
+
+            return response()->json([ // Retornamos una respuesta JSON
                 'mensaje' => 'Convocatoria actualizada exitosamente',
-                'data' => $convocatoria->fresh()// Obtenemos la versión más reciente de la convocatoria
-            ], 200);  // Código de respuesta HTTP 200 (OK)
-        } catch (\Exception $e) {
-             // Si ocurre algún error, capturamos la excepción y devolvemos un mensaje de error
+            ], 200);
+        } catch (\Exception $e) { // manejamos cualquier excepción que
             return response()->json([
                 'mensaje' => 'Error al actualizar la convocatoria',
                 'error' => $e->getMessage()
-            ], 500);// Código de respuesta HTTP 500 (Error interno del servidor)
+            ], 500);
         }
     }
 
-     // Método para eliminar una convocatoria
+    /**
+     * Eliminar una convocatoria existente.
+     *
+     * Este método permite eliminar una convocatoria del sistema, identificada por su ID. 
+     * Antes de eliminar el registro, se eliminan los archivos asociados utilizando el servicio `ArchivoService`.
+     * Toda la operación se realiza dentro de una transacción para asegurar la consistencia de los datos.
+     * En caso de que la convocatoria no exista o se produzca un error durante la eliminación,
+     * se captura una excepción y se retorna una respuesta adecuada.
+     *
+     * @param int $id ID de la convocatoria que se desea eliminar.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function eliminarConvocatoria($id)
     {
         try {
-        // Buscamos la convocatoria por su ID
-            $convocatoria = Convocatoria::findOrFail($id);
-        // Iniciamos una transacción para eliminar de manera atómica
-            DB::transaction(function () use ($convocatoria) {
-            // Eliminamos el archivo asociado a la convocatoria
-                $this->archivoService->eliminarArchivoDocumento($convocatoria);
-            // Eliminamos la convocatoria de la base de datos
-                $convocatoria->delete();
+            $convocatoria = Convocatoria::findOrFail($id); // Buscamos la convocatoria por su ID
+            DB::transaction(function () use ($convocatoria) { // Inicio de la transacción
+                $this->archivoService->eliminarArchivoDocumento($convocatoria); // Eliminamos el archivo asociado a la convocatoria
+                $convocatoria->delete(); // Eliminamos la convocatoria de la base de datos
             });
-            // Retornamos una respuesta JSON con un mensaje de éxito
-            return response()->json(['mensaje' => 'Convocatoria eliminada exitosamente'], 200);
-        } catch (\Exception $e) {
-            // Si ocurre algún error, capturamos la excepción y devolvemos un mensaje de error
+
+            return response()->json(['mensaje' => 'Convocatoria eliminada exitosamente'], 200); // Retornamos una respuesta JSON indicando que la convocatoria fue eliminada exitosamente
+
+        } catch (\Exception $e) { // manejamos cualquier excepción que ocurra durante la transacción
             return response()->json([
                 'mensaje' => 'Error al eliminar la convocatoria',
                 'error' => $e->getMessage()
-            ], 500);// Código de respuesta HTTP 500 (Error interno del servidor)
+            ], 500);
         }
     }
 
-    // Método para obtener todas las convocatorias
+    /**
+     * Obtener todas las convocatorias registradas con sus documentos asociados.
+     *
+     * Este método recupera todas las convocatorias disponibles en el sistema, incluyendo los documentos
+     * relacionados mediante la relación `documentosConvocatoria`. Las convocatorias se ordenan por su
+     * fecha de creación en orden descendente. Para cada documento, se genera la URL pública del archivo 
+     * utilizando el helper `asset()`. Si no se encuentran convocatorias, se lanza una excepción con código 404.
+     * En caso de error, se captura la excepción y se retorna una respuesta adecuada.
+     *
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con la lista de convocatorias o mensaje de error.
+     */
     public function obtenerConvocatorias()
     {
         try {
-            // Obtenemos todas las convocatorias, incluyendo sus documentos asociados
-            $convocatorias = Convocatoria::with('documentosConvocatoria')->orderBy('created_at', 'desc')->get();
-            // Si no se encuentran convocatorias, lanzamos una excepción
-            if ($convocatorias->isEmpty()) {
-                throw new \Exception('No se encontraron convocatorias', 404); // Excepción con código de error 404 (No encontrado)
+            $convocatorias = Convocatoria::with('documentosConvocatoria') // Obtenemos todas las convocatorias con sus documentos asociados
+                ->orderBy('created_at', 'desc') // Ordenamos las convocatorias por fecha de creación de forma descendente
+                ->get();
 
+            if ($convocatorias->isEmpty()) { // Verificamos si no se encontraron convocatorias
+                throw new \Exception('No se encontraron convocatorias', 404);
             }
-            // Recorremos las convocatorias y asignamos la URL del archivo a cada documento
-            foreach ($convocatorias as $convocatoria) {
-                foreach ($convocatoria->documentosConvocatoria as $documento) {
-            // Asignamos la URL del archivo usando el helper asset
-                    $documento->archivo_url = asset('storage/' . $documento->archivo);
+            foreach ($convocatorias as $convocatoria) { // Recorremos cada convocatoria
+                foreach ($convocatoria->documentosConvocatoria as $documento) { // Recorremos cada documento asociado a la convocatoria
+                    $documento->archivo_url = asset('storage/' . $documento->archivo); // Asignamos la URL del archivo usando el helper asset
                 }
             }
-            // Retornamos una respuesta JSON con las convocatorias
-            return response()->json(['convocatorias' => $convocatorias], 200);
+            return response()->json(['convocatorias' => $convocatorias], 200); // Retornamos una respuesta JSON con las convocatorias
+
         } catch (\Exception $e) {
-        // Si ocurre algún error, capturamos la excepción y devolvemos un mensaje de error
-            return response()->json([
+            return response()->json([ // Si ocurre algún error, capturamos la excepción y devolvemos un mensaje de error
                 'mensaje' => 'Error al obtener las convocatorias',
-                'error' => $e->getMessage() // Devolvemos el mensaje del error
-            ], $e->getCode() ?: 500);  // Usamos el código de error de la excepción o el 500 si no hay código
+                'error' => $e->getMessage()
+            ], $e->getCode() ?: 500);
         }
     }
 
-    // Método para obtener una convocatoria por su ID
+    /**
+     * Obtener una convocatoria específica por su ID.
+     *
+     * Este método busca una convocatoria mediante su ID y carga los documentos asociados a ella
+     * utilizando la relación `documentosConvocatoria`. Para cada documento que tenga un archivo,
+     * se genera una URL pública utilizando el helper `asset()`. Si la convocatoria no existe,
+     * se lanza una excepción y se retorna una respuesta con el mensaje correspondiente.
+     *
+     * @param int $id ID de la convocatoria que se desea consultar.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con la información de la convocatoria o mensaje de error.
+     */
     public function obtenerConvocatoriaPorId($id)
     {
         try {
-            // Obtenemos la convocatoria por su ID, incluyendo sus documentos asociados
-            $convocatoria = Convocatoria::with('documentosConvocatoria')->findOrFail($id);
-            // Asignamos la URL del archivo a cada documento de la convocatoria
-            foreach ($convocatoria->documentosConvocatoria as $documento) {
-                if (!empty($documento->archivo)) {
-                // Asignamos la URL del archivo usando el helper asset
-                    $documento->archivo_url = asset('storage/' . $documento->archivo);
+            $convocatoria = Convocatoria::with('documentosConvocatoria')->findOrFail($id); // Buscamos la convocatoria por su ID y cargamos los documentos asociados
+
+            foreach ($convocatoria->documentosConvocatoria as $documento) { // Recorremos cada documento asociado a la convocatoria
+                if (!empty($documento->archivo)) { // Verificamos si el campo archivo no está vacío
+                    $documento->archivo_url = asset('storage/' . $documento->archivo); // Asignamos la URL del archivo usando el helper asset
                 }
             }
-            // Retornamos una respuesta JSON con la convocatoria
-            return response()->json(['convocatoria' => $convocatoria], 200);// Código de respuesta HTTP 200 (OK)
+            return response()->json(['convocatoria' => $convocatoria], 200); // Retornamos una respuesta JSON con la convocatoria encontrada
+
         } catch (\Exception $e) {
-            // Si ocurre algún error, capturamos la excepción y devolvemos un mensaje de error
-            return response()->json([
+            return response()->json([ // Si ocurre algún error, capturamos la excepción y devolvemos un mensaje de error
                 'mensaje' => 'Error al obtener la convocatoria',
-                'error' => $e->getMessage()// Devolvemos el mensaje del error
-            ], $e->getCode() ?: 500);  // Usamos el código de error de la excepción o el 500 si no hay código
+                'error' => $e->getMessage()
+            ], $e->getCode() ?: 500);
         }
     }
 }

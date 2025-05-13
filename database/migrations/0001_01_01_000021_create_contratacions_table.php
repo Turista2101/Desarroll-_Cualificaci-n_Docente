@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('contratacions', function (Blueprint $table) {
             $table->smallIncrements('id_contratacion');
             $table->unsignedBigInteger('user_id');
-            $table->enum('tipo_contrato', TipoContratacion::all());
-            $table->enum('area', AreasContratacion::all());
+            $table->string('tipo_contrato');
+            $table->string('area');
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
             $table->decimal('valor_contrato', 12, 0);

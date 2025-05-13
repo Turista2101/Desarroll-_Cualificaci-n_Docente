@@ -7,6 +7,7 @@ use App\Constants\ConstRut\CodigoCiiu;
 use App\Constants\ConstRut\TipoPersona;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ActualizarRutRequest extends FormRequest
 {
@@ -36,10 +37,10 @@ class ActualizarRutRequest extends FormRequest
             'razon_social'                  => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
               // El campo `razon_social` es opcional, pero si está presente, es obligatorio.
             // Debe ser una cadena con un mínimo de 7 caracteres y un máximo de 100, y cumplir con el mismo patrón regex.
-            'tipo_persona'                  => 'sometimes|required|in:' . implode(',', TipoPersona::all()),
+            'tipo_persona'                  => ['sometimes','required','string', Rule::in(TipoPersona::all())],
              // El campo `tipo_persona` es opcional, pero si está presente, es obligatorio.
             // Su valor debe estar dentro de los valores definidos en `TipoPersona::all()`.
-            'codigo_ciiu'                   => 'sometimes|required|in:' . implode(',', CodigoCiiu::all()),
+            'codigo_ciiu'                   => ['sometimes','required','string', Rule::in(CodigoCiiu::all())],
             // El campo `codigo_ciiu` es opcional, pero si está presente, es obligatorio.
             // Su valor debe estar dentro de los valores definidos en `CodigoCiiu::all()`.
             'responsabilidades_tributarias' => 'sometimes|required|string|min:7|max:100',
@@ -48,8 +49,7 @@ class ActualizarRutRequest extends FormRequest
             'archivo'                       => 'sometimes|nullable|file|mimes:pdf|max:2048', // Validación del archivo
               // El campo `archivo` es opcional, pero si está presente, debe ser un archivo (`file`) con extensiones permitidas
             // (`pdf`, `jpg`, `png`) y su tamaño no debe exceder los 2048 KB.
-       
-        ];
+          ];
     }
     
     protected function failedValidation(Validator $validator)

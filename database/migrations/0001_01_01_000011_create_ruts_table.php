@@ -18,8 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('numero_rut')->unique();
             $table->string('razon_social');
-            $table->enum('tipo_persona',TipoPersona::all());
-            $table->enum('codigo_ciiu', CodigoCiiu::all() );
+            $table->string('tipo_persona');
+            $table->string('codigo_ciiu');
             $table->string('responsabilidades_tributarias');
             $table->timestamps();
             // Relación con la tabla de usuarios

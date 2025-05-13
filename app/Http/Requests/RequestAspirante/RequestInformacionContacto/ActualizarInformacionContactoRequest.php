@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Constants\ConstInformacionContacto\CategoriaLibretaMilitar;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 class ActualizarInformacionContactoRequest extends FormRequest
 {
     /**
@@ -31,7 +31,7 @@ class ActualizarInformacionContactoRequest extends FormRequest
             'municipio_id'                          => 'sometimes|required|exists:municipios,id_municipio',
              // El campo `municipio_id` es opcional (`sometimes`), pero si está presente, es obligatorio (`required`).
             // Además, debe existir en la tabla `municipios` en la columna `id_municipio`.
-            'categoria_libreta_militar'             => 'sometimes|nullable|in:' . implode(',', CategoriaLibretaMilitar::all()),//llamo a la constante categoria libreta militar para obtener los tipos de libreta militar
+            'categoria_libreta_militar'             => ['sometimes','nullable','string', Rule::in(CategoriaLibretaMilitar::all())],//llamo a la constante categoria libreta militar para obtener los tipos de libreta militar
              // El campo `categoria_libreta_militar` es opcional, pero si está presente, su valor debe estar dentro
             // de los valores definidos en `CategoriaLibretaMilitar::all()`.
             'numero_libreta_militar'                => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',

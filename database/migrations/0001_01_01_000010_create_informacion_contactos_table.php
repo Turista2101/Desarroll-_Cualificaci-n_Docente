@@ -17,7 +17,7 @@ return new class extends Migration
             $table->smallIncrements('id_informacion_contacto');
             $table->unsignedBigInteger('user_id');//relacion de muchos a uno con la tabla users
             $table->unsignedSmallInteger('municipio_id');//relacion de muchos a uno con la tabla municipios
-            $table->enum('categoria_libreta_militar',CategoriaLibretaMilitar::all())->nullable();
+            $table->string('categoria_libreta_militar')->nullable();
             $table->string('numero_libreta_militar')->nullable();
             $table->string('numero_distrito_militar')->nullable();
             $table->string('direccion_residencia')->nullable();

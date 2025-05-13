@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Constants\ConstUsuario\Genero;
 use App\Constants\ConstUsuario\EstadoCivil;
 use App\Constants\ConstUsuario\TipoIdentificacion;
-
+use Illuminate\Validation\Rule;
 
 
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -31,15 +31,15 @@ class CrearAuthRequest extends FormRequest
     {
         return [
             'municipio_id'           => 'required|exists:municipios,id_municipio',
-            'tipo_identificacion'    => 'required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
+            'tipo_identificacion'    => ['required','string', Rule::in(TipoIdentificacion::all())],// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
             'numero_identificacion'  => 'required|string|max:50|unique:users',
-            'genero'                 => 'nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
+            'genero'                 => ['nullable','string', Rule::in(Genero::all())],//llamo a la constante genero para obtener los tipos de genero
             'primer_nombre'          => 'required|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'segundo_nombre'         => 'nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'primer_apellido'        => 'required|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'segundo_apellido'       => 'nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_nacimiento'       => 'required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
-            'estado_civil'           => 'nullable|in:' . implode(',', EstadoCivil::all()),//llamo a la constante estadocivil para obtener los tipos de estado civil
+            'estado_civil'           => ['nullable','string', Rule::in(EstadoCivil::all())],//llamo a la constante estadocivil para obtener los tipos de estado civil
             'archivo'                => 'nullable|file|mimes:pdf|max:2048', // Validación del archivo
             'email'                  => 'required|string|email|max:100|unique:users',
             'password'               => 'required|string|min:8',

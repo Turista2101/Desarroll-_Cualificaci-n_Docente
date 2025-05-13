@@ -16,40 +16,54 @@ use App\Http\Requests\RequestAuth\CrearAuthRequest;
 use App\Services\ArchivoService;
 
 
+// Este controlador maneja la autenticación de usuarios, incluyendo el registro, inicio de sesión,
+// actualización de datos, cierre de sesión y restablecimiento de contraseña.
 class AuthController
 {
     protected $archivoService;
 
+    /**
+     * Constructor del controlador.
+     *
+     * Inyecta el servicio `ArchivoService`, utilizado para gestionar las operaciones relacionadas
+     * con archivos (guardar, actualizar y eliminar) vinculados al Auth del usuario.
+     *
+     * @param ArchivoService $archivoService Servicio responsable de la gestión de archivos asociados al RUT.
+     */
     public function __construct(ArchivoService $archivoService)
     {
         $this->archivoService = $archivoService;
     }
 
-    //Registro de usuario
-
+    /**
+     * Registrar un nuevo usuario en el sistema.
+     *
+     * Este método permite crear un nuevo usuario, asignarle el rol de "Aspirante" y generar un token JWT
+     * para su autenticación inmediata. La creación del usuario se realiza dentro de una transacción para
+     * asegurar la integridad de los datos. Si ocurre algún error durante el proceso, se captura la excepción
+     * y se retorna una respuesta con el mensaje de error correspondiente.
+     *
+     * @param CrearAuthRequest $request Solicitud validada con los datos del nuevo usuario.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito, token generado o mensaje de error.
+     */
     public function registrar(CrearAuthRequest $request)
     {
         try {
             $user = DB::transaction(function () use ($request) {
-                //Validar los datos de entrada
-                $datosUser = $request->validated();
-                // crear un usuario
-                $user = User::create($datosUser);
-                // Asignar el rol "aspirante" al usuario recién creado
-                $user->assignRole('Aspirante');
 
-                return $user;
+                $datosUser = $request->validated(); //Validar los datos de entrada
+                $user = User::create($datosUser); // crear un usuario
+                $user->assignRole('Aspirante'); // Asignar el rol "aspirante" al usuario recién creado
+
             });
 
-            //Generar un token para el usuario
-            $token = JWTAuth::fromUser($user);
+            $token = JWTAuth::fromUser($user); //Generar un token para el usuario
 
-            //Devolver respuesat con el token y el usuario
-            return response()->json([
+            return response()->json([ //Devolver respuesat con el token y el usuario
                 'menssage' => 'Usuario creado exitosamente',
                 'token' => $token
             ], 201);
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
                 'message' => 'Error al crear el usuario',
                 'error'   => $e->getMessage(),
@@ -57,42 +71,45 @@ class AuthController
         }
     }
 
-
-    //Iniciar sesión
+    /**
+     * Iniciar sesión de usuario y generar token JWT.
+     *
+     * Este método valida las credenciales proporcionadas (correo y contraseña) y, si son correctas,
+     * autentica al usuario, genera un token JWT y retorna información básica del usuario autenticado,
+     * incluyendo su rol principal. Si la validación falla o las credenciales son incorrectas, se lanza
+     * una excepción con el código de error correspondiente.
+     *
+     * @param Request $request Solicitud HTTP con las credenciales del usuario.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con token de acceso, rol del usuario o mensaje de error.
+     */
     public function iniciarSesion(Request $request)
     {
         try {
-            // Validar los datos de entrada
-            $validator = Validator::make($request->all(), [
+            $validator = Validator::make($request->all(), [ // Validar los datos de entrada
                 'email'    => 'required|string|email',
                 'password' => 'required|string|min:8',
             ]);
 
-            // Si la validación falla, devolver un mensaje de error
-            if ($validator->fails()) {
+
+            if ($validator->fails()) { // Si la validación falla, devolver un mensaje de error
                 throw new \Exception($validator->errors()->toJson(), 400);
             }
 
-            // Credenciales para autenticar
-            $credentials = $request->only('email', 'password');
+            $credentials = $request->only('email', 'password'); // Credenciales para autenticar
 
-            // Intentar autenticar y generar un token
-            if (!$token = JWTAuth::attempt($credentials)) {
+            if (!$token = JWTAuth::attempt($credentials)) { // Intentar autenticar y generar un token
                 throw new \Exception('Credenciales incorrectas', 401);
             }
 
-            // Obtener el usuario autenticado
-            $user = JWTAuth::user();
+            $user = JWTAuth::user(); // Obtener el usuario autenticado
             $rol = $user->getRoleNames()->first(); // Obtener el primer rol del usuario
 
-
-            // Devolver respuesta con el token y el usuario
-            return response()->json([
+            return response()->json([ // Devolver respuesta con el token y el usuario
                 'message' => 'Inicio de sesión exitoso',
                 'token'   => $token,
                 'rol'     => $rol
             ], 200);
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
                 'message' => 'Error al iniciar sesión',
                 'error'   => $e->getMessage()
@@ -100,23 +117,31 @@ class AuthController
         }
     }
 
-
-    //actualizar la informacion del usuario
+    /**
+     * Actualizar la información del usuario autenticado.
+     *
+     * Este método permite modificar los datos del usuario actualmente autenticado. La operación se realiza
+     * dentro de una transacción para asegurar la integridad de la información. Si se adjunta un archivo
+     * (como un documento de identificación), este se actualiza o se crea usando el servicio `ArchivoService`.
+     * Después de la actualización, se retorna el usuario con los datos frescos desde la base de datos,
+     * incluyendo las URLs públicas de los documentos relacionados si existen.
+     * En caso de error durante el proceso, se captura la excepción y se retorna una respuesta con el mensaje correspondiente.
+     *
+     * @param ActualizarAuthRequest $request Solicitud validada con los datos actualizados del usuario y archivo opcional.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con el usuario actualizado o mensaje de error.
+     */
     public function actualizarUsuario(ActualizarAuthRequest $request)
     {
         try {
             $user = DB::transaction(function () use ($request) {
-                // Obtener el usuario autenticado
-                $user = JWTAuth::user();
 
-                // Validar los datos de entrada
-                $datosAuth = $request->validated();
+                $user = JWTAuth::user(); // Obtener el usuario autenticado
+                $datosAuth = $request->validated(); // Validar los datos de entrada
 
-                // Actualizar los datos del usuario
-                $user->update($datosAuth);
+                $user->update($datosAuth); // Actualizar los datos del usuario
 
-                // Manejo del archivo (actualizar o crear documento de identificación)
-                if ($request->hasFile('archivo')) {
+
+                if ($request->hasFile('archivo')) { // Manejo del archivo (actualizar o crear documento de identificación)
                     $this->archivoService->actualizarArchivoDocumento(
                         $request->file('archivo'),
                         $user,
@@ -127,20 +152,19 @@ class AuthController
                 return $user->fresh(); // Retornar el usuario actualizado
             });
 
-            // Agregar la URL del archivo si existe
-            if ($user->documentosUser) {
+
+            if ($user->documentosUser) { // Agregar la URL del archivo si existe
                 foreach ($user->documentosUser as $documento) {
                     if (!empty($documento->archivo)) {
                         $documento->archivo_url = asset('storage/' . $documento->archivo);
                     }
                 }
             }
-
             return response()->json([
                 'message' => 'Usuario actualizado exitosamente',
                 'user'    => $user,
             ], 200);
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
                 'message' => 'Error al actualizar el usuario',
                 'error'   => $e->getMessage(),
@@ -148,18 +172,23 @@ class AuthController
         }
     }
 
-
-
-    //Cerrar sesión
+    /**
+     * Cerrar sesión del usuario autenticado.
+     *
+     * Este método invalida el token JWT activo del usuario, cerrando efectivamente su sesión en el sistema.
+     * Si el token es inválido o ocurre algún error durante el proceso, se captura una excepción y se retorna
+     * una respuesta con el mensaje de error correspondiente.
+     *
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON indicando el éxito o error del cierre de sesión.
+     */
     public function cerrarSesion()
     {
         try {
-            // Invalidar el token actual
-            JWTAuth::invalidate(JWTAuth::getToken());
+            JWTAuth::invalidate(JWTAuth::getToken()); // Invalidar el token actual
 
-            // Devolver respuesta
-            return response()->json(['message' => 'Sesión cerrada exitosamente'], 200);
-        } catch (\Exception $e) {
+            return response()->json(['message' => 'Sesión cerrada exitosamente'], 200); // Devolver respuesta
+
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
                 'message' => 'Error al cerrar sesión',
                 'error'   => $e->getMessage()
@@ -167,28 +196,31 @@ class AuthController
         }
     }
 
-
-    //Obtener el usuario autenticado
+    /**
+     * Obtener los datos del usuario autenticado.
+     *
+     * Este método retorna la información del usuario actualmente autenticado mediante JWT, incluyendo
+     * sus documentos asociados. Para cada documento, si existe un archivo, se genera una URL pública
+     * para facilitar su visualización o descarga. En caso de error durante la obtención del usuario o
+     * sus datos, se captura una excepción y se retorna una respuesta con el mensaje correspondiente.
+     *
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con los datos del usuario o mensaje de error.
+     */
     public function obtenerUsuarioAutenticado()
     {
         try {
-            // Obtener el usuario autenticado
-            $user = JWTAuth::user();
 
-            if (!$user) {
-                throw new \Exception('Usuario no autenticado', 401);
-            }
+            $user = JWTAuth::user(); // Obtener el usuario autenticado
 
-            // Agregar la URL del archivo a cada documento si existe
-            foreach ($user->documentosUser as $documento) {
+            foreach ($user->documentosUser as $documento) { // Agregar la URL del archivo a cada documento si existe
                 if (!empty($documento->archivo)) {
                     $documento->archivo_url = asset('storage/' . $documento->archivo);
                 }
             }
 
-            // Devolver respuesta con el usuario
-            return response()->json(['user' => $user], 200);
-        } catch (\Exception $e) {
+            return response()->json(['user' => $user], 200); // Devolver respuesta con el usuario
+
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
                 'message' => 'Error al obtener el usuario autenticado',
                 'error'   => $e->getMessage()
@@ -196,15 +228,23 @@ class AuthController
         }
     }
 
-
-
-    //Actualizar la contraseña
-
+    /**
+     * Actualizar la contraseña del usuario autenticado.
+     *
+     * Este método permite al usuario cambiar su contraseña actual. Primero valida los datos de entrada,
+     * luego verifica que la contraseña actual proporcionada coincida con la registrada.
+     * Si la verificación es exitosa, la nueva contraseña se cifra y se guarda.
+     * En caso de errores de validación, verificación o al guardar, se captura la excepción
+     * y se retorna un mensaje adecuado.
+     *
+     * @param Request $request Solicitud HTTP con la contraseña actual y la nueva contraseña.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con mensaje de éxito o mensaje de error.
+     */
     public function actualizarContrasena(Request $request)
     {
         try {
-            // Validar los datos de entrada
-            $validator = Validator::make($request->all(), [
+
+            $validator = Validator::make($request->all(), [ // Validar los datos de entrada
                 'password' => 'required|string|min:8',
                 'new_password' => 'required|string|min:8',
             ]);
@@ -213,20 +253,18 @@ class AuthController
                 throw new \Exception('error', 400);
             }
 
-            // Obtener el usuario autenticado
-            $user = JWTAuth::user();
+            $user = JWTAuth::user(); // Obtener el usuario autenticado
 
-            // Verificar la contraseña actual
-            if (!Hash::check($request->password, $user->password)) {
+            if (!Hash::check($request->password, $user->password)) { // Verificar la contraseña actual
                 throw new \Exception('Contraseña incorrecta', 422);
             }
 
-            // Actualizar la contraseña
-            $user->password = Hash::make($request->new_password);
+            $user->password = Hash::make($request->new_password); // Actualizar la contraseña
             $user->save();
 
-            return response()->json(['message' => 'Contraseña actualizada exitosamente'], 200);
-        } catch (\Exception $e) {
+            return response()->json(['message' => 'Contraseña actualizada exitosamente'], 200); // Devolver respuesta
+
+        } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
                 'message' => 'Error al actualizar la contraseña.',
                 'error' => $e->getMessage()
@@ -234,44 +272,38 @@ class AuthController
         }
     }
 
-
-    //Restablecer la contraseña
+    /**
+     * Enviar enlace para restablecer la contraseña del usuario.
+     *
+     * Este método valida el correo electrónico proporcionado y, si el usuario existe, genera un token único
+     * para restablecimiento de contraseña. Luego guarda o actualiza dicho token en la tabla `password_reset_tokens`
+     * y envía un correo electrónico al usuario con un enlace para restablecer la contraseña.
+     * Si la validación falla o el usuario no existe, se retorna un mensaje de error.
+     *
+     * @param Request $request Solicitud HTTP con el correo electrónico del usuario.
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON indicando el resultado del envío del correo.
+     */
     public function restablecerContrasena(Request $request)
     {
-        //Validar los datos de entrada
-        $validator = Validator::make(request()->all(), [
+        $validator = Validator::make(request()->all(), [ //Validar los datos de entrada
             'email' => 'required|string|email|max:100',
         ]);
 
-        //Si la validación falla, se guarda el mensaje de error
-        if ($validator->fails()) {
+        if ($validator->fails()) { //Si la validación falla, se guarda el mensaje de error
             return response()->json(['error' => $validator->error()], 400);
         }
 
-        //Recuperar el usuario por su email
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first(); //Recuperar el usuario por su email
+        $token = bin2hex(random_bytes(32)); //Generar un token para restablecer la contraseña
 
-        //Si el usuario no existe, se guarda el mensaje de error
-        if (!$user) {
-            return response()->json(['message' => 'Usuario no encontrado'], 404);
-        }
 
-        //Generar un token para restablecer la contraseña
-        $token = bin2hex(random_bytes(32));
-
-        //Guardar el token en la base de datos
-        DB::table('password_reset_tokens')->updateOrInsert(
+        DB::table('password_reset_tokens')->updateOrInsert( //Guardar el token en la base de datos
             ['email' => $request->email], // Condición para buscar
             ['token' => $token, 'created_at' => now()] // Datos a actualizar o insertar
         );
 
-        //Generar el enlace de restablecimiento de contraseña
-        $resetLink = url('/password/reset', ['token' => $token, 'email' => $user->email]);
-
-        //Enviar un correo electrónico con el token
-        Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink));
-
-        //Devolver respuesta
-        return response()->json(['message' => 'Correo electrónico enviado'], 200);
+        $resetLink = url('/password/reset', ['token' => $token, 'email' => $user->email]); //Generar el enlace de restablecimiento de contraseña
+        Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink)); //Enviar un correo electrónico con el token
+        return response()->json(['message' => 'Correo electrónico enviado'], 200); //Devolver respuesta
     }
 }

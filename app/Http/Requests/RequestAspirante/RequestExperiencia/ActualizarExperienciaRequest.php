@@ -7,6 +7,7 @@ use App\Constants\ConstAgregarExperiencia\TiposExperiencia;
 use App\Constants\ConstAgregarExperiencia\TrabajoActual;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ActualizarExperienciaRequest extends FormRequest
 {
@@ -27,7 +28,7 @@ class ActualizarExperienciaRequest extends FormRequest
     {
         return [
 
-            'tipo_experiencia'             => 'sometimes|required|string|in:' . implode(',', TiposExperiencia::all()),
+            'tipo_experiencia'             => ['sometimes','required','string', Rule::in(TiposExperiencia::all())],
              // Valida que `tipo_experiencia` sea opcional (`sometimes`), requerido si está presente, de tipo `string`,
             // y que su valor esté dentro de los valores definidos en `TiposExperiencia`.
             'institucion_experiencia'      => 'sometimes|required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
@@ -36,13 +37,13 @@ class ActualizarExperienciaRequest extends FormRequest
             'cargo'                        => 'sometimes|required|string|min:3|max:100|regex:/^[\pL\pN\s\-]+$/u',
               // Valida que `cargo` sea opcional (`sometimes`), requerido si está presente, de tipo `string`,
             // con un mínimo de 3 caracteres, un máximo de 100 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
-            'trabajo_actual'               => 'sometimes|required|in:' . implode(',', TrabajoActual::all()),
+            'trabajo_actual'               => ['sometimes','required','string', Rule::in(TrabajoActual::all())],
              // Valida que `trabajo_actual` sea opcional (`sometimes`), requerido si está presente y que su valor esté
             // dentro de los valores definidos en `TrabajoActual`.
             'intensidad_horaria'           => 'sometimes|nullable|integer|min:1|max:168',
              // Valida que `intensidad_horaria` sea opcional (`sometimes`), puede ser nulo (`nullable`), de tipo `integer`,
             // con un valor mínimo de 1 y un máximo de 168 (horas en una semana).
-            'fecha_inicio'                 => 'sometimes|required|date', 
+            'fecha_inicio'                 => 'sometimes|required|date',
             // Valida que `fecha_inicio` sea opcional (`sometimes`), requerido si está presente y de tipo `date`.
             'fecha_finalizacion'           => 'sometimes|nullable|date|after_or_equal:fecha_inicio',
             // Valida que `fecha_finalizacion` sea opcional (`sometimes`), puede ser nulo (`nullable`), de tipo `date`,

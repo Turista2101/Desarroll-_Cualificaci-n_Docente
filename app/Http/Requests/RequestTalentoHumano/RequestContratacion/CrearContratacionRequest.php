@@ -7,7 +7,7 @@ use App\Constants\ConstTalentoHumano\TipoContratacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 class CrearContratacionRequest extends FormRequest
 {
     /**
@@ -29,10 +29,10 @@ class CrearContratacionRequest extends FormRequest
     // Método que define las reglas de validación para los datos enviados en la solicitud.
     {
         return [
-            'tipo_contrato' => 'required|in:' . implode(',', TipoContratacion::all()),
+            'tipo_contrato' => ['required','string', Rule::in( TipoContratacion::all())],
             // El campo `tipo_contrato` es obligatorio (`required`).
             // Su valor debe estar dentro de los valores definidos en `TipoContratacion::all()`.
-            'area' => 'required|in:' . implode(',', AreasContratacion::all()),
+            'area' => ['required','string', Rule::in(',', AreasContratacion::all())],
              // El campo `area` es obligatorio (`required`).
             // Su valor debe estar dentro de los valores definidos en `AreasContratacion::all()`.
             'fecha_inicio' => 'required|date',

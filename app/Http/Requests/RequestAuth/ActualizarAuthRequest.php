@@ -9,7 +9,7 @@ use App\Constants\ConstUsuario\EstadoCivil;
 use App\Constants\ConstUsuario\TipoIdentificacion;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 class ActualizarAuthRequest extends FormRequest
 {
     /**
@@ -29,15 +29,15 @@ class ActualizarAuthRequest extends FormRequest
     {
         return [
             'municipio_id'           => 'sometimes|required|exists:municipios,id_municipio',
-            'tipo_identificacion'    => 'sometimes|required|in:' . implode(',', TipoIdentificacion::all()),// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
+            'tipo_identificacion'    => ['sometimes','required','string', Rule::in(TipoIdentificacion::all())],// llamo a la constante TipoIdentificacion para obtener los tipos de identificacion
             'numero_identificacion'  => 'sometimes|required|string|max:50',
-            'genero'                 => 'sometimes|nullable|in:' . implode(',', Genero::all()),//llamo a la constante genero para obtener los tipos de genero
+            'genero'                 => ['sometimes','nullable','string', Rule::in(Genero::all())],//llamo a la constante genero para obtener los tipos de genero
             'primer_nombre'          => 'sometimes|required|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'segundo_nombre'         => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             'primer_apellido'        => 'sometimes|required|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'segundo_apellido'       => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             'fecha_nacimiento'       => 'sometimes|required|date|before:today',//la fecha de nacimiento no puede ser mayor a la fecha actual
-            'estado_civil'           => 'sometimes|nullable|in:' . implode(',', EstadoCivil::all()),//llamo a la constante estadocivil para obtener los tipos de estado civil
+            'estado_civil'           => ['sometimes','nullable','string', Rule::in(EstadoCivil::all())],//llamo a la constante estadocivil para obtener los tipos de estado civil
             'archivo'                => 'sometimes|nullable|file|mimes:pdf|max:2048', // Validación del archivo
         ];
     }

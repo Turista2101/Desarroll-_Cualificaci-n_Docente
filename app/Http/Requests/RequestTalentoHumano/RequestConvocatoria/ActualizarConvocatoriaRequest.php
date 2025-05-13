@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Constants\ConstTalentoHumano\EstadoConvocatoria;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 class ActualizarConvocatoriaRequest extends FormRequest
 {
     /**
@@ -44,7 +44,7 @@ class ActualizarConvocatoriaRequest extends FormRequest
             'descripcion'           => 'sometimes|required|string|max:1000|regex:/^[\pL\pN\s\-]+$/u',
              // El campo `descripcion` es opcional, pero si está presente, es obligatorio.
             // Debe ser una cadena con un máximo de 1000 caracteres y cumplir con el mismo patrón regex.
-            'estado_convocatoria'   => 'sometimes|required|in:' . implode(',', EstadoConvocatoria::all()),
+            'estado_convocatoria'   => ['sometimes','required','string', Rule::in(EstadoConvocatoria::all())],
              // El campo `estado_convocatoria` es opcional, pero si está presente, es obligatorio.
             // Su valor debe estar dentro de los valores definidos en `EstadoConvocatoria::all()`.
             'archivo'               => 'sometimes|nullable|file|mimes:pdf|max:2048',

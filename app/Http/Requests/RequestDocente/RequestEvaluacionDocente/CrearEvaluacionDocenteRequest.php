@@ -7,7 +7,7 @@ use App\Constants\ConstDocente\EstadoEvaluacionDocente;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 class CrearEvaluacionDocenteRequest extends FormRequest
 {
     /**
@@ -32,7 +32,7 @@ class CrearEvaluacionDocenteRequest extends FormRequest
             'promedio_evaluacion_docente' => 'required|numeric|min:0|max:10',
              // El campo `promedio_evaluacion_docente` es obligatorio (`required`).
             // Debe ser un valor numérico (`numeric`) entre 0 y 10.
-            'estado_evaluacion_docente' => 'nullable|in:' . implode(',', EstadoEvaluacionDocente::all()),
+            'estado_evaluacion_docente' => ['nullable','string', Rule::in(EstadoEvaluacionDocente::all())],
              // El campo `estado_evaluacion_docente` es opcional (`nullable`), pero si está presente, su valor debe estar dentro
             // de los valores definidos en `EstadoEvaluacionDocente::all()`.
         ];

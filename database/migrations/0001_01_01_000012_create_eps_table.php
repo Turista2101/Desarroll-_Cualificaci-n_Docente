@@ -18,11 +18,11 @@ return new class extends Migration
             $table->smallIncrements('id_eps');
             $table->unsignedBigInteger('user_id');
             $table->string('nombre_eps');
-            $table->enum('tipo_afiliacion', TipoAfiliacion::all());
-            $table->enum('estado_afiliacion',EstadoAfiliacion::all());
+            $table->string('tipo_afiliacion');
+            $table->string('estado_afiliacion');
             $table->date('fecha_afiliacion_efectiva');
             $table->date('fecha_finalizacion_afiliacion')->nullable();
-            $table->enum('tipo_afiliado',TipoAfiliado::all());
+            $table->string('tipo_afiliado');
             $table->string('numero_afiliado')->nullable();
             $table->timestamps();
             // Relación con la tabla de usuarios

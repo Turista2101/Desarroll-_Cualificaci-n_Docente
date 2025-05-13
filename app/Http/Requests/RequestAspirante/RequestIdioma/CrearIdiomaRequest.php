@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Constants\ConstAgregarIdioma\NivelIdioma;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use Illuminate\Validation\Rule;
 
 class CrearIdiomaRequest extends FormRequest
 {
@@ -37,7 +37,7 @@ class CrearIdiomaRequest extends FormRequest
             // y cumplir con el mismo patrón regex.
             'fecha_certificado'  => 'required|date',//poner este campo otra ves a requerido
             // El campo `fecha_certificado` es obligatorio y debe ser una fecha válida.
-            'nivel'              => 'required|in:' . implode(',', NivelIdioma::all()),
+            'nivel'              => ['required','string' , Rule::in(NivelIdioma::all())],
             // El campo `nivel` es obligatorio y su valor debe estar dentro de los valores definidos en `NivelIdioma::all()`.
             'archivo'            => 'required|file|mimes:pdf|max:2048', // Validación de archivo
             // El campo `archivo` es obligatorio, debe ser un archivo (`file`) con extensiones permitidas (`pdf`, `jpg`, `png`)
