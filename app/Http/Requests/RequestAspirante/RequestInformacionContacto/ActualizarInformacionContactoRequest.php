@@ -7,6 +7,7 @@ use App\Constants\ConstInformacionContacto\CategoriaLibretaMilitar;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+
 class ActualizarInformacionContactoRequest extends FormRequest
 {
     /**
@@ -16,7 +17,7 @@ class ActualizarInformacionContactoRequest extends FormRequest
     // Método que determina si el usuario está autorizado para realizar esta solicitud.
     {
         return true;
-    // Retorna `true`, lo que significa que cualquier usuario está autorizado para usar esta solicitud.
+        // Retorna `true`, lo que significa que cualquier usuario está autorizado para usar esta solicitud.
     }
 
     /**
@@ -29,19 +30,19 @@ class ActualizarInformacionContactoRequest extends FormRequest
     {
         return [
             'municipio_id'                          => 'sometimes|required|exists:municipios,id_municipio',
-             // El campo `municipio_id` es opcional (`sometimes`), pero si está presente, es obligatorio (`required`).
+            // El campo `municipio_id` es opcional (`sometimes`), pero si está presente, es obligatorio (`required`).
             // Además, debe existir en la tabla `municipios` en la columna `id_municipio`.
-            'categoria_libreta_militar'             => ['sometimes','nullable','string', Rule::in(CategoriaLibretaMilitar::all())],//llamo a la constante categoria libreta militar para obtener los tipos de libreta militar
-             // El campo `categoria_libreta_militar` es opcional, pero si está presente, su valor debe estar dentro
+            'categoria_libreta_militar'             => ['sometimes', 'nullable', 'string', Rule::in(CategoriaLibretaMilitar::all())], //llamo a la constante categoria libreta militar para obtener los tipos de libreta militar
+            // El campo `categoria_libreta_militar` es opcional, pero si está presente, su valor debe estar dentro
             // de los valores definidos en `CategoriaLibretaMilitar::all()`.
             'numero_libreta_militar'                => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
-              // El campo `numero_libreta_militar` es opcional, pero si está presente, debe ser una cadena (`string`)
+            // El campo `numero_libreta_militar` es opcional, pero si está presente, debe ser una cadena (`string`)
             // con un máximo de 50 caracteres y cumplir con un patrón regex que permite letras, números, espacios y guiones.
             'numero_distrito_militar'               => 'sometimes|nullable|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
             // El campo `numero_distrito_militar` es opcional, pero si está presente, debe cumplir las mismas reglas
             // que `numero_libreta_militar`.
-            'direccion_residencia'                  => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
-             // El campo `direccion_residencia` es opcional, pero si está presente, debe ser una cadena con un máximo
+            'direccion_residencia'                  => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-,#]+$/u',
+            // El campo `direccion_residencia` es opcional, pero si está presente, debe ser una cadena con un máximo
             // de 100 caracteres y cumplir con un patrón regex que permite letras, números, espacios y guiones.
             'barrio'                                => 'sometimes|nullable|string|max:100|regex:/^[\pL\pN\s\-]+$/u',
             // El campo `barrio` es opcional, pero si está presente, debe cumplir las mismas reglas que `direccion_residencia`.
@@ -55,17 +56,17 @@ class ActualizarInformacionContactoRequest extends FormRequest
             // El campo `correo_alterno` es opcional, pero si está presente, debe ser una cadena válida de correo electrónico,
             // con un máximo de 100 caracteres y debe ser único en la tabla `users` en la columna `email`.
             'archivo'                               => 'sometimes|nullable|file|mimes:pdf|max:2048',
-             // El campo `archivo` es opcional, pero si está presente, debe ser un archivo (`file`) con extensiones permitidas
+            // El campo `archivo` es opcional, pero si está presente, debe ser un archivo (`file`) con extensiones permitidas
             // (`pdf`, `jpg`, `png`) y su tamaño no debe exceder los 2048 KB.
-    
+
         ];
     }
     protected function failedValidation(Validator $validator)
-        // Método que se ejecuta cuando la validación falla.
+    // Método que se ejecuta cuando la validación falla.
     {
         throw new HttpResponseException(
-        // Lanza una excepción `HttpResponseException` para devolver una respuesta JSON personalizada.
-           response()->json([
+            // Lanza una excepción `HttpResponseException` para devolver una respuesta JSON personalizada.
+            response()->json([
                 'success' => false,
                 // Indica que la solicitud no fue exitosa.
                 'message' => 'Error en el formulario',
@@ -73,7 +74,7 @@ class ActualizarInformacionContactoRequest extends FormRequest
                 'errors' => $validator->errors(),
                 // Incluye los errores específicos de validación generados por el validador.
             ], 422)
-                // Devuelve un código de estado HTTP 422 (Unprocessable Entity) para indicar errores de validación.
+            // Devuelve un código de estado HTTP 422 (Unprocessable Entity) para indicar errores de validación.
         );
     }
 }

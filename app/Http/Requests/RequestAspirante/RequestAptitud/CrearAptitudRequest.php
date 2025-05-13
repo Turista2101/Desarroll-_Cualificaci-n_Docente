@@ -26,7 +26,7 @@ class CrearAptitudRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_aptitud' => 'required|string|max:50|regex:/^[\pL\pN\s\-]+$/u',
+            'nombre_aptitud' => 'required|string|max:50|regex:/^[\pL\pN\s\-,]+$/u',
              // La regla para `nombre_aptitud` indica que es obligatorio (`required`), debe ser una cadena (`string`),
             // tiene un máximo de 50 caracteres (`max:50`) y debe coincidir con un patrón regex que permite letras,
             // números, espacios y guiones.
