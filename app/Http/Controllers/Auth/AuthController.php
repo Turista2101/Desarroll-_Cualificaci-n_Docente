@@ -302,7 +302,7 @@ class AuthController
             ['token' => $token, 'created_at' => now()] // Datos a actualizar o insertar
         );
 
-        $resetLink = env('FRONTEND_URL') . '/restablecer-contrasena2?token=' . $token . '&email=' . $user->email; //Generar el enlace de restablecimiento de contraseña
+        $resetLink = env('FRONTEND_URL') . '/restablecer-contrasena2?token=' . $token . '&email=' . urlencode($user->email);//Generar el enlace de restablecimiento de contraseña
         Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink)); //Enviar un correo electrónico con el token
         return response()->json(['message' => 'Correo electrónico enviado'], 200); //Devolver respuesta
     }
