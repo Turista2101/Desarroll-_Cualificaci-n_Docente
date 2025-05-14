@@ -16,8 +16,12 @@ Route::group([
     Route::post('iniciar-sesion', [AuthController::class, 'iniciarSesion']);
     // Ruta para restablecer la contraseña
     Route::post('restablecer-contrasena', [AuthController::class, 'restablecerContrasena']);
+    // ruta para restablecer la contraseña cuando se te olvido
+    Route::post('restablecer-contraseña-token', [AuthController::class, 'actualizarContrasenaConToken']);
+    
     // Define un subgrupo de rutas protegidas por el middleware 'auth:api'
     Route::group(['middleware' => 'auth:api'], function () {
+        
         // Ruta para cerrar sesión
         Route::post('cerrar-sesion', [AuthController::class, 'cerrarSesion']);
         // Ruta para obtener los datos del usuario autenticado
@@ -26,5 +30,6 @@ Route::group([
         Route::post('actualizar-contrasena/{id}', [AuthController::class, 'actualizarContrasena']);
         // Ruta para actualizar los datos del usuario autenticado
         Route::post('actualizar-usuario', [AuthController::class, 'actualizarUsuario']);
+        
     });
 });

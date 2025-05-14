@@ -297,14 +297,59 @@ class AuthController
         $user = User::where('email', $request->email)->first(); //Recuperar el usuario por su email
         $token = bin2hex(random_bytes(32)); //Generar un token para restablecer la contraseña
 
-
         DB::table('password_reset_tokens')->updateOrInsert( //Guardar el token en la base de datos
             ['email' => $request->email], // Condición para buscar
             ['token' => $token, 'created_at' => now()] // Datos a actualizar o insertar
         );
 
-        $resetLink = url('/password/reset', ['token' => $token, 'email' => $user->email]); //Generar el enlace de restablecimiento de contraseña
+        $resetLink = env('FRONTEND_URL') . '/restablecer-contrasena2?token=' . $token . '&email=' . $user->email; //Generar el enlace de restablecimiento de contraseña
         Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink)); //Enviar un correo electrónico con el token
         return response()->json(['message' => 'Correo electrónico enviado'], 200); //Devolver respuesta
+    }
+
+
+    public function actualizarContrasenaConToken(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
+                'token' => 'required|string',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+
+            if ($validator->fails()) {
+                throw new \Exception('Validación fallida.', 422);
+            }
+
+            $reset = DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->where('token', $request->token)
+                ->first();
+
+            if (!$reset) {
+                throw new \Exception('Token inválido o expirado.', 404);
+            }
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                throw new \Exception('Usuario no encontrado.', 404);
+            }
+
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            // Eliminar el token luego de usarlo
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+            return response()->json([
+                'message' => 'Contraseña actualizada correctamente.',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar la contraseña.',
+                'error' => $e->getMessage(),
+            ], $e->getCode() ?: 500);
+        }
     }
 }
