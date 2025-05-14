@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Requests\RequestAuth\ActualizarAuthRequest;
 use App\Http\Requests\RequestAuth\CrearAuthRequest;
 use App\Services\ArchivoService;
-
+use Carbon\Carbon;
 
 // Este controlador maneja la autenticación de usuarios, incluyendo el registro, inicio de sesión,
 // actualización de datos, cierre de sesión y restablecimiento de contraseña.
@@ -286,25 +286,38 @@ class AuthController
      */
     public function restablecerContrasena(Request $request)
     {
-        $validator = Validator::make(request()->all(), [ //Validar los datos de entrada
-            'email' => 'required|string|email|max:100',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [ // Validar los datos de entrada
+                'email' => 'required|string|email|max:100',
+            ]);
 
-        if ($validator->fails()) { //Si la validación falla, se guarda el mensaje de error
-            return response()->json(['error' => $validator->error()], 400);
+            if ($validator->fails()) { // Si la validación falla, se guarda el mensaje de error
+                throw new \Exception('Validación fallida.', 422);
+            }
+
+            $user = User::where('email', $request->email)->first(); // Recuperar el usuario por su email
+            if (!$user) {
+                throw new \Exception('Usuario no encontrado.', 404);
+            }
+
+            $token = bin2hex(random_bytes(32)); // Generar un token para restablecer la contraseña
+
+            DB::table('password_reset_tokens')->updateOrInsert( // Guardar el token en la base de datos
+                ['email' => $request->email], // Condición para buscar
+                ['token' => $token, 'created_at' => now()] // Datos a actualizar o insertar
+            );
+
+            $resetLink = env('FRONTEND_URL') . '/restablecer-contrasena2?token=' . $token . '&email=' . urlencode($user->email); // Generar el enlace
+            Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink)); // Enviar correo
+
+            return response()->json(['message' => 'Correo electrónico enviado'], 200); // Devolver respuesta
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al enviar el correo de restablecimiento.',
+                'error' => $e->getMessage()
+            ], $e->getCode() ?: 500);
         }
-
-        $user = User::where('email', $request->email)->first(); //Recuperar el usuario por su email
-        $token = bin2hex(random_bytes(32)); //Generar un token para restablecer la contraseña
-
-        DB::table('password_reset_tokens')->updateOrInsert( //Guardar el token en la base de datos
-            ['email' => $request->email], // Condición para buscar
-            ['token' => $token, 'created_at' => now()] // Datos a actualizar o insertar
-        );
-
-        $resetLink = env('FRONTEND_URL') . '/restablecer-contrasena2?token=' . $token . '&email=' . urlencode($user->email);//Generar el enlace de restablecimiento de contraseña
-        Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink)); //Enviar un correo electrónico con el token
-        return response()->json(['message' => 'Correo electrónico enviado'], 200); //Devolver respuesta
     }
 
 
@@ -327,11 +340,16 @@ class AuthController
                 ->first();
 
             if (!$reset) {
-                throw new \Exception('Token inválido o expirado.', 404);
+                throw new \Exception('Token inválido.', 404);
+            }
+
+            // Verificar si el token ha expirado (5 minutos)
+            $createdAt = Carbon::parse($reset->created_at);
+            if ($createdAt->diffInMinutes(now()) > 5) {
+                throw new \Exception('El token ha expirado. Por favor solicita uno nuevo.', 410);
             }
 
             $user = User::where('email', $request->email)->first();
-
             if (!$user) {
                 throw new \Exception('Usuario no encontrado.', 404);
             }
@@ -339,8 +357,7 @@ class AuthController
             $user->password = Hash::make($request->password);
             $user->save();
 
-            // Eliminar el token luego de usarlo
-            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete(); // Eliminar token
 
             return response()->json([
                 'message' => 'Contraseña actualizada correctamente.',
