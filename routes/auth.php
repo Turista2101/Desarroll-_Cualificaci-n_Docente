@@ -17,8 +17,8 @@ Route::group([
     // Ruta para restablecer la contraseña
     Route::post('restablecer-contrasena', [AuthController::class, 'restablecerContrasena']);
     // ruta para restablecer la contraseña cuando se te olvido
-    Route::post('restablecer-contraseña-token', [AuthController::class, 'actualizarContrasenaConToken']);
-    
+    Route::post('restablecer-contrasena-token', [AuthController::class, 'actualizarContrasenaConToken']);
+
     // Define un subgrupo de rutas protegidas por el middleware 'auth:api'
     Route::group(['middleware' => 'auth:api'], function () {
         
