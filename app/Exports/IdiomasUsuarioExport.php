@@ -45,7 +45,7 @@ class IdiomasUsuarioExport implements FromCollection, WithHeadings, WithTitle, S
             ->get()
             ->map(function ($idioma) {
                 return [
-                    'docente' => $idioma->usuarioidioma->primer_nombre . ' ' . $idioma->usuarioidioma->segundo_nombre . ' ' . $idioma->usuarioidioma->primer_apellido . ' ' . $idioma->usuarioidioma->segundo_apellido,
+                    'numero_identificacion' => $idioma->usuarioidioma->numero_identificacion,
                     'email' => $idioma->usuarioidioma->email,
                     'idioma' => $idioma->idioma,
                     'institucion_idioma' => $idioma->institucion_idioma,
@@ -57,7 +57,7 @@ class IdiomasUsuarioExport implements FromCollection, WithHeadings, WithTitle, S
     public function headings(): array
     {
         return [
-            'Docente',
+            'Número Identificación',
             'Email',
             'Idioma',
             'Institución Idioma',

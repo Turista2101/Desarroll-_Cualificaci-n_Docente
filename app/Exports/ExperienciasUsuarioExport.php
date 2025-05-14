@@ -44,7 +44,7 @@ class ExperienciasUsuarioExport implements FromCollection, WithHeadings, WithTit
             ->get()
             ->map(function ($experiencia) {
                 return [
-                    'nombre' => $experiencia->usuarioExperiencia->primer_nombre . ' ' . $experiencia->usuarioExperiencia->segundo_nombre . ' ' . $experiencia->usuarioExperiencia->primer_apellido . ' ' . $experiencia->usuarioExperiencia->segundo_apellido,
+                    'numero_identificacion' => $experiencia->usuarioExperiencia->numero_identificacion,
                     'Email' => $experiencia->usuarioExperiencia->email,
                     'tipo_experiencia' => $experiencia->tipo_experiencia,
                     'institucion' => $experiencia->institucion_experiencia,
@@ -60,7 +60,7 @@ class ExperienciasUsuarioExport implements FromCollection, WithHeadings, WithTit
     public function headings(): array
     {
         return [
-            'Nombre',
+            'Numero de Identificacion',
             'Email',
             'Tipo de Experiencia',
             'Institucion',

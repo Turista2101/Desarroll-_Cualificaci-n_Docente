@@ -46,7 +46,7 @@ class ProduccionesAcademicasUsuarioExport implements FromCollection, WithHeading
             ->map(
                 function ($produccionAcademica) {
                     return [
-                        'docente' => $produccionAcademica->usuarioProduccionAcademica->primer_nombre . ' ' . $produccionAcademica->usuarioProduccionAcademica->segundo_nombre . ' ' . $produccionAcademica->usuarioProduccionAcademica->primer_apellido . ' ' . $produccionAcademica->usuarioProduccionAcademica->segundo_apellido,
+                        'numero_identificacion' => $produccionAcademica->usuarioProduccionAcademica->numero_identificacion,
                         'email' => $produccionAcademica->usuarioProduccionAcademica->email,
                         'ambito_divulgacion' => $produccionAcademica->ambito_divulgacion,
                         'titulo' => $produccionAcademica->titulo,
@@ -61,7 +61,7 @@ class ProduccionesAcademicasUsuarioExport implements FromCollection, WithHeading
     public function headings(): array
     {
         return [
-            'Docente',
+            'Número Identificación',
             'Email',
             'Ámbito de divulgación',
             'Título',

@@ -45,7 +45,7 @@ class EstudiosUsuarioExport implements FromCollection, WithHeadings, WithTitle, 
             ->get()
             ->map(function ($estudio) {
                 return [
-                    'nombre' => $estudio->usuarioEstudio->primer_nombre . '' . $estudio->usuarioEstudio->segundo_nombre . '' . $estudio->usuarioEstudio->primer_apellido . '' . $estudio->usuarioEstudio->segundo_apellido,
+                    'numero_identificacion' => $estudio->usuarioEstudio->numero_identificacion,
                     'Email' => $estudio->usuarioEstudio->email,
                     'tipo_estudio' => $estudio->tipo_estudio,
                     'Grauado' => $estudio->graduado,
@@ -64,7 +64,7 @@ class EstudiosUsuarioExport implements FromCollection, WithHeadings, WithTitle, 
     public function headings(): array
     {
         return [
-            'Nombre',
+            'Número de Identificación',
             'Email',
             'Tipo de Estudio',
             'Graduado',

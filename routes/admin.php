@@ -35,6 +35,7 @@ Route::group([
     Route::put('actualizar-normativa/{id}', [NormativaController::class, 'actualizarNormativa']);
     Route::delete('eliminar-normativa/{id}', [NormativaController::class, 'eliminarNormativa']);
 
+    // Rutas de reportes
     Route::get('usuarios-excel', [ReporteController::class, 'usuariosExcel']);
 
     
