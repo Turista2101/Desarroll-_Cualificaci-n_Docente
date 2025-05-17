@@ -5,7 +5,7 @@ namespace App\Constants\ConstTalentoHumano;
 class EstadoPostulacion
 {
     // Estado cuando la postulación ha sido enviada pero aún no ha sido evaluada
-    public const ENVIADA = 'Enviada';
+    public const ENVIADA = 'Faltan documentos';
     // Estado cuando la postulación ha sido aceptada y el postulante avanza al siguiente paso
     public const ACEPTADA = 'Aceptada';
     // Estado cuando la postulación ha sido rechazada y el postulante no continúa en el proceso

@@ -48,7 +48,7 @@ class ConvertidorPDFService
         $comando = $this->ghostscriptPath . ' ' .
             '-sDEVICE=pdfwrite ' .
             '-dCompatibilityLevel=1.4 ' .
-            '-dPDFSETTINGS=/prepress ' . 
+            '-dPDFSETTINGS=/prepress ' .
             '-dNOPAUSE ' .
             '-dQUIET ' .
             '-dBATCH ' .

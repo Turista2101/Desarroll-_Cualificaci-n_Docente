@@ -38,13 +38,13 @@ class GeneradorHojaDeVidaPDFService
             // Crear una nueva instancia del PDF usando FPDI
             $pdf = new Fpdi();
             $pdf->AddPage(); // Agrega una nueva página al PDF
-            $pdf->SetFont('Helvetica', '', 12);// Establece la fuente a usar en el PDF
-            
+            $pdf->SetFont('Helvetica', '', 12); // Establece la fuente a usar en el PDF
+
             // --- Foto de perfil ---
             // Imprime la foto de perfil del usuario en el PDF
             $this->imprimirFotoPerfil($pdf, $usuario);
 
-            $pdf->Ln(70);// Deja un espacio de 70 unidades después de la foto
+            $pdf->Ln(70); // Deja un espacio de 70 unidades después de la foto
 
             // --- Información personal ---
             // Imprime los datos personales del usuario
@@ -71,7 +71,7 @@ class GeneradorHojaDeVidaPDFService
             $this->procesarRelacionSimple($pdf, $usuario->rutUsuario, 'documentosRut', 'RUT');
 
             // --- Idiomas ---
-             // Imprime los idiomas que maneja el usuario
+            // Imprime los idiomas que maneja el usuario
             $this->imprimirIdiomas($pdf, $usuario->idiomasUsuario);
 
             // --- Estudios ---
@@ -79,7 +79,7 @@ class GeneradorHojaDeVidaPDFService
             $this->imprimirEstudios($pdf, $usuario->estudiosUsuario);
 
             // --- Experiencias ---
-             // Imprime la experiencia laboral del usuario
+            // Imprime la experiencia laboral del usuario
             $this->imprimirExperiencias($pdf, $usuario->experienciasUsuario);
 
             // --- Producción Académica ---
@@ -104,7 +104,7 @@ class GeneradorHojaDeVidaPDFService
     // Imprime una línea centrada en el PDF, con etiqueta en negrita y valor en normal
     private function imprimirLineaCentrada($pdf, $etiqueta, $valor)
     {
-        $textoCompleto = $etiqueta . ' ' . $valor;// Junta etiqueta y valor en un solo string
+        $textoCompleto = $etiqueta . ' ' . $valor; // Junta etiqueta y valor en un solo string
         $anchoTexto = $pdf->GetStringWidth($textoCompleto); // Calcula el ancho total del texto
         $paginaAncho = $pdf->GetPageWidth(); // Obtiene el ancho de la página
         $x = ($paginaAncho - $anchoTexto) / 2; // Calcula la posición X para centrar el texto
@@ -115,14 +115,14 @@ class GeneradorHojaDeVidaPDFService
         $pdf->Write(10, $valor); // Escribe el valor
         $pdf->Ln(12); // Salta una línea (espacio después del par etiqueta-valor)
     }
-    
+
     // Inserta la foto de perfil del usuario en el PDF, centrada en la página
     private function imprimirFotoPerfil($pdf, $usuario)
     {
         if ($usuario->fotoPerfilUsuario && $usuario->fotoPerfilUsuario->documentosFotoPerfil) { // Verifica si el usuario tiene una foto de perfil
             $fotoRelativePath = $usuario->fotoPerfilUsuario->documentosFotoPerfil->first()->archivo ?? null; // toma el primer archivo de la foto de perfil
             if ($fotoRelativePath) {
-                $fotoStoragePath = public_path('storage/' . $fotoRelativePath);// obtiene la ruta completa de la foto
+                $fotoStoragePath = public_path('storage/' . $fotoRelativePath); // obtiene la ruta completa de la foto
                 if (file_exists($fotoStoragePath)) { // Verifica si el archivo existe
                     $pageWidth = $pdf->GetPageWidth(); // Obtiene el ancho de la página
                     $imageWidth = 50; // Ancho deseado de la imagen
@@ -247,7 +247,7 @@ class GeneradorHojaDeVidaPDFService
                     'Fecha Inicio:' => $estudio->fecha_inicio,
                     'Fecha Fin:' => $estudio->fecha_fin ?? 'No aplica',
                 ];
-  
+
                 // Recorre el array y lo imprime en el PDF
                 foreach ($datos as $etiqueta => $valor) {
                     $pdf->SetFont('Helvetica', 'B', 12); // Etiqueta en negrita
@@ -355,9 +355,9 @@ class GeneradorHojaDeVidaPDFService
     private function procesarRelacionMultiple($pdf, $modelos, $campoDocumentos, $titulo)
     {
         if ($modelos) { // Verifica que exista la colección de modelos
-            foreach ($modelos as $modelo) {// Recorre cada modelo en la colección
+            foreach ($modelos as $modelo) { // Recorre cada modelo en la colección
                 if ($modelo->$campoDocumentos) { // Si el modelo tiene documentos asociados
-                    foreach ($modelo->$campoDocumentos as $documento) {// Recorre todos los documentos de ese modelo
+                    foreach ($modelo->$campoDocumentos as $documento) { // Recorre todos los documentos de ese modelo
                         $this->procesarDocumento($documento, $pdf, $titulo);  // Procesa cada documento individualmente
                     }
                 }
@@ -377,7 +377,7 @@ class GeneradorHojaDeVidaPDFService
             }
         }
     }
-    
+
     // Función para procesar un documento individual
     private function procesarDocumento($documento, $pdf, $tipoDocumento)
     {
@@ -388,13 +388,13 @@ class GeneradorHojaDeVidaPDFService
                 $pdfConvertido = $this->convertidorPDFService->convertir($pdfPath); // Usa un servicio para convertir el documento (por si se necesita transformar el PDF)
                 $pageCount = $pdf->setSourceFile($pdfConvertido);  // Cuenta cuántas páginas tiene el PDF convertido
 
-                for ($page = 1; $page <= $pageCount; $page++) {// Recorre cada página del documento
+                for ($page = 1; $page <= $pageCount; $page++) { // Recorre cada página del documento
                     $tplIdx = $pdf->importPage($page); // Importa la página actual como plantilla
                     $pdf->AddPage(); // Crea una nueva página en el PDF final
                     $pdf->useTemplate($tplIdx, 10, 10, 190);  // Inserta la plantilla importada en la página nueva
                 }
 
-                 // Elimina el archivo temporal convertido si es diferente del archivo original
+                // Elimina el archivo temporal convertido si es diferente del archivo original
                 if (realpath($pdfConvertido) !== realpath($pdfPath)) {
                     @unlink($pdfConvertido);
                 }

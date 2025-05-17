@@ -118,22 +118,22 @@ class PostulacionController
      * @param int $idConvocatoria ID de la convocatoria cuyas postulaciones se desean consultar.
      * @return \Illuminate\Http\JsonResponse Respuesta JSON con la lista de postulaciones o mensaje de error.
      */
-    public function obtenerPorConvocatoria($idConvocatoria)
-    {
-        try {
-            $postulaciones = Postulacion::where('convocatoria_id', $idConvocatoria) // Obtener las postulaciones por ID de convocatoria
-                ->with('usuarioPostulacion') // Incluir la relación con el usuario postulante
-                ->get();
+    // public function obtenerPorConvocatoria($idConvocatoria)
+    // {
+    //     try {
+    //         $postulaciones = Postulacion::where('convocatoria_id', $idConvocatoria) // Obtener las postulaciones por ID de convocatoria
+    //             ->with('usuarioPostulacion') // Incluir la relación con el usuario postulante
+    //             ->get();
 
-            return response()->json(['postulaciones' => $postulaciones], 200); // Retornar las postulaciones en formato JSON
+    //         return response()->json(['postulaciones' => $postulaciones], 200); // Retornar las postulaciones en formato JSON
 
-        } catch (\Exception $e) { // Manejar excepciones
-            return response()->json([
-                'message' => 'Ocurrió un error al obtener las postulaciones por convocatoria.', // Retornar un mensaje de error
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+    //     } catch (\Exception $e) { // Manejar excepciones
+    //         return response()->json([
+    //             'message' => 'Ocurrió un error al obtener las postulaciones por convocatoria.', // Retornar un mensaje de error
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     /**
      * Obtener las postulaciones del usuario autenticado.

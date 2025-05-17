@@ -12,7 +12,7 @@ class AdminSeeder extends Seeder
     {
         // Crear usuario administrador por defecto si no existe
         $admin = User::firstOrCreate([
-            'email' => 'adminunic@universidad.com'
+            'email' => 'adminunidoc@universidad.com'
         ], [
             'municipio_id'           => 703, // Cambia este valor según el municipio en tu DB
             'tipo_identificacion'    => 'Cédula de ciudadanía', // Cambia según los valores en TipoIdentificacion::all()
