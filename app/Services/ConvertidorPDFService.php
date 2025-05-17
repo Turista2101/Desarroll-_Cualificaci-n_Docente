@@ -12,7 +12,7 @@ class ConvertidorPDFService
 
     public function __construct()
     {
-        $this->ghostscriptPath = '"C:\Program Files\gs\gs10.05.0\bin\gswin64c.exe"'; // Ruta de Ghostscript
+        $this->ghostscriptPath = '"C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe"'; // Ruta de Ghostscript
         $this->carpetaDestino = public_path('storage/Documentos_Compartidos');
     }
 
