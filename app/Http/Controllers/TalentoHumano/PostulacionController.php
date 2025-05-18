@@ -269,6 +269,7 @@ class PostulacionController
             return response()->json([ // Retornar un mensaje de éxito
                 'message' => 'Postulación eliminada correctamente.'
             ]);
+            
         } catch (\Exception $e) { // Manejar excepciones
             return response()->json([ // Retornar un mensaje de error
                 'message' => 'Ocurrió un error al eliminar la postulación.',

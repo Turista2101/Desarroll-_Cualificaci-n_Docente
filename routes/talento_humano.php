@@ -21,7 +21,7 @@ Route::group([
 
     // Rutas relacionadas con postulaciones
     Route::get('obtener-postulaciones',[PostulacionController::class, 'obtenerPostulaciones']);
-    Route::get('obtener-postulaciones-convocatoria/{idConvocatoria}',[PostulacionController::class, 'obtenerPorConvocatoria']);
+    // Route::get('obtener-postulaciones-convocatoria/{idConvocatoria}',[PostulacionController::class, 'obtenerPorConvocatoria']);
     Route::delete('eliminar-postulacion/{idPostulacion}',[PostulacionController::class, 'eliminarPostulacion']);
     Route::put('actualizar-postulacion/{idPostulacion}',[PostulacionController::class, 'actualizarEstadoPostulacion']);
     Route::get('hoja-de-vida-pdf/{idConvocatoria}/{idUsuario}', [PostulacionController::class, 'generarHojaDeVidaPDF']);

@@ -32,7 +32,7 @@ class CrearContratacionRequest extends FormRequest
             'tipo_contrato' => ['required','string', Rule::in( TipoContratacion::all())],
             // El campo `tipo_contrato` es obligatorio (`required`).
             // Su valor debe estar dentro de los valores definidos en `TipoContratacion::all()`.
-            'area' => ['required','string', Rule::in(',', AreasContratacion::all())],
+            'area' => ['required','string', Rule::in(AreasContratacion::all())],
              // El campo `area` es obligatorio (`required`).
             // Su valor debe estar dentro de los valores definidos en `AreasContratacion::all()`.
             'fecha_inicio' => 'required|date',
