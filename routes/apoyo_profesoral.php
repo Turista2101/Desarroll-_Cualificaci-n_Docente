@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 // Define un grupo de rutas con configuraciones específicas
 Route::group([
-    'middleware' => 'api', 'auth:api', 'role:Apoyo Profesoral',
+    'middleware' => ['api', 'auth:api', 'role:Apoyo Profesoral'],
     'prefix' => 'apoyoProfesoral',
 ], function () {
     // Rutas para la verificación de documentos
@@ -16,8 +16,20 @@ Route::group([
     Route::put('actualizar-documento/{id}', [VerificacionDocumentosController::class, 'actualizarEstadoDocumento']);
     Route::get('listar-docentes', [VerificacionDocumentosController::class, 'listarDocentes']);
     Route::get('ver-documentos-docente/{id}', [VerificacionDocumentosController::class, 'verDocumentosPorDocente']);
-    // Rutas para filtrar docentes
-    Route::get('filtrar-docentes-estudio/{tipo}', [FiltrarDocentesController::class, 'obtenerDocentesPorTipoEstudio']);
+    // Rutas para filtrar docentes por estudio
+    Route::get('filtrar-docentes-estudio/{tipo}', [FiltrarDocentesController::class, 'filtrarPorTipoEstudio']);
+    Route::get('mostrar-todos-estudios', [FiltrarDocentesController::class, 'mostrarTodosLosEstudios']);
+    Route::get('filtrar-docentes-estudio-id/{id}', [FiltrarDocentesController::class, 'obtenerEstudiosPorDocente']);
+     // Rutas para filtrar docentes por idioma
+    Route::get('mostrar-todos-idioma', [FiltrarDocentesController::class, 'mostrarTodosLosIdiomas']);
+    Route::get('filtrar-docentes-idioma/{idioma}', [FiltrarDocentesController::class, 'filtrarPorNivelIdioma']);
+    Route::get('filtrar-docentes-idioma-id/{id}', [FiltrarDocentesController::class, 'obtenerIdiomasPorDocente']);
+    // Rutas para filtrar docentes por producción académica
+    Route::get('mostrar-todos-produccion', [FiltrarDocentesController::class, 'mostrarTodaLaProduccionAcademica']);
+    Route::get('filtrar-docentes-produccion/{id}', [FiltrarDocentesController::class, 'obtenerProduccionAcademicaPorDocente']);
+    Route::get('filtrar-docentes-ambito/{ambitoId}', [FiltrarDocentesController::class, 'filtrarPorAmbitoDivulgacion']);
+
+
 
 
 });
