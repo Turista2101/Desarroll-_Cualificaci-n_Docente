@@ -11,175 +11,79 @@ use Illuminate\Validation\Rule;
 
 class VerificacionDocumentosController
 {
-    public function obtenerEstudiosPendientes()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'estudiosUsuario',
-            'documentosEstudio',
-            'pendiente'
+    /**
+     * Relaciones entre categorías de documentos y sus modelos asociados.
+     */
+    protected array $relaciones = [
+        'estudiosUsuario' => 'documentosEstudio',
+        'experienciasUsuario' => 'documentosExperiencia',
+        'idiomasUsuario' => 'documentosIdioma',
+        'rutUsuario' => 'documentosRut',
+        'informacionContactoUsuario' => 'documentosInformacionContacto',
+        'epsUsuario' => 'documentosEps',
+    ];
 
-        );
+
+    private function prepararRelacionesFiltradas($estado)
+    {
+        $relacionesFiltradas = [];
+        foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+            $relacionesFiltradas[$relacionPadre . '.' . $relacionDocumentos] = function ($query) use ($estado) {
+                $query->where('estado', $estado);
+            };
+        }
+        return $relacionesFiltradas;
     }
 
-    public function obtenerExperineciasPendientes()
+    
+    private function aplicarFiltrosPorEstado($query, $estado)
     {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'experienciasUsuario',
-            'documentosExperiencia',
-            'pendiente'
+        foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+            $query->orWhereHas($relacionPadre . '.' . $relacionDocumentos, function ($q) use ($estado) {
+                $q->where('estado', $estado);
+            });
+        }
 
-        );
+        $query->orWhereHas('documentosUser', function ($q) use ($estado) {
+            $q->where('estado', $estado);
+        });
     }
 
-    public function obtenerIdiomasPendientes()
+    private function agregarUrlADocumentos($usuarios)
     {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'idiomasUsuario',
-            'documentosIdioma',
-            'pendiente'
-
-        );
-    }
-
-    public function obtenerRutPendientes()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'rutUsuario',
-            'documentosRut',
-            'pendiente'
-
-        );
-    }
-
-    public function obtenerLibretaMilitarPendientes()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'informacionContactoUsuario',
-            'documentosInformacionContacto',
-            'pendiente'
-
-
-        );
-    }
-
-    public function obtenerEpsPendientes()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'epsUsuario',
-            'documentosEps',
-            'pendiente'
-
-        );
-    }
-
-    public function obtenerIndenitificacionPendientes()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'user',
-            'documentosUser',
-            'pendiente'
-        );
-    }
-
-    //obtener documentos aprobados
-    public function obtenerEstudiosAprobados()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'estudiosUsuario',
-            'documentosEstudio',
-            'aprobado'
-
-        );
-    }
-
-    public function obtenerExperineciasAprobados()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'experienciasUsuario',
-            'documentosExperiencia',
-            'aprobado'
-
-        );
-    }
-
-    public function obtenerIdiomasAprobados()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'idiomasUsuario',
-            'documentosIdioma',
-            'aprobado'
-
-        );
-    }
-
-    public function obtenerRutAprobados()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'rutUsuario',
-            'documentosRut',
-            'aprobado'
-
-        );
-    }
-
-    public function obtenerLibretaMilitarAprobados()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'informacionContactoUsuario',
-            'documentosInformacionContacto',
-            'aprobado'
-
-
-        );
-    }
-
-    public function obtenerEpsAprobados()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'epsUsuario',
-            'documentosEps',
-            'aprobado'
-
-        );
-    }
-
-    public function obtenerIndenitificacionAprobados()
-    {
-        return $this->obtenerDocumentosPorRelacionYEstado(
-            'user',
-            'documentosUser',
-            'aprobado'
-        );
-    }
-
-    protected function obtenerDocumentosPorRelacionYEstado($relacionPadre, $relacionDocumentos, $estado)
-    {
-        try {
-            $usuarios = User::role('Docente')
-                ->with([$relacionPadre . '.' . $relacionDocumentos => function ($query) use ($estado) {
-                    $query->where('estado', $estado);
-                }])
-                ->whereHas($relacionPadre . '.' . $relacionDocumentos, function ($query) use ($estado) {
-                    $query->where('estado', $estado);
-                })
-                ->get();
-
-            if ($usuarios->isEmpty()) {
-                return response()->json([
-                    'message' => 'Aún no hay documentos por aprobar.',
-                    'data' => []
-                ], 200);
-            }
-
-            foreach ($usuarios as $usuario) {
-                foreach ($usuario->$relacionPadre as $elemento) {
-                    foreach ($elemento->$relacionDocumentos as $documento) {
+        foreach ($usuarios as $usuario) {
+            foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+                foreach ($usuario->$relacionPadre ?? [] as $elemento) {
+                    foreach ($elemento->$relacionDocumentos ?? [] as $documento) {
                         $documento->archivo_url = Storage::url($documento->archivo);
                     }
                 }
             }
 
-            return response()->json(['data' => $usuarios], 200);
+            foreach ($usuario->documentosUser ?? [] as $documentoUser) {
+                $documentoUser->archivo_url = Storage::url($documentoUser->archivo);
+            }
+        }
+    }
+
+    public function obtenerDocumentosPorEstado($estado)
+    {
+        try {
+            $relacionesFiltradas = $this->prepararRelacionesFiltradas($estado);
+
+            $usuarios = User::role('Docente')
+                ->with($relacionesFiltradas)
+                ->where(function ($query) use ($estado) {
+                    $this->aplicarFiltrosPorEstado($query, $estado);
+                })
+                ->get();
+
+            $this->agregarUrlADocumentos($usuarios);
+
+            return response()->json([
+                'data' => $usuarios,
+                'message' => $usuarios->isEmpty() ? 'No se encontraron documentos con ese estado.' : ''
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al obtener documentos.',
@@ -188,16 +92,78 @@ class VerificacionDocumentosController
         }
     }
 
+    // public function obtenerDocumentosPorEstado($estado)
+    // {
+    //     try {
+    //         $relacionesFiltradas = [];
 
+    //         // Prepara las relaciones para hacer eager loading con condición por estado
+    //         foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+    //             $relacionesFiltradas[$relacionPadre . '.' . $relacionDocumentos] = function ($query) use ($estado) {
+    //                 $query->where('estado', $estado);
+    //             };
+    //         }
+
+    //         // Obtener solo usuarios que tienen al menos un documento con el estado dado en cualquier relación
+    //         $usuarios = User::role('Docente')
+    //             ->with($relacionesFiltradas)
+    //             ->where(function ($query) use ($estado) {
+    //                 // Filtrar por estado en cada una de las relaciones definidas
+    //                 foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+    //                     $query->orWhereHas($relacionPadre . '.' . $relacionDocumentos, function ($q) use ($estado) {
+    //                         $q->where('estado', $estado);
+    //                     });
+    //                 }
+
+    //                 // Filtrar los documentos directamente relacionados con el usuario (documentosUser)
+    //                 $query->orWhereHas('documentosUser', function ($q) use ($estado) {
+    //                     $q->where('estado', $estado);
+    //                 });
+    //             })
+    //             ->get();
+
+    //         // Agregar URL a cada documento
+    //         foreach ($usuarios as $usuario) {
+    //             // Filtramos documentos relacionados con las relaciones definidas
+    //             foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+    //                 $elementos = $usuario->$relacionPadre ?? [];
+
+    //                 foreach ($elementos as $elemento) {
+    //                     foreach ($elemento->$relacionDocumentos ?? [] as $documento) {
+    //                         $documento->archivo_url = Storage::url($documento->archivo);
+    //                     }
+    //                 }
+    //             }
+
+    //             // Filtrar y agregar URL a los documentos directamente relacionados con el usuario (documentosUser)
+    //             foreach ($usuario->documentosUser ?? [] as $documentoUser) {
+    //                 $documentoUser->archivo_url = Storage::url($documentoUser->archivo);
+    //             }
+    //         }
+
+    //         return response()->json([
+    //             'data' => $usuarios,
+    //             'message' => $usuarios->isEmpty() ? 'No se encontraron documentos con ese estado.' : ''
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Error al obtener documentos.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+    /**
+     * Actualiza el estado de un documento específico.
+     */
     public function actualizarEstadoDocumento(Request $request, $documento_id)
     {
         try {
             $request->validate([
-                'estado' => ['required', Rule::in(EstadoDocumentos::all())], // o ['aprobado', 'rechazado', ...]
+                'estado' => ['required', Rule::in(EstadoDocumentos::all())],
             ]);
 
             $documento = Documento::findOrFail($documento_id);
-
             $documento->estado = $request->estado;
             $documento->save();
 

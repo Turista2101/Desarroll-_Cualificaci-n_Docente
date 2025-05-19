@@ -19,3 +19,5 @@ require_once __DIR__ . '/docente.php';
 require_once __DIR__ . '/evaluador_produccion.php';
 // Incluye el archivo produccion_academica.php, contiene rutas relacionadas con la producción académica
 require_once __DIR__ . '/produccion_academica.php';
+// Incluye el archivo apoyo_profesoral.php, contiene rutas relacionadas con el apoyo profesional
+require_once __DIR__ . '/apoyo_profesoral.php';

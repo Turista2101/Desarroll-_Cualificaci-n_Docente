@@ -7,14 +7,10 @@ use Illuminate\Support\Facades\Route;
 
 // Define un grupo de rutas con configuraciones específicas
 Route::group([
-    // Aplica los middlewares 'api', 'auth:api' y 'role:Apoyo Profesoral' para proteger las rutas
-    'middleware' => 'api', 'auth:api', 'role:Apoyo Profesoral',
-    // Establece un prefijo 'aspirante' para las rutas dentro de este grupo
+    'middleware' => ['api', 'auth:api', 'role:Apoyo Profesoral'],
     'prefix' => 'apoyoProfesoral',
 ], function () {
-
-    Route::get('obtener-documentos/{tipo}', [VerificacionDocumentosController::class, 'obtenerDocumentosPorTipoYEstado']);
-    Route::put('actualizar-documentos/{documento_id}', [VerificacionDocumentosController::class, 'actualizarEstadoDocumento']);
-
+    Route::get('obtener-documentos/{estado}', [VerificacionDocumentosController::class, 'obtenerDocumentosPorEstado']);
+    Route::put('actualizar-documento/{id}', [VerificacionDocumentosController::class, 'actualizarEstadoDocumento']);
     
 });
