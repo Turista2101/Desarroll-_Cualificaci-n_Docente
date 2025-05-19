@@ -8,6 +8,7 @@ use App\Models\Usuario\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class VerificacionDocumentosController
 {
@@ -21,50 +22,74 @@ class VerificacionDocumentosController
         'rutUsuario' => 'documentosRut',
         'informacionContactoUsuario' => 'documentosInformacionContacto',
         'epsUsuario' => 'documentosEps',
+        // Relación directa del usuario (polimórfica)
+        'usuario'                 => 'documentosUser',
     ];
 
 
     private function prepararRelacionesFiltradas($estado)
     {
         $relacionesFiltradas = [];
+
         foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+            // Saltar la relación directa del usuario
+            if ($relacionPadre === 'usuario') {
+                continue;
+            }
             $relacionesFiltradas[$relacionPadre . '.' . $relacionDocumentos] = function ($query) use ($estado) {
                 $query->where('estado', $estado);
             };
         }
+
         return $relacionesFiltradas;
     }
 
-    
+
     private function aplicarFiltrosPorEstado($query, $estado)
     {
         foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
-            $query->orWhereHas($relacionPadre . '.' . $relacionDocumentos, function ($q) use ($estado) {
-                $q->where('estado', $estado);
-            });
+            if ($relacionPadre === 'usuario') {
+                $query->orWhereHas('documentosUser', function ($q) use ($estado) {
+                    $q->where('estado', $estado);
+                });
+            } else {
+                $query->orWhereHas($relacionPadre . '.' . $relacionDocumentos, function ($q) use ($estado) {
+                    $q->where('estado', $estado);
+                });
+            }
         }
-
-        $query->orWhereHas('documentosUser', function ($q) use ($estado) {
-            $q->where('estado', $estado);
-        });
     }
+
 
     private function agregarUrlADocumentos($usuarios)
     {
         foreach ($usuarios as $usuario) {
             foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
-                foreach ($usuario->$relacionPadre ?? [] as $elemento) {
-                    foreach ($elemento->$relacionDocumentos ?? [] as $documento) {
-                        $documento->archivo_url = Storage::url($documento->archivo);
-                    }
+                if ($relacionPadre === 'usuario') {
+                    $this->agregarUrlADocumentosDirectos($usuario);
+                } else {
+                    $this->agregarUrlADocumentosRelacionados($usuario, $relacionPadre, $relacionDocumentos);
                 }
-            }
-
-            foreach ($usuario->documentosUser ?? [] as $documentoUser) {
-                $documentoUser->archivo_url = Storage::url($documentoUser->archivo);
             }
         }
     }
+
+    private function agregarUrlADocumentosDirectos($usuario): void
+    {
+        foreach ($usuario->documentosUser ?? [] as $documentoUser) {
+            $documentoUser->archivo_url = Storage::url($documentoUser->archivo);
+        }
+    }
+
+    private function agregarUrlADocumentosRelacionados($usuario, $relacionPadre, $relacionDocumentos): void
+    {
+        foreach ($usuario->$relacionPadre ?? [] as $elemento) {
+            foreach ($elemento->$relacionDocumentos ?? [] as $documento) {
+                $documento->archivo_url = Storage::url($documento->archivo);
+            }
+        }
+    }
+
 
     public function obtenerDocumentosPorEstado($estado)
     {
@@ -92,66 +117,59 @@ class VerificacionDocumentosController
         }
     }
 
-    // public function obtenerDocumentosPorEstado($estado)
-    // {
-    //     try {
-    //         $relacionesFiltradas = [];
 
-    //         // Prepara las relaciones para hacer eager loading con condición por estado
-    //         foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
-    //             $relacionesFiltradas[$relacionPadre . '.' . $relacionDocumentos] = function ($query) use ($estado) {
-    //                 $query->where('estado', $estado);
-    //             };
-    //         }
+    public function listarDocentes()
+    {
+        try {
+            $docentes = User::role('Docente')
+                ->select(
+                    'id',
+                    DB::raw("CONCAT(primer_nombre, ' ', segundo_nombre, ' ', primer_apellido, ' ', segundo_apellido) AS nombre_completo"),
+                    'email',
+                    'numero_identificacion'
+                ) // Solo los campos necesarios
+                ->get();
 
-    //         // Obtener solo usuarios que tienen al menos un documento con el estado dado en cualquier relación
-    //         $usuarios = User::role('Docente')
-    //             ->with($relacionesFiltradas)
-    //             ->where(function ($query) use ($estado) {
-    //                 // Filtrar por estado en cada una de las relaciones definidas
-    //                 foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
-    //                     $query->orWhereHas($relacionPadre . '.' . $relacionDocumentos, function ($q) use ($estado) {
-    //                         $q->where('estado', $estado);
-    //                     });
-    //                 }
+            return response()->json([
+                'data' => $docentes,
+                'message' => $docentes->isEmpty() ? 'No hay docentes registrados.' : ''
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener los docentes.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
-    //                 // Filtrar los documentos directamente relacionados con el usuario (documentosUser)
-    //                 $query->orWhereHas('documentosUser', function ($q) use ($estado) {
-    //                     $q->where('estado', $estado);
-    //                 });
-    //             })
-    //             ->get();
+    public function verDocumentosPorDocente($user_id)
+    {
+        try {
+            $usuario = User::with(array_merge(
+                // Cargar relaciones anidadas
+                collect($this->relaciones)
+                    ->reject(fn($relacionDocumentos, $relacionPadre) => $relacionPadre === 'usuario')
+                    ->mapWithKeys(fn($relacionDocumentos, $relacionPadre) => [
+                        $relacionPadre . '.' . $relacionDocumentos => fn($q) => $q,
+                    ])
+                    ->toArray(),
+                // Cargar documentosUser directamente
+                ['documentosUser']
+            ))->findOrFail($user_id);
 
-    //         // Agregar URL a cada documento
-    //         foreach ($usuarios as $usuario) {
-    //             // Filtramos documentos relacionados con las relaciones definidas
-    //             foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
-    //                 $elementos = $usuario->$relacionPadre ?? [];
+            $this->agregarUrlADocumentos([$usuario]);
 
-    //                 foreach ($elementos as $elemento) {
-    //                     foreach ($elemento->$relacionDocumentos ?? [] as $documento) {
-    //                         $documento->archivo_url = Storage::url($documento->archivo);
-    //                     }
-    //                 }
-    //             }
-
-    //             // Filtrar y agregar URL a los documentos directamente relacionados con el usuario (documentosUser)
-    //             foreach ($usuario->documentosUser ?? [] as $documentoUser) {
-    //                 $documentoUser->archivo_url = Storage::url($documentoUser->archivo);
-    //             }
-    //         }
-
-    //         return response()->json([
-    //             'data' => $usuarios,
-    //             'message' => $usuarios->isEmpty() ? 'No se encontraron documentos con ese estado.' : ''
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'message' => 'Error al obtener documentos.',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
+            return response()->json([
+                'usuario' => $usuario,
+                'message' => 'Documentos cargados correctamente.',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener los documentos del usuario.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     /**
      * Actualiza el estado de un documento específico.

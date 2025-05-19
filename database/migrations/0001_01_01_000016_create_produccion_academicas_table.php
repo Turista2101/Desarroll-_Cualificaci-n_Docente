@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('medio_divulgacion');
             $table->date('fecha_divulgacion');
             $table->timestamps();
-            
+
             // llave foranea
             $table->foreign('ambito_divulgacion_id')
                 ->references('id_ambito_divulgacion')
@@ -32,7 +32,10 @@ return new class extends Migration
                 ->on('users'); // Eliminar produccion_academica si se elimina el usuario
 
             // clave unica para evitar duplicados
-            $table->unique(['user_id', 'titulo'], 'produccion_academicas_unique_constraint');
+            $table->unique(
+                ['user_id', 'titulo', 'medio_divulgacion', 'fecha_divulgacion'],
+                'produccion_academicas_unique_constraint'
+            );
         });
     }
 
