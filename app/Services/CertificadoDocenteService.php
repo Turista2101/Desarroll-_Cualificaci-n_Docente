@@ -3,17 +3,17 @@
 namespace App\Services;
 
 use setasign\Fpdi\Tcpdf\Fpdi;
-use Illuminate\Http\File;
+use Illuminate\Http\UploadedFile;
 
 class CertificadoDocenteService
 {
     /**
-     * Genera un certificado en PDF con base en la plantilla y datos del docente.
+     * Genera un certificado en PDF como archivo subible.
      *
      * @param array $data
-     * @return string Ruta relativa del PDF generado.
+     * @return UploadedFile
      */
-    public function generarPDF(array $data): string
+    public function generarPDF(array $data): UploadedFile
     {
         $pdf = new Fpdi();
 
@@ -48,7 +48,6 @@ class CertificadoDocenteService
         $pdf->SetXY(104, 150);
         $pdf->Cell(90, 10, $data['fecha'], 0, 0, 'C');
 
-        // Guardar temporalmente
         $nombreArchivo = 'certificado_' . $data['docente_id'] . '_' . time() . '.pdf';
         $rutaTemporal = storage_path('app/temp/' . $nombreArchivo);
 
@@ -58,6 +57,12 @@ class CertificadoDocenteService
 
         $pdf->Output($rutaTemporal, 'F');
 
-        return new File($rutaTemporal);
+        return new UploadedFile(
+            $rutaTemporal,
+            $nombreArchivo,
+            'application/pdf',
+            null,
+            true
+        );
     }
 }

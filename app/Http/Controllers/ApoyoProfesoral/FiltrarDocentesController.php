@@ -1,10 +1,17 @@
 <?php
+// Declaración del namespace donde se encuentra este controlador, 
+// lo que ayuda a organizar el código y evitar conflictos de nombres.
 
 namespace App\Http\Controllers\ApoyoProfesoral;
+// Importa el modelo User, que representa a los usuarios en la base de datos.
+// Este modelo se usará para consultar y filtrar docentes.
 
 use App\Models\Usuario\User;
-use Illuminate\Support\Facades\Log;
+// Importa la fachada Log de Laravel, que permite registrar mensajes en los logs del sistema.
+// Se utiliza para registrar errores y facilitar la depuración.
 
+use Illuminate\Support\Facades\Log;
+// Definición de la clase FiltrarDocentesController, que contiene métodos para filtrar y mostrar información de docentes.
 class FiltrarDocentesController
 {
     /**
@@ -15,19 +22,25 @@ class FiltrarDocentesController
     public function mostrarTodosLosEstudios()
     {
         try {
+             // Consulta todos los usuarios que tengan el rol 'Docente'.
+            // whereHas verifica que el usuario tenga al menos un rol con el nombre 'Docente'.
             $usuarios = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
+             // Eager loading de la relación 'estudiosUsuario' para traer los estudios de cada docente.
+            // Esto evita el problema N+1 y mejora el rendimiento.
                 ->with('estudiosUsuario') // Sin filtros
+            // Ejecuta la consulta y obtiene todos los resultados.
                 ->get();
-
+            // Devuelve una respuesta JSON con el estado 'success' y los datos de los usuarios encontrados.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuarios
             ], 200);
         } catch (\Exception $e) {
+            // Si ocurre una excepción, se registra el error en los logs con el mensaje correspondiente.
             Log::error('Error al obtener los estudios: ' . $e->getMessage());
-
+            // Devuelve una respuesta JSON con estado 'error', un mensaje y el error específico.
             return response()->json([
                 'status' => 'error',
                 'message' => 'Ocurrió un error al obtener los estudios.',
@@ -44,19 +57,23 @@ class FiltrarDocentesController
     public function obtenerEstudiosPorDocente($id)
     {
         try {
+    // Busca un usuario con el rol 'docente' (ojo: aquí está en minúscula, podría causar problemas si los roles son case-sensitive).
             $usuario = User::whereHas('roles', function ($query) {
                 $query->where('name', 'docente');
             })
+    // Eager loading de la relación 'estudiosUsuario'.
                 ->with('estudiosUsuario')
+    // Busca el usuario por su ID, lanza excepción si no existe.
                 ->findOrFail($id);
-
+    // Devuelve solo los estudios del docente encontrado.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuario->estudiosUsuario
             ], 200);
         } catch (\Exception $e) {
+    // Registra el error en los logs.
             Log::error('Error al obtener estudios del docente: ' . $e->getMessage());
-
+    // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'No se pudieron obtener los estudios del docente.',
@@ -77,6 +94,7 @@ class FiltrarDocentesController
             $usuarios = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
+            // Eager loading de la relación 'estudiosUsuario', pero solo los estudios que coincidan con el tipo dado.
                 ->with(['estudiosUsuario' => function ($query) use ($tipo) {
                     $query->where('tipo_estudio', $tipo);
                 }])

@@ -65,33 +65,33 @@ class GenerarCertificadosController
 
             // Generar el certificado PDF
             $pdfFile = $this->certificadoService->generarPDF([
-                'docente_id' => $docente->id,
-                'nombre_docente' => $docente->name,
+                'docente_id'         => $docente->id,
+                'nombre_docente'     => $docente->primer_nombre . ' ' . $docente->segundo_nombre . ' ' . $docente->primer_apellido . ' ' . $docente->segundo_apellido,
                 'titulo_certificado' => $request->titulo_estudio,
-                'fecha' => Carbon::parse($request->fecha_fin)->translatedFormat('d \d\e F \d\e Y'),
+                'fecha'              => Carbon::parse($request->fecha_fin)->translatedFormat('d \d\e F \d\e Y'),
             ]);
 
             // Crear estudio
             $estudio = Estudio::create([
-                'user_id' => $docente->id,
-                'tipo_estudio' => $request->tipo_estudio,
-                'graduado' => $request->graduado,
-                'titulo_estudio' => $request->titulo_estudio,
-                'institucion' => $request->institucion,
-                'fecha_inicio' => $request->fecha_inicio,
-                'fecha_fin' => $request->fecha_fin,
-                'fecha_graduacion' => $request->fecha_graduacion ?? $request->fecha_inicio,
-                'titulo_convalidado' => $request->titulo_convalidado,
-                'fecha_convalidacion' => $request->fecha_convalidacion,
+                'user_id'                  => $docente->id,
+                'tipo_estudio'             => $request->tipo_estudio,
+                'graduado'                 => $request->graduado,
+                'titulo_estudio'           => $request->titulo_estudio,
+                'institucion'              => $request->institucion,
+                'fecha_inicio'             => $request->fecha_inicio,
+                'fecha_fin'                => $request->fecha_fin,
+                'fecha_graduacion'         => $request->fecha_graduacion ?? $request->fecha_inicio,
+                'titulo_convalidado'       => $request->titulo_convalidado,
+                'fecha_convalidacion'      => $request->fecha_convalidacion,
                 'resolucion_convalidacion' => $request->resolucion_convalidacion,
                 'posible_fecha_graduacion' => $request->posible_fecha_graduacion,
             ]);
 
             // Guardar documento asociado (polimórfico)
-            $this->archivoService->guardarArchivoDocumento($pdfFile, $estudio, 'estudios');
+            $this->archivoService->guardarArchivoDocumento($pdfFile, $estudio, 'Estudios');
 
-            // Limpiar archivo temporal
-            unlink($pdfFile->getPathname());
+            // Eliminar archivo temporal
+           unlink($pdfFile->getRealPath());
         }
 
         return response()->json([
