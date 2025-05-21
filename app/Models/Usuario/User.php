@@ -37,10 +37,10 @@ class User extends Authenticatable implements JWTSubject
     // utilizamos el trait Notifiable para definir las notificaciones de usuarios
     // utilizamos el trait HasRoles para definir los roles de usuarios
     use HasFactory, Notifiable, HasRoles;
-    
+
     protected $table = 'users';
 
- 
+
     /**
      * The attributes that are mass assignable.
      *
@@ -61,7 +61,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password'
     ];
- 
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -72,7 +72,7 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
     ];
- 
+
     /**
      * Get the attributes that should be cast.
      *
@@ -86,7 +86,7 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
- 
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
@@ -97,7 +97,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->getKey();
     }
- 
+
     /**
      * Return a key value array, containing any custom claims to be added to the JWT.
      *
@@ -106,60 +106,62 @@ class User extends Authenticatable implements JWTSubject
     // devolver un array de valores clave, que contenga cualquier reclamacion personalizada que se agregara al JWT
     public function getJWTCustomClaims()
     {
-        return [];
+        return [
+            'rol' => $this->getRoleNames()->first()
+        ];
     }
 
     // relacion de uno a uno con la tabla municipios
-    public function municipioUsuarios():BelongsTo
+    public function municipioUsuarios(): BelongsTo
     {
-        return $this->belongsTo(Municipio::class,'municipio_id', 'id_municipio');
+        return $this->belongsTo(Municipio::class, 'municipio_id', 'id_municipio');
     }
 
 
-    
+
 
     //relaciones que solo tienen un documento
     // relacion de uno a uno con la tabla eps
-    public function epsUsuario():HasOne
+    public function epsUsuario(): HasOne
     {
         return $this->hasOne(Eps::class, 'user_id', 'id');
     }
 
     // relacion de uno a uno con la tabla ruts
-    public function rutUsuario():HasOne
+    public function rutUsuario(): HasOne
     {
         return $this->hasOne(Rut::class, 'user_id', 'id');
     }
 
     // relacion de uno a uno con la tabla informacion_contacto
-    public function informacionContactoUsuario():HasOne
+    public function informacionContactoUsuario(): HasOne
     {
-        return $this->hasOne(InformacionContacto::class, 'user_id','id');
+        return $this->hasOne(InformacionContacto::class, 'user_id', 'id');
     }
-     
 
-    
+
+
     // relaciones que tienen varios documentos
     // relacion de uno a muchos con la tabla idiomas
-    public function idiomasUsuario():HasMany
+    public function idiomasUsuario(): HasMany
     {
         return $this->hasMany(Idioma::class, 'user_id', 'id');
     }
 
     // relacion de uno a muchos con la tabla experiencias
-    public function experienciasUsuario():HasMany
+    public function experienciasUsuario(): HasMany
     {
         return $this->hasMany(Experiencia::class, 'user_id', 'id');
     }
-    
+
     // relacion de uno a muchos con la tabla estudios
-    public function estudiosUsuario():HasMany
+    public function estudiosUsuario(): HasMany
     {
         return $this->hasMany(Estudio::class, 'user_id', 'id');
     }
 
     // relacion de uno a muchos con la tabla produccion_academica
-    public function produccionAcademicaUsuario():HasMany
+    public function produccionAcademicaUsuario(): HasMany
     {
         return $this->hasMany(ProduccionAcademica::class, 'user_id', 'id');
     }
@@ -167,51 +169,44 @@ class User extends Authenticatable implements JWTSubject
 
 
     //relacion polimorfica con la tabla documentos
-    public function documentosUser():MorphMany
+    public function documentosUser(): MorphMany
     {
         return $this->morphMany(Documento::class, 'documentable');
     }
 
     // relacion con la tabla puntajes
-    public function puntajeUsuario():HasOne
+    public function puntajeUsuario(): HasOne
     {
         return $this->hasOne(Puntaje::class, 'user_id', 'id');
     }
 
     // relacion de uno a muchos con la tabla postulaciones
-    public function postulacionesUsuario():HasMany
+    public function postulacionesUsuario(): HasMany
     {
         return $this->hasMany(Postulacion::class, 'user_id', 'id');
     }
 
     //relacion de uno a muchos con la tabla contrataciones
-    public function contratacionUsuario():HasOne
+    public function contratacionUsuario(): HasOne
     {
         return $this->hasone(Contratacion::class, 'user_id', 'id');
     }
 
     //relacion de uno a uno con la tabla foto_perfils
-    public function fotoPerfilUsuario():HasOne
+    public function fotoPerfilUsuario(): HasOne
     {
         return $this->hasOne(FotoPerfil::class, 'user_id', 'id');
     }
 
     //relacion de uno a muchos con la tabla aptitudes
-    public function aptitudesUsuario():HasMany
+    public function aptitudesUsuario(): HasMany
     {
         return $this->hasMany(Aptitud::class, 'user_id', 'id');
     }
-    
+
     //relacion de uno a uno con la tabla evaluacion_docentes
-    public function evaluacionDocenteUsuario():HasOne
+    public function evaluacionDocenteUsuario(): HasOne
     {
         return $this->hasOne(EvaluacionDocente::class, 'user_id', 'id');
     }
-   
-
-   
-   
-
-    
-    
 }

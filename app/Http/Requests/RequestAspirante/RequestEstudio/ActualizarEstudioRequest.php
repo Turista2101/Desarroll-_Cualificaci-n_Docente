@@ -52,7 +52,7 @@ class ActualizarEstudioRequest extends FormRequest
             // con un mínimo de 7 caracteres, un máximo de 100 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
             'posible_fecha_graduacion'  => 'sometimes|nullable|date',
             // Valida que `posible_fecha_graduacion` sea opcional (`sometimes`), puede ser nulo (`nullable`) y de tipo `date`.
-            'titulo_estudio'            => 'sometimes|nullable|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
+            'titulo_estudio'            => 'sometimes|required|string|min:7|max:100|regex:/^[\pL\pN\s\-]+$/u',
              // Valida que `titulo_estudio` sea opcional (`sometimes`), puede ser nulo (`nullable`), de tipo `string`,
             // con un mínimo de 7 caracteres, un máximo de 100 caracteres y que coincida con el patrón de letras, números, espacios y guiones.
             'fecha_inicio'              => 'sometimes|required|date', // volver este campo a requerido

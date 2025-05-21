@@ -16,21 +16,21 @@ class CalculoPuntajeDocenteService
             'ingles' => 'B1',          // Nivel mínimo de inglés: B1
             'evaluacion' => 4.0,       // Evaluación docente mínima: 4.0
             'puntaje' => 20,           // Puntaje mínimo de producción académica
-            'años' => 4                // Años mínimos en categoría anterior
+            'anos' => 4                // Anos mínimos en categoría anterior
         ],
         'Asociado' => [
             'formacion' => 'Doctorado',
             'ingles' => 'B2',
             'evaluacion' => 4.0,
             'puntaje' => 30,
-            'años' => 6
+            'anos' => 6
         ],
         'Titular' => [
             'formacion' => 'Doctorado',
             'ingles' => 'B2',
             'evaluacion' => 4.0,
             'puntaje' => 60,
-            'años' => 8
+            'anos' => 8
         ],
     ];
 
@@ -88,7 +88,7 @@ class CalculoPuntajeDocenteService
             'ingles' => $this->validarNivelIngles($user, $titular['ingles']),
             'evaluacion' => optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $titular['evaluacion'],
             'puntaje' => $puntaje >= $titular['puntaje'],
-            'años' => $anios >= $titular['años'],
+            'anos' => $anios >= $titular['anos'],
             'produccion_academica' => $tieneProduccion,
         ];
 
@@ -123,7 +123,7 @@ class CalculoPuntajeDocenteService
                 'ingles' => $this->validarNivelIngles($user, $asistente['ingles']),
                 'evaluacion' => optional($user->evaluacionDocenteUsuario)->promedio_evaluacion_docente >= $asistente['evaluacion'],
                 'puntaje' => $puntaje >= $asistente['puntaje'],
-                'años' => $anios >= $asistente['años'],
+                'anos' => $anios >= $asistente['anos'],
                 'produccion_academica' => $tieneProduccion,
             ];
 

@@ -102,13 +102,9 @@ class AuthController
                 throw new \Exception('Credenciales incorrectas', 401);
             }
 
-            $user = JWTAuth::user(); // Obtener el usuario autenticado
-            $rol = $user->getRoleNames()->first(); // Obtener el primer rol del usuario
-
             return response()->json([ // Devolver respuesta con el token y el usuario
                 'message' => 'Inicio de sesión exitoso',
                 'token'   => $token,
-                'rol'     => $rol
             ], 200);
         } catch (\Exception $e) { // Manejo de excepciones
             return response()->json([
@@ -298,6 +294,11 @@ class AuthController
             $user = User::where('email', $request->email)->first(); // Recuperar el usuario por su email
             if (!$user) {
                 throw new \Exception('Usuario no encontrado.', 404);
+            }
+
+            $rolesNoPermitidos = ['Administrador', 'Talento Humano', 'Apoyo Profesoral', 'Evaluador Produccion'];
+            if ($user->hasAnyRole($rolesNoPermitidos)) {
+                throw new \Exception('Este usuario no tiene permitido restablecer la contraseña.', 403);
             }
 
             $token = bin2hex(random_bytes(32)); // Generar un token para restablecer la contraseña

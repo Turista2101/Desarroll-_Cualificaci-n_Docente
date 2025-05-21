@@ -5,10 +5,11 @@
 use App\Http\Controllers\ApoyoProfesoral\FiltrarDocentesController;
 use App\Http\Controllers\ApoyoProfesoral\VerificacionDocumentosController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApoyoProfesoral\GenerarCertificadosController;
 
 // Define un grupo de rutas con configuraciones específicas
 Route::group([
-    'middleware' => ['api', 'auth:api', 'role:Apoyo Profesoral'],
+    'middleware' => 'api', 'auth:api', 'role:Apoyo Profesoral',
     'prefix' => 'apoyoProfesoral',
 ], function () {
     // Rutas para la verificación de documentos
@@ -28,6 +29,10 @@ Route::group([
     Route::get('mostrar-todos-produccion', [FiltrarDocentesController::class, 'mostrarTodaLaProduccionAcademica']);
     Route::get('filtrar-docentes-produccion/{id}', [FiltrarDocentesController::class, 'obtenerProduccionAcademicaPorDocente']);
     Route::get('filtrar-docentes-ambito/{ambitoId}', [FiltrarDocentesController::class, 'filtrarPorAmbitoDivulgacion']);
+
+    // Rutas para generar certificados
+    Route::post('crear-certificados-masivos', [GenerarCertificadosController::class, 'crearCertificadosMasivos']);
+
 
 
 

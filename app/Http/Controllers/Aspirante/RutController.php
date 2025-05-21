@@ -102,8 +102,10 @@ class RutController
                 ], 200); // No es error, simplemente no tiene Rut aún
             }
 
-            foreach ($rut->documentosRut as $documento) { // Por cada documento asociado, se genera la URL pública del archivo
-                $documento->archivo_url = asset('storage/' . $documento->archivo);
+            foreach ($rut->documentosRut as $documento) {
+                if (!empty($documento->archivo)) {
+                    $documento->archivo_url = asset('storage/' . $documento->archivo);
+                }
             }
 
             return response()->json(['rut' => $rut], 200); // Devuelve el RUT encontrado junto con sus archivos

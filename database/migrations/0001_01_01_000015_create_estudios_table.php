@@ -27,7 +27,7 @@ return new class extends Migration
             $table->date('fecha_convalidacion')->nullable();
             $table->string('resolucion_convalidacion')->nullable();
             $table->date('posible_fecha_graduacion')->nullable();
-            $table->string('titulo_estudio')->nullable();
+            $table->string('titulo_estudio');
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->timestamps();

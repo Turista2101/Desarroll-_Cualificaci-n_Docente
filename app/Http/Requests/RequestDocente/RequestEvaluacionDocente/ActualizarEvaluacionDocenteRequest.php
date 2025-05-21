@@ -29,7 +29,7 @@ class ActualizarEvaluacionDocenteRequest extends FormRequest
             'promedio_evaluacion_docente' => 'sometimes|required|numeric|min:0|max:10',
               // El campo `promedio_evaluacion_docente` es opcional (`sometimes`), pero si está presente, es obligatorio (`required`).
             // Debe ser un valor numérico (`numeric`) entre 0 y 10.
-            'estado_evaluacion_docente' => ['sometimes','nullable','string', Rule::in(EstadoEvaluacionDocente::all())],
+            'estado_evaluacion_docente' => ['sometimes','required','string', Rule::in(EstadoEvaluacionDocente::all())],
               // El campo `estado_evaluacion_docente` es opcional, pero si está presente, su valor debe estar dentro
             // de los valores definidos en `EstadoEvaluacionDocente::all()`. También puede ser nulo (`nullable`).
     
