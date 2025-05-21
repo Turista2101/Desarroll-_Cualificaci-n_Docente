@@ -29,15 +29,33 @@ class GenerarCertificadosController
     public function listarDocentes()
     {
         try {
+        // Inicia una consulta al modelo User, utilizando el método role('Docente') para filtrar únicamente
+        // aquellos usuarios que tengan asignado el rol 'Docente'. Este método es proporcionado por el paquete
+        // Spatie Laravel Permission y facilita la consulta de usuarios por roles.
             $docentes = User::role('Docente')
+            // El método select permite especificar las columnas que se desean recuperar de la base de datos.
+            // Aquí se seleccionan los siguientes campos:
+            // - 'id': el identificador único del usuario.
+            // - DB::raw("CONCAT(...) AS nombre_completo"): se utiliza una expresión SQL cruda para concatenar
+            //   los nombres y apellidos del docente en un solo campo llamado 'nombre_completo'. Esto facilita
+            //   la presentación del nombre completo en la respuesta.
+            // - 'email': el correo electrónico del docente.
+            // - 'numero_identificacion': el número de identificación del docente.
+           
                 ->select(
                     'id',
                     DB::raw("CONCAT(primer_nombre, ' ', segundo_nombre, ' ', primer_apellido, ' ', segundo_apellido) AS nombre_completo"),
                     'email',
                     'numero_identificacion'
                 )
+            // El método get ejecuta la consulta y recupera todos los resultados como una colección de objetos User.
                 ->get();
-
+        // Se retorna una respuesta JSON con los datos obtenidos.
+        // El array incluye:
+        // - 'data': contiene la colección de docentes recuperados.
+        // - 'message': si la colección está vacía, se envía un mensaje indicando que no hay docentes registrados;
+        //   en caso contrario, se envía una cadena vacía.
+        // El segundo parámetro es el código de estado HTTP, en este caso 200 (OK).
             return response()->json([
                 'data' => $docentes,
                 'message' => $docentes->isEmpty() ? 'No hay docentes registrados.' : ''

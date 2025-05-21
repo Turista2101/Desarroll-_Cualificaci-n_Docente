@@ -6,6 +6,7 @@ use App\Http\Requests\RequestDocente\RequestEvaluacionDocente\ActualizarEvaluaci
 use App\Http\Requests\RequestDocente\RequestEvaluacionDocente\CrearEvaluacionDocenteRequest;
 use App\Models\Docente\EvaluacionDocente;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 
 //Este controlador maneja las evaluaciones docentes, permitiendo crear, ver y actualizar evaluaciones.
@@ -67,27 +68,26 @@ class EvaluacionDocenteController
      * @param int $user_id ID del usuario cuya evaluación docente se desea consultar.
      * @return \Illuminate\Http\JsonResponse Respuesta JSON con los datos de la evaluación o mensaje de error.
      */
-    public function verEvaluacionDocente($user_id)
-    {
-        try {
-            $evaluaciones = EvaluacionDocente::where('user_id', $user_id)->first(); // Obtener la evaluación docente del usuario autenticado
+    public function verMiEvaluacionDocente(Request $request)
+{
+    try {
+        $user = $request->user();
+        $evaluacion = EvaluacionDocente::where('user_id', $user->id)->first();
 
-            if (!$evaluaciones) { // Verificar si no se encontró la evaluación
-                return response()->json([
-                    'message' => 'No se encontraro la evaluacion para este usuario.',
-                ], 404);
-            }
-
-            return response()->json([ // Devuelve la evaluación docente en formato JSON
-                'data' => $evaluaciones,
-            ]);
-        } catch (\Exception $e) { // Manejo de excepciones
+        if (!$evaluacion) {
             return response()->json([
-                'message' => 'No se encontró la evaluación para este usuario.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'No se encontró su evaluación.',
+            ], 404);
         }
+
+        return response()->json(['data' => $evaluacion]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error al obtener la evaluación.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     /**
      * Actualizar la evaluación docente del usuario autenticado.
