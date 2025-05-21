@@ -8,7 +8,7 @@ use App\Http\Controllers\EvaluadorProduccion\EvaluadorProduccionController;
 // Define un grupo de rutas con configuraciones específicas para el rol "Evaluador Producción"
 Route::group([
     // Aplica los middlewares 'api', 'auth:api' y 'role:Evaluador Produccion' para proteger las rutas
-    'middleware' =>['api', 'auth:api', 'role:Evaluador Produccion'],
+    'middleware' =>[ 'auth:api', 'role:Evaluador Produccion'],
     // Establece un prefijo 'evaluadorProduccion' para las rutas dentro de este grupo
     'prefix' => 'evaluadorProduccion'
 ], function () {

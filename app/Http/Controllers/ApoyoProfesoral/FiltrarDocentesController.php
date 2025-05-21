@@ -102,17 +102,19 @@ class FiltrarDocentesController
 
             // Solo los que tienen estudios de ese tipo
             $usuariosConEstudios = $usuarios->filter(function ($usuario) {
+            // isNotEmpty() verifica que la colección de estudios no esté vacía.
                 return $usuario->estudiosUsuario->isNotEmpty();
             })->values();
-
+            // Devuelve los usuarios filtrados.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuariosConEstudios
             ], 200);
         } catch (\Exception $e) {
+            // Registra el error.
             Log::error('Error al filtrar estudios: ' . $e->getMessage());
 
-
+            // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'Ocurrió un error al filtrar los estudios.',
@@ -130,19 +132,21 @@ class FiltrarDocentesController
     public function mostrarTodosLosIdiomas()
     {
         try {
+            // Busca todos los usuarios con rol 'Docente' y carga sus idiomas.
             $usuarios = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
                 ->with('idiomasUsuario') // Sin filtros
                 ->get();
-
+            // Devuelve los usuarios con sus idiomas.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuarios
             ], 200);
         } catch (\Exception $e) {
+            // Registra el error.
             Log::error('Error al obtener los idiomas: ' . $e->getMessage());
-
+            // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'Ocurrió un error al obtener los idiomas.',
@@ -160,19 +164,21 @@ class FiltrarDocentesController
     public function obtenerIdiomasPorDocente($id)
     {
         try {
+            // Busca el usuario con rol 'Docente' y carga sus idiomas.
             $usuario = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
                 ->with('idiomasUsuario')
                 ->findOrFail($id);
-
+            // Devuelve los idiomas del docente.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuario->idiomasUsuario
             ], 200);
         } catch (\Exception $e) {
+            // Registra el error.
             Log::error('Error al obtener idiomas del docente: ' . $e->getMessage());
-
+            // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'No se pudieron obtener los idiomas del docente.',
@@ -180,6 +186,12 @@ class FiltrarDocentesController
             ], 500);
         }
     }
+    /**
+     * Filtra los docentes por nivel de idioma.
+     *
+     * @param string $idioma El nivel de idioma a filtrar (por ejemplo, 'Básico', 'Avanzado').
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function filtrarPorNivelIdioma($idioma)
     {
         try {
@@ -196,14 +208,15 @@ class FiltrarDocentesController
             $usuariosConIdioma = $usuarios->filter(function ($usuario) {
                 return $usuario->idiomasUsuario->isNotEmpty();
             })->values();
-
+            // Devuelve los usuarios filtrados.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuariosConIdioma
             ], 200);
         } catch (\Exception $e) {
+            // Registra el error.
             Log::error('Error al filtrar idiomas: ' . $e->getMessage());
-
+            // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'Ocurrió un error al filtrar los idiomas.',
@@ -211,7 +224,11 @@ class FiltrarDocentesController
             ], 500);
         }
     }
-
+    /**
+     * Muestra todas las experiencias de los docentes.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function obtenerTodasLasExperiencias()
     {
         try {
@@ -226,14 +243,15 @@ class FiltrarDocentesController
             $usuariosConExperiencias = $usuarios->filter(function ($usuario) {
                 return $usuario->experienciasUsuario->isNotEmpty();
             })->values();
-
+            // Devuelve los usuarios filtrados.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuariosConExperiencias
             ], 200);
         } catch (\Exception $e) {
+            // Registra el error.
             Log::error('Error al obtener experiencias: ' . $e->getMessage());
-
+            // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'Ocurrió un error al obtener las experiencias.',
@@ -241,7 +259,12 @@ class FiltrarDocentesController
             ], 500);
         }
     }
-
+/**
+     * Filtra los docentes por tipo de experiencia.
+     *
+     * @param string $tipo El tipo de experiencia a filtrar.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function filtrarPorTipoExperiencia($tipo)
     {
         try {
@@ -258,14 +281,15 @@ class FiltrarDocentesController
             $usuariosConExperiencias = $usuarios->filter(function ($usuario) {
                 return $usuario->experienciasUsuario->isNotEmpty();
             })->values();
-
+            // Devuelve los usuarios filtrados.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuariosConExperiencias
             ], 200);
         } catch (\Exception $e) {
+            // Registra el error.
             Log::error('Error al filtrar experiencias: ' . $e->getMessage());
-
+            // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'Ocurrió un error al filtrar las experiencias.',
@@ -273,23 +297,30 @@ class FiltrarDocentesController
             ], 500);
         }
     }
-    
+    /**
+     * Obtiene las experiencias de un docente específico.
+     *
+     * @param int $id El ID del docente.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function obtenerExperienciasPorDocente($id)
     {
         try {
+            // Busca el usuario con rol 'Docente' y carga sus experiencias.
             $usuario = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
                 ->with('experienciasUsuario')
                 ->findOrFail($id);
-
+            // Devuelve las experiencias del docente.
             return response()->json([
                 'status' => 'success',
                 'data' => $usuario->experienciasUsuario
             ], 200);
         } catch (\Exception $e) {
+            // Registra el error.
             Log::error('Error al obtener experiencias del docente: ' . $e->getMessage());
-
+            // Devuelve respuesta de error.
             return response()->json([
                 'status' => 'error',
                 'message' => 'No se pudieron obtener las experiencias del docente.',
@@ -297,13 +328,16 @@ class FiltrarDocentesController
             ], 500);
         }
     }
-
-
-
+/**
+     * Muestra toda la producción académica de los docentes.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
 
     public function mostrarTodaLaProduccionAcademica()
     {
         try {
+            // Busca usuarios con rol 'Docente' y carga toda su producción académica.
             $usuarios = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })

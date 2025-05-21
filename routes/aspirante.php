@@ -17,7 +17,7 @@ use App\Http\Controllers\Aspirante\NormativaController;
 // Define un grupo de rutas con configuraciones específicas para el rol "Aspirante"
 Route::group([
     // Aplica los middlewares 'api', 'auth:api' y 'role:Aspirante' para proteger las rutas
-    'middleware' => ['api', 'auth:api', 'role:Aspirante'],
+    'middleware' => [ 'auth:api', 'role:Aspirante'],
     // Establece un prefijo 'aspirante' para las rutas dentro de este grupo
     'prefix' => 'aspirante'
 ], function () {

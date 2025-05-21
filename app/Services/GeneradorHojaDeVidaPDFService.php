@@ -86,8 +86,22 @@ class GeneradorHojaDeVidaPDFService
             // Imprime la producción académica del usuario
             $this->imprimirProduccionAcademica($pdf, $usuario->produccionAcademicaUsuario);
 
-            // muestra el PDF en pantalla ('I' significa inline en el navegador)
-            $pdf->Output('hoja_de_vida_' . $idUsuario . '.pdf', 'I');
+            $nombreArchivo = 'hoja_de_vida_' . $idUsuario . '_' . time() . '.pdf';
+            $rutaTemporal = storage_path('app/temp/' . $nombreArchivo);
+
+            if (!is_dir(storage_path('app/temp'))) {
+                mkdir(storage_path('app/temp'), 0777, true);
+            }
+
+            $pdf->Output($rutaTemporal, 'F');
+
+            return response()->streamDownload(function () use ($rutaTemporal) {
+                echo file_get_contents($rutaTemporal);
+                unlink($rutaTemporal);
+            }, $nombreArchivo, [
+                'Content-Type' => 'application/pdf',
+            ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Ocurrió un error al generar el PDF.',

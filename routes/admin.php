@@ -8,7 +8,7 @@ use App\Http\Controllers\Aspirante\NormativaController;
 use App\Http\Controllers\Admin\ReporteController;
 
 Route::group([
-    'middleware' => ['api', 'auth:api', 'role:Administrador'],
+    'middleware' => ['auth:api', 'role:Administrador'],
     'prefix' => 'admin'
 ], function () {
     // // Rutas de roles

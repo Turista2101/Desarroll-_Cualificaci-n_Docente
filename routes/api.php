@@ -1,6 +1,5 @@
 <?php
-// Importa la clase Route desde el espacio de nombres Illuminate\Support\Facades
-use Illuminate\Support\Facades\Route;
+
 // Incluye el archivo auth.php,contiene rutas relacionadas con la autenticación
 require_once __DIR__ . '/auth.php';
 // Incluye el archivo ubicaciones.php,contiene rutas relacionadas con ubicaciones

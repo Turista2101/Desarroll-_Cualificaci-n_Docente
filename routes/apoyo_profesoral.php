@@ -9,7 +9,7 @@ use App\Http\Controllers\ApoyoProfesoral\GenerarCertificadosController;
 
 // Define un grupo de rutas con configuraciones específicas
 Route::group([
-    'middleware' => 'api', 'auth:api', 'role:Apoyo Profesoral',
+    'middleware' => 'auth:api', 'role:Apoyo Profesoral',
     'prefix' => 'apoyoProfesoral',
 ], function () {
     // Rutas para la verificación de documentos
