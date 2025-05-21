@@ -171,20 +171,29 @@ class VerificacionDocumentosController
         }
     }
 
-    /**
-     * Actualiza el estado de un documento específico.
-     */
+   /**
+ * Actualiza el estado de un documento específico.
+ *
+ * Este método recibe una solicitud HTTP para actualizar el estado de un documento identificado por su ID.
+ * Valida la entrada, realiza la actualización y responde en formato JSON.
+ */
     public function actualizarEstadoDocumento(Request $request, $documento_id)
     {
         try {
+        // Valida que el campo 'estado' esté presente en la solicitud y que su valor sea uno de los permitidos.
+        // Rule::in(EstadoDocumentos::all()) asegura que solo se acepten estados válidos definidos en la constante.
             $request->validate([
                 'estado' => ['required', Rule::in(EstadoDocumentos::all())],
             ]);
-
+        // Busca el documento en la base de datos usando el ID proporcionado.
+        // Si no se encuentra, lanza una excepción ModelNotFoundException que será capturada por el catch.
             $documento = Documento::findOrFail($documento_id);
+        // Asigna el nuevo estado al documento usando el valor recibido en la solicitud.
             $documento->estado = $request->estado;
+        // Guarda los cambios realizados en el documento en la base de datos.
             $documento->save();
-
+ // Si todo sale bien, retorna una respuesta JSON indicando éxito.
+        // El mensaje informa que el estado del documento fue actualizado correctamente.
             return response()->json([
                 'message' => 'Estado del documento actualizado correctamente.',
             ]);

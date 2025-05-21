@@ -68,7 +68,7 @@ class EvaluacionDocenteController
      * @param int $user_id ID del usuario cuya evaluación docente se desea consultar.
      * @return \Illuminate\Http\JsonResponse Respuesta JSON con los datos de la evaluación o mensaje de error.
      */
-    public function verMiEvaluacionDocente(Request $request)
+    public function verEvaluacionDocente(Request $request)
 {
     try {
         $user = $request->user();

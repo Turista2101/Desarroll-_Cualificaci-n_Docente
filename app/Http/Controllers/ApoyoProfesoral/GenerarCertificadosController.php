@@ -61,6 +61,12 @@ class GenerarCertificadosController
                 'message' => $docentes->isEmpty() ? 'No hay docentes registrados.' : ''
             ], 200);
         } catch (\Exception $e) {
+        // Si ocurre cualquier excepción durante la ejecución del bloque try, se captura aquí.
+        // Se retorna una respuesta JSON indicando que ocurrió un error.
+        // El array incluye:
+        // - 'message': un mensaje genérico para el usuario.
+        // - 'error': el mensaje específico de la excepción, útil para depuración.
+        // El código de estado HTTP es 500 (Internal Server Error).
             return response()->json([
                 'message' => 'Error al obtener los docentes.',
                 'error' => $e->getMessage()
