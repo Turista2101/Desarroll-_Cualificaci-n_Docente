@@ -20,7 +20,7 @@ use App\Http\Controllers\Aspirante\NormativaController;
 // Define un grupo de rutas con configuraciones específicas para el rol "Docente"
 Route::group([
     // Aplica los middlewares 'api', 'auth:api' y 'role:Docente' para proteger las rutas
-    'middleware' => ['api', 'auth:api', 'role:Docente'],
+    'middleware' => [ 'api', 'auth:api', 'role:Docente'],
     // Establece un prefijo 'docente' para las rutas dentro de este grupo
     'prefix' => 'docente'
 ], function () {

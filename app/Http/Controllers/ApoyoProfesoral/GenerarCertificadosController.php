@@ -112,7 +112,8 @@ class GenerarCertificadosController
             ]);
 
             // Guardar documento asociado (polimórfico)
-            $this->archivoService->guardarArchivoDocumento($pdfFile, $estudio, 'Estudios');
+            $documento = $this->archivoService->guardarArchivoDocumento($pdfFile, $estudio, 'Estudios');
+            $documento->update(['estado' => 'aprobado']);
 
             // Eliminar archivo temporal
            unlink($pdfFile->getRealPath());

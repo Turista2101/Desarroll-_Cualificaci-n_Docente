@@ -224,22 +224,18 @@ class VerificacionDocumentosController
                 'message' => 'Documentos cargados correctamente.',
             ], 200);
         } catch (\Exception $e) {
-            return response()->json([  // Si ocurre cualquier excepción, retorna un mensaje de error y el detalle de la excepción.
+            return response()->json([    // Si ocurre cualquier excepción, retorna un mensaje de error y el detalle de la excepción.
                 'message' => 'Error al obtener los documentos del usuario.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 
-   /**
+    /**
      * Actualiza el estado de un documento específico.
      *
      * Este método recibe una solicitud HTTP para actualizar el estado de un documento identificado por su ID.
      * Valida la entrada, realiza la actualización y responde en formato JSON.
-     *
-     * @param Request $request Solicitud HTTP que contiene el nuevo estado.
-     * @param int $documento_id ID del documento a actualizar.
-     * @return \Illuminate\Http\JsonResponse
      */
     public function actualizarEstadoDocumento(Request $request, $documento_id)
     {
