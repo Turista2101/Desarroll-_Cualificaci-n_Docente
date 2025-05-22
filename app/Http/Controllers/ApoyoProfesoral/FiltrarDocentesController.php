@@ -22,15 +22,15 @@ class FiltrarDocentesController
     public function mostrarTodosLosEstudios()
     {
         try {
-             // Consulta todos los usuarios que tengan el rol 'Docente'.
+            // Consulta todos los usuarios que tengan el rol 'Docente'.
             // whereHas verifica que el usuario tenga al menos un rol con el nombre 'Docente'.
             $usuarios = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
-             // Eager loading de la relación 'estudiosUsuario' para traer los estudios de cada docente.
-            // Esto evita el problema N+1 y mejora el rendimiento.
+                // Eager loading de la relación 'estudiosUsuario' para traer los estudios de cada docente.
+                // Esto evita el problema N+1 y mejora el rendimiento.
                 ->with('estudiosUsuario') // Sin filtros
-            // Ejecuta la consulta y obtiene todos los resultados.
+                // Ejecuta la consulta y obtiene todos los resultados.
                 ->get();
             // Devuelve una respuesta JSON con el estado 'success' y los datos de los usuarios encontrados.
             return response()->json([
@@ -57,23 +57,20 @@ class FiltrarDocentesController
     public function obtenerEstudiosPorDocente($id)
     {
         try {
-    // Busca un usuario con el rol 'docente' (ojo: aquí está en minúscula, podría causar problemas si los roles son case-sensitive).
+            // Busca al usuario con rol Docente y carga los estudios con sus documentos
             $usuario = User::whereHas('roles', function ($query) {
-                $query->where('name', 'docente');
+                $query->where('name', 'Docente'); // Asegúrate que el nombre del rol está bien escrito
             })
-    // Eager loading de la relación 'estudiosUsuario'.
-                ->with('estudiosUsuario')
-    // Busca el usuario por su ID, lanza excepción si no existe.
+                ->with('estudiosUsuario.documentosEstudio') // Carga documentos asociados a los estudios
                 ->findOrFail($id);
-    // Devuelve solo los estudios del docente encontrado.
+
             return response()->json([
                 'status' => 'success',
-                'data' => $usuario->estudiosUsuario
+                'data' => $usuario->estudiosUsuario // Aquí ya vendrán los documentos también
             ], 200);
         } catch (\Exception $e) {
-    // Registra el error en los logs.
             Log::error('Error al obtener estudios del docente: ' . $e->getMessage());
-    // Devuelve respuesta de error.
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'No se pudieron obtener los estudios del docente.',
@@ -94,7 +91,7 @@ class FiltrarDocentesController
             $usuarios = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
-            // Eager loading de la relación 'estudiosUsuario', pero solo los estudios que coincidan con el tipo dado.
+                // Eager loading de la relación 'estudiosUsuario', pero solo los estudios que coincidan con el tipo dado.
                 ->with(['estudiosUsuario' => function ($query) use ($tipo) {
                     $query->where('tipo_estudio', $tipo);
                 }])
@@ -102,7 +99,7 @@ class FiltrarDocentesController
 
             // Solo los que tienen estudios de ese tipo
             $usuariosConEstudios = $usuarios->filter(function ($usuario) {
-            // isNotEmpty() verifica que la colección de estudios no esté vacía.
+                // isNotEmpty() verifica que la colección de estudios no esté vacía.
                 return $usuario->estudiosUsuario->isNotEmpty();
             })->values();
             // Devuelve los usuarios filtrados.
@@ -259,7 +256,7 @@ class FiltrarDocentesController
             ], 500);
         }
     }
-/**
+    /**
      * Filtra los docentes por tipo de experiencia.
      *
      * @param string $tipo El tipo de experiencia a filtrar.
@@ -328,7 +325,7 @@ class FiltrarDocentesController
             ], 500);
         }
     }
-/**
+    /**
      * Muestra toda la producción académica de los docentes.
      *
      * @return \Illuminate\Http\JsonResponse
@@ -340,43 +337,43 @@ class FiltrarDocentesController
             // Busca usuarios con rol 'Docente' y carga toda su producción académica.
             $usuarios = User::whereHas('roles', function ($query) {
                 // Esta función anónima se utiliza para modificar la consulta de la relación 'roles'.
-            // El método whereHas permite filtrar los usuarios que tengan al menos un rol que cumpla la condición.
-            // En este caso, la condición es que el nombre del rol ('name') sea exactamente 'Docente'.
-            // Esto asegura que solo se seleccionen los usuarios que son docentes.
-           
+                // El método whereHas permite filtrar los usuarios que tengan al menos un rol que cumpla la condición.
+                // En este caso, la condición es que el nombre del rol ('name') sea exactamente 'Docente'.
+                // Esto asegura que solo se seleccionen los usuarios que son docentes.
+
                 $query->where('name', 'Docente');
             })
-            // El método with permite realizar eager loading de relaciones.
-            // Aquí se indica que, además de los datos del usuario, se debe cargar la relación
-            // 'produccionAcademicaUsuario', que representa toda la producción académica asociada a ese usuario.
-            // No se aplican filtros adicionales, por lo que se traerán todos los registros de producción académica
-            // de cada docente
+                // El método with permite realizar eager loading de relaciones.
+                // Aquí se indica que, además de los datos del usuario, se debe cargar la relación
+                // 'produccionAcademicaUsuario', que representa toda la producción académica asociada a ese usuario.
+                // No se aplican filtros adicionales, por lo que se traerán todos los registros de producción académica
+                // de cada docente
                 ->with('produccionAcademicaUsuario') // Sin filtros
-            // El método get ejecuta la consulta y obtiene todos los resultados como una colección de objetos User.
-            // Cada objeto User incluirá, en su propiedad 'produccionAcademicaUsuario', una colección con todos los
-            // registros de producción académica relacionados.
+                // El método get ejecuta la consulta y obtiene todos los resultados como una colección de objetos User.
+                // Cada objeto User incluirá, en su propiedad 'produccionAcademicaUsuario', una colección con todos los
+                // registros de producción académica relacionados.
                 ->get();
-// Una vez obtenidos los usuarios y su producción académica, se prepara la respuesta.
-        // Se utiliza el helper response()->json() para devolver una respuesta HTTP en formato JSON.
-        // El primer parámetro es un array asociativo con dos claves:
-        //  - 'status' => 'success': indica que la operación fue exitosa.
-        //  - 'data' => $usuarios: contiene la colección de usuarios con su producción académica.
-        // El segundo parámetro es el código de estado HTTP, en este caso 200 (OK).
+            // Una vez obtenidos los usuarios y su producción académica, se prepara la respuesta.
+            // Se utiliza el helper response()->json() para devolver una respuesta HTTP en formato JSON.
+            // El primer parámetro es un array asociativo con dos claves:
+            //  - 'status' => 'success': indica que la operación fue exitosa.
+            //  - 'data' => $usuarios: contiene la colección de usuarios con su producción académica.
+            // El segundo parámetro es el código de estado HTTP, en este caso 200 (OK).
             return response()->json([
                 'status' => 'success',
                 'data' => $usuarios
             ], 200);
         } catch (\Exception $e) {
-             // Si ocurre cualquier excepción durante la ejecución del bloque try, se captura aquí.
-        // Se utiliza la fachada Log de Laravel para registrar el error en los logs del sistema.
-        // El mensaje incluye un texto descriptivo y el mensaje específico de la excepción.
+            // Si ocurre cualquier excepción durante la ejecución del bloque try, se captura aquí.
+            // Se utiliza la fachada Log de Laravel para registrar el error en los logs del sistema.
+            // El mensaje incluye un texto descriptivo y el mensaje específico de la excepción.
             Log::error('Error al obtener la producción académica: ' . $e->getMessage());
-  // Se devuelve una respuesta JSON indicando que ocurrió un error.
-        // El array incluye:
-        //  - 'status' => 'error': indica que la operación falló.
-        //  - 'message': un mensaje genérico para el usuario.
-        //  - 'error': el mensaje específico de la excepción, útil para depuración.
-        // El código de estado HTTP es 500 (Internal Server Error).
+            // Se devuelve una respuesta JSON indicando que ocurrió un error.
+            // El array incluye:
+            //  - 'status' => 'error': indica que la operación falló.
+            //  - 'message': un mensaje genérico para el usuario.
+            //  - 'error': el mensaje específico de la excepción, útil para depuración.
+            // El código de estado HTTP es 500 (Internal Server Error).
             return response()->json([
                 'status' => 'error',
                 'message' => 'Ocurrió un error al obtener la producción académica.',
@@ -388,7 +385,7 @@ class FiltrarDocentesController
     public function obtenerProduccionAcademicaPorDocente($id)
     {
         try {
-        // Inicia una consulta sobre el modelo User para buscar un usuario específico.
+            // Inicia una consulta sobre el modelo User para buscar un usuario específico.
             $usuario = User::whereHas('roles', function ($query) {
                 // Esta función anónima se utiliza para modificar la consulta de la relación 'roles'.
                 // El método whereHas filtra los usuarios que tengan al menos un rol que cumpla la condición.
@@ -396,7 +393,7 @@ class FiltrarDocentesController
                 // Así, solo se seleccionan los usuarios que son docentes.
                 $query->where('name', 'Docente');
             })
-                 // El método with permite realizar eager loading de relaciones.
+                // El método with permite realizar eager loading de relaciones.
                 // Aquí se indica que, además de los datos del usuario, se debe cargar la relación
                 // 'produccionAcademicaUsuario', que representa toda la producción académica asociada a ese usuario.
                 // No se aplican filtros adicionales, por lo que se traerán todos los registros de producción académica
@@ -415,7 +412,7 @@ class FiltrarDocentesController
                 'data' => $usuario->produccionAcademicaUsuario
             ], 200);
         } catch (\Exception $e) {
-             // Si ocurre cualquier excepción durante la ejecución del bloque try, se captura aquí.
+            // Si ocurre cualquier excepción durante la ejecución del bloque try, se captura aquí.
             // Se utiliza la fachada Log de Laravel para registrar el error en los logs del sistema.
             // El mensaje incluye un texto descriptivo y el mensaje específico de la excepción.
             Log::error('Error al obtener la producción académica del docente: ' . $e->getMessage());
@@ -432,63 +429,62 @@ class FiltrarDocentesController
             ], 500);
         }
     }
-     /**
+    /**
      * Filtra la producción académica de los docentes por ámbito de divulgación.
      *
      * Este método permite obtener una lista de docentes que tienen producción académica
      * asociada a un ámbito de divulgación específico. Explicación línea por línea:
      */
-public function filtrarPorAmbitoDivulgacion($ambitoId)
-{
-    try {
-        // Inicia una consulta sobre el modelo User para buscar usuarios con el rol 'Docente'.
-        $usuarios = User::whereHas('roles', function ($query) {
+    public function filtrarPorAmbitoDivulgacion($ambitoId)
+    {
+        try {
+            // Inicia una consulta sobre el modelo User para buscar usuarios con el rol 'Docente'.
+            $usuarios = User::whereHas('roles', function ($query) {
                 // Esta función anónima modifica la consulta de la relación 'roles'.
                 // El método whereHas filtra los usuarios que tengan al menos un rol que cumpla la condición.
                 // En este caso, la condición es que el nombre del rol ('name') sea exactamente 'Docente'.
-            $query->where('name', 'Docente');
-        })
-            // El método with permite realizar eager loading de relaciones.
-            // Aquí se indica que, además de los datos del usuario, se debe cargar la relación
-            // 'produccionAcademicaUsuario', pero solo aquellos registros donde el campo
-            // 'ambito_divulgacion_id' coincida con el parámetro recibido ($ambitoId).
-        ->with(['produccionAcademicaUsuario' => function ($query) use ($ambitoId) {
-            $query->where('ambito_divulgacion_id', $ambitoId);
-        }])
-            // Ejecuta la consulta y obtiene todos los resultados como una colección de objetos User.
-        ->get();
+                $query->where('name', 'Docente');
+            })
+                // El método with permite realizar eager loading de relaciones.
+                // Aquí se indica que, además de los datos del usuario, se debe cargar la relación
+                // 'produccionAcademicaUsuario', pero solo aquellos registros donde el campo
+                // 'ambito_divulgacion_id' coincida con el parámetro recibido ($ambitoId).
+                ->with(['produccionAcademicaUsuario' => function ($query) use ($ambitoId) {
+                    $query->where('ambito_divulgacion_id', $ambitoId);
+                }])
+                // Ejecuta la consulta y obtiene todos los resultados como una colección de objetos User.
+                ->get();
             // Filtra los usuarios para quedarse solo con aquellos que realmente tienen producción académica
             // en el ámbito solicitado (es decir, que la colección no esté vacía).
-        $usuariosConProduccion = $usuarios->filter(function ($usuario) {
-            // isNotEmpty() verifica que la colección de producción académica no esté vacía.
-            return $usuario->produccionAcademicaUsuario->isNotEmpty();
-        })->values();
+            $usuariosConProduccion = $usuarios->filter(function ($usuario) {
+                // isNotEmpty() verifica que la colección de producción académica no esté vacía.
+                return $usuario->produccionAcademicaUsuario->isNotEmpty();
+            })->values();
             // Retorna una respuesta JSON con los docentes filtrados y su producción académica correspondiente.
             // El array incluye:
             //  - 'status' => 'success': indica que la operación fue exitosa.
             //  - 'data' => $usuariosConProduccion: contiene la colección de usuarios filtrados.
             // El segundo parámetro es el código de estado HTTP, en este caso 200 (OK).
-        return response()->json([
-            'status' => 'success',
-            'data' => $usuariosConProduccion
-        ], 200);
-    } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $usuariosConProduccion
+            ], 200);
+        } catch (\Exception $e) {
             // Si ocurre cualquier excepción durante la ejecución del bloque try, se captura aquí.
             // Se utiliza la fachada Log de Laravel para registrar el error en los logs del sistema.
             // El mensaje incluye un texto descriptivo y el mensaje específico de la excepción.
-        Log::error('Error al filtrar la producción académica por ámbito: ' . $e->getMessage());
+            Log::error('Error al filtrar la producción académica por ámbito: ' . $e->getMessage());
             // Se devuelve una respuesta JSON indicando que ocurrió un error.
             // El array incluye:
             //  - 'status' => 'error': indica que la operación falló.
             //  - 'message': un mensaje genérico para el usuario.
             //  - 'error': el mensaje específico de la excepción, útil para depuración.
             // El código de estado HTTP es 500 (Internal Server Error).
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Ocurrió un error al filtrar la producción académica.',
-            'error' => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ocurrió un error al filtrar la producción académica.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
-
 }

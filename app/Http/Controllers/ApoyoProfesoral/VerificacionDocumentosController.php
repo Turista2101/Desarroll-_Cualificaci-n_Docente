@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage; // Facade para interactuar con el sistem
 use Illuminate\Http\Request; // Clase para manejar solicitudes HTTP.
 use Illuminate\Validation\Rule; // Clase para reglas de validación.
 use Illuminate\Support\Facades\DB; // Facade para ejecutar consultas SQL directas.
+
 class VerificacionDocumentosController
 {
     /**
@@ -18,13 +19,13 @@ class VerificacionDocumentosController
      * con 'documentosEstudio', lo que permite cargar documentos de estudios de un usuario.
      */
     protected array $relaciones = [
-        'estudiosUsuario' => 'documentosEstudio',
-        'experienciasUsuario' => 'documentosExperiencia',
-        'idiomasUsuario' => 'documentosIdioma',
-        'rutUsuario' => 'documentosRut',
+        'estudiosUsuario'            => 'documentosEstudio',
+        'experienciasUsuario'        => 'documentosExperiencia',
+        'idiomasUsuario'             => 'documentosIdioma',
+        'rutUsuario'                 => 'documentosRut',
         'informacionContactoUsuario' => 'documentosInformacionContacto',
-        'epsUsuario' => 'documentosEps',
-        'usuario'      => 'documentosUser',
+        'epsUsuario'                 => 'documentosEps',
+        'usuario'                    => 'documentosUser',
     ];
 
     /**
@@ -59,7 +60,6 @@ class VerificacionDocumentosController
      * @param \Illuminate\Database\Eloquent\Builder $query Consulta Eloquent a modificar.
      * @param string $estado Estado por el cual se filtrarán los documentos.
      */
-
     private function aplicarFiltrosPorEstado($query, $estado)
     {
         $query->where(function ($subQuery) use ($estado) {
@@ -121,12 +121,12 @@ class VerificacionDocumentosController
         }
     }
 
-
     /**
      * Agrega la URL pública a los documentos directos del usuario.
      *
      * @param User $usuario Usuario al que se le agregarán las URLs.
      */
+
     private function agregarUrlADocumentosDirectos($usuario): void
     {
         // Itera sobre cada documento directo del usuario.
@@ -135,6 +135,7 @@ class VerificacionDocumentosController
             $documentoUser->archivo_url = Storage::url($documentoUser->archivo);
         }
     }
+
     /**
      * Agrega la URL pública a los documentos de relaciones anidadas del usuario.
      *
@@ -142,6 +143,7 @@ class VerificacionDocumentosController
      * @param string $relacionPadre Nombre de la relación padre (ej: 'estudiosUsuario').
      * @param string $relacionDocumentos Nombre de la relación de documentos (ej: 'documentosEstudio').
      */
+
     private function agregarUrlADocumentosRelacionados($usuario, $relacionPadre, $relacionDocumentos): void
     {
         $relacion = $usuario->$relacionPadre ?? null;
@@ -169,6 +171,7 @@ class VerificacionDocumentosController
      * @param string $estado Estado por el cual se filtrarán los documentos.
      * @return \Illuminate\Http\JsonResponse
      */
+
     public function obtenerDocumentosPorEstado($estado)
     {
         try {
@@ -205,6 +208,7 @@ class VerificacionDocumentosController
      *
      * @return \Illuminate\Http\JsonResponse
      */
+
     public function listarDocentes()
     {
         try {
@@ -231,6 +235,7 @@ class VerificacionDocumentosController
             ], 500);
         }
     }
+
     /**
      * Obtiene todos los documentos de un docente específico.
      * Carga todas las relaciones de documentos asociadas al usuario y agrega la URL pública de cada archivo.
@@ -238,6 +243,7 @@ class VerificacionDocumentosController
      * @param int $user_id ID del usuario (docente) a consultar.
      * @return \Illuminate\Http\JsonResponse
      */
+
     public function verDocumentosPorDocente($user_id)
     {
         try {
@@ -274,6 +280,7 @@ class VerificacionDocumentosController
      * Este método recibe una solicitud HTTP para actualizar el estado de un documento identificado por su ID.
      * Valida la entrada, realiza la actualización y responde en formato JSON.
      */
+
     public function actualizarEstadoDocumento(Request $request, $documento_id)
     {
         try {
