@@ -165,7 +165,7 @@ class FiltrarDocentesController
             $usuario = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
-                ->with('idiomasUsuario')
+                ->with('idiomasUsuario.documentosIdioma') // Carga documentos asociados a los idiomas
                 ->findOrFail($id);
             // Devuelve los idiomas del docente.
             return response()->json([
@@ -307,7 +307,7 @@ class FiltrarDocentesController
             $usuario = User::whereHas('roles', function ($query) {
                 $query->where('name', 'Docente');
             })
-                ->with('experienciasUsuario')
+                ->with('experienciasUsuario.documentosExperiencia') // Carga documentos asociados a las experiencias
                 ->findOrFail($id);
             // Devuelve las experiencias del docente.
             return response()->json([
@@ -398,7 +398,7 @@ class FiltrarDocentesController
                 // 'produccionAcademicaUsuario', que representa toda la producción académica asociada a ese usuario.
                 // No se aplican filtros adicionales, por lo que se traerán todos los registros de producción académica
                 // de ese docente.
-                ->with('produccionAcademicaUsuario')
+                ->with('produccionAcademicaUsuario.documentosProduccionAcademica') // Carga documentos asociados a la producción académica
                 // El método findOrFail busca el usuario por su ID.
                 // Si el usuario no existe, lanza una excepción ModelNotFoundException.
                 ->findOrFail($id);
