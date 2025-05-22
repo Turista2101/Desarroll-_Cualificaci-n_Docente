@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 // Definición de la clase FiltrarDocentesController, que contiene métodos para filtrar y mostrar información de docentes.
 
 use Illuminate\Support\Facades\Storage;
+
 class FiltrarDocentesController
 {
     /**
@@ -65,13 +66,13 @@ class FiltrarDocentesController
             })
                 ->with('estudiosUsuario.documentosEstudio') // Carga documentos asociados a los estudios
                 ->findOrFail($id);
-                $estudios = $usuario->estudiosUsuario->map(function ($estudio) {
-                    $estudio->documentosEstudio->map(function ($documento) {
-                        $documento->archivo_url = Storage::url($documento->archivo); // usa el campo 'archivo'
-                            return $documento;
-                    });
-                  return $estudio;
+            $estudios = $usuario->estudiosUsuario->map(function ($estudio) {
+                $estudio->documentosEstudio->map(function ($documento) {
+                    $documento->archivo_url = url(Storage::url($documento->archivo)); // usa el campo 'archivo'
+                    return $documento;
                 });
+                return $estudio;
+            });
             return response()->json([
                 'status' => 'success',
                 'data' => $estudios // Aquí ya vendrán los documentos también
@@ -175,13 +176,13 @@ class FiltrarDocentesController
             })
                 ->with('idiomasUsuario.documentosIdioma') // Carga documentos asociados a los idiomas
                 ->findOrFail($id);
-                $idiomas = $usuario->idiomasUsuario->map(function ($idioma) {
-                    $idioma->documentosIdioma->map(function ($documento) {
-                        $documento->archivo_url = Storage::url($documento->archivo); // usa el campo 'archivo'
-                            return $documento;
-                    });
+            $idiomas = $usuario->idiomasUsuario->map(function ($idioma) {
+                $idioma->documentosIdioma->map(function ($documento) {
+                    $documento->archivo_url = url(Storage::url($documento->archivo)); // usa el campo 'archivo'
+                    return $documento;
+                });
                 return $idioma;
-           });
+            });
             return response()->json([
                 'status' => 'success',
                 'data' => $idiomas
@@ -323,13 +324,13 @@ class FiltrarDocentesController
             })
                 ->with('experienciasUsuario.documentosExperiencia') // Carga documentos asociados a las experiencias
                 ->findOrFail($id);
-                $experiencias = $usuario->experienciasUsuario->map(function ($experiencia) {
-                    $experiencia->documentosExperiencia->map(function ($documento) {
-                        $documento->archivo_url = Storage::url($documento->archivo); // usa el campo 'archivo'
-                            return $documento;
-                    });
-                  return $experiencia;
-               });
+            $experiencias = $usuario->experienciasUsuario->map(function ($experiencia) {
+                $experiencia->documentosExperiencia->map(function ($documento) {
+                    $documento->archivo_url = url(Storage::url($documento->archivo)); // usa el campo 'archivo'
+                    return $documento;
+                });
+                return $experiencia;
+            });
             return response()->json([
                 'status' => 'success',
                 'data' => $experiencias
@@ -422,13 +423,13 @@ class FiltrarDocentesController
                 // El método findOrFail busca el usuario por su ID.
                 // Si el usuario no existe, lanza una excepción ModelNotFoundException.
                 ->findOrFail($id);
-                $produccionAcademica = $usuario->produccionAcademicaUsuario->map(function ($produccion) {
-                    $produccion->documentosProduccionAcademica->map(function ($documento) {
-                        $documento->archivo_url = Storage::url($documento->archivo); // usa el campo 'archivo'
-                            return $documento;
-                    });
-                  return $produccion;
+            $produccionAcademica = $usuario->produccionAcademicaUsuario->map(function ($produccion) {
+                $produccion->documentosProduccionAcademica->map(function ($documento) {
+                    $documento->archivo_url = url(Storage::url($documento->archivo));// usa el campo 'archivo'
+                    return $documento;
                 });
+                return $produccion;
+            });
             return response()->json([
                 'status' => 'success',
                 'data' => $produccionAcademica
