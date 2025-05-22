@@ -29,11 +29,11 @@ Route::group([
 
     // // Rutas funcionales y que sirven
     // //normativas
-    // Route::post('crear-normativa', [NormativaController::class, 'crearNormativa']);
-    // Route::get('obtener-normativas', [NormativaController::class, 'obtenerNormativas']);
-    // Route::get('obtener-normativa/{id}', [NormativaController::class, 'obtenerNormativaPorId']);
-    // Route::put('actualizar-normativa/{id}', [NormativaController::class, 'actualizarNormativa']);
-    // Route::delete('eliminar-normativa/{id}', [NormativaController::class, 'eliminarNormativa']);
+    Route::post('crear-normativa', [NormativaController::class, 'crearNormativa']);
+    Route::get('obtener-normativas', [NormativaController::class, 'obtenerNormativas']);
+    Route::get('obtener-normativa/{id}', [NormativaController::class, 'obtenerNormativaPorId']);
+    Route::put('actualizar-normativa/{id}', [NormativaController::class, 'actualizarNormativa']);
+    Route::delete('eliminar-normativa/{id}', [NormativaController::class, 'eliminarNormativa']);
 
     // Rutas de reportes
     Route::get('usuarios-excel', [ReporteController::class, 'usuariosExcel']);
