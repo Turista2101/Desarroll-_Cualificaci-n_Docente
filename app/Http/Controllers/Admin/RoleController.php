@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 // Creamos un controlador para manejar los roles de usuario
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\Usuario\User;
 
 class RoleController
