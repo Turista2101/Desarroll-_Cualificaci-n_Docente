@@ -212,24 +212,28 @@ class VerificacionDocumentosController
     public function listarDocentes()
     {
         try {
-            // Consulta todos los usuarios con el rol 'Docente'.
-            // Selecciona solo los campos necesarios y concatena los nombres y apellidos en un solo campo.
             $docentes = User::role('Docente')
                 ->select(
                     'id',
-                    DB::raw("CONCAT(primer_nombre, ' ', segundo_nombre, ' ', primer_apellido, ' ', segundo_apellido) AS nombre_completo"),
+                    DB::raw("
+                    CONCAT(
+                        primer_nombre, ' ',
+                        COALESCE(segundo_nombre, ''), ' ',
+                        primer_apellido, ' ',
+                        COALESCE(segundo_apellido, '')
+                    ) AS nombre_completo
+                "),
                     'email',
                     'numero_identificacion'
-                ) // Solo los campos necesarios
+                )
                 ->get();
-            // Retorna una respuesta JSON con la lista de docentes.
-            // Si no hay docentes, se envía un mensaje informativo.
+
             return response()->json([
                 'data' => $docentes,
                 'message' => $docentes->isEmpty() ? 'No hay docentes registrados.' : ''
             ], 200);
         } catch (\Exception $e) {
-            return response()->json([  // Si ocurre cualquier excepción, retorna un mensaje de error y el detalle de la excepción.
+            return response()->json([
                 'message' => 'Error al obtener los docentes.',
                 'error' => $e->getMessage()
             ], 500);
