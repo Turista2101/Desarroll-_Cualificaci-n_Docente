@@ -63,18 +63,24 @@ class VerificacionDocumentosController
 
     private function aplicarFiltrosPorEstado($query, $estado)
     {
-       
-        foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) { // Itera sobre cada relación definida en el array $relaciones.
-            if ($relacionPadre === 'usuario') {
-                $query->orWhereHas('documentosUser', function ($q) use ($estado) {// Si es la relación directa del usuario, aplica el filtro sobre 'documentosUser'.
-                    $q->where('estado', $estado);
-                });
-            } else {
-                $query->orWhereHas($relacionPadre . '.' . $relacionDocumentos, function ($q) use ($estado) { // Si es una relación anidada, aplica el filtro sobre la relación correspondiente.
-                    $q->where('estado', $estado);
-                });
+        $query->where(function ($subQuery) use ($estado) {
+            $esPrimera = true;
+
+            foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
+                $whereHas = $relacionPadre === 'usuario' ? 'documentosUser' : $relacionPadre . '.' . $relacionDocumentos;
+
+                if ($esPrimera) {
+                    $subQuery->whereHas($whereHas, function ($q) use ($estado) {
+                        $q->where('estado', $estado);
+                    });
+                    $esPrimera = false;
+                } else {
+                    $subQuery->orWhereHas($whereHas, function ($q) use ($estado) {
+                        $q->where('estado', $estado);
+                    });
+                }
             }
-        }
+        });
     }
 
     /**
@@ -85,17 +91,27 @@ class VerificacionDocumentosController
      */
     private function agregarUrlADocumentos($usuarios)
     {
-       
-        foreach ($usuarios as $usuario) { // Itera sobre cada usuario recibido.
-            foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {  // Itera sobre cada relación definida en el array $relaciones.
+        foreach ($usuarios as $usuario) {
+            foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
                 if ($relacionPadre === 'usuario') {
-                    $this->agregarUrlADocumentosDirectos($usuario);// Si es la relación directa, llama al método específico para documentos directos.
+                    $this->agregarUrlADocumentosDirectos($usuario);
+                    // Oculta los documentos vacíos si no hay nada en documentosUser
+                    if ($usuario->documentosUser->isEmpty()) {
+                        $usuario->unsetRelation('documentosUser');
+                    }
                 } else {
-                    $this->agregarUrlADocumentosRelacionados($usuario, $relacionPadre, $relacionDocumentos);// Si es una relación anidada, llama al método específico para relaciones anidadas.
+                    $this->agregarUrlADocumentosRelacionados($usuario, $relacionPadre, $relacionDocumentos);
+
+                    $filtrados = collect($usuario->$relacionPadre)->filter(function ($item) use ($relacionDocumentos) {
+                        return count($item->$relacionDocumentos) > 0;
+                    })->values();
+
+                    $usuario->setRelation($relacionPadre, $filtrados);
                 }
             }
         }
     }
+
     /**
      * Agrega la URL pública a los documentos directos del usuario.
      *
@@ -109,7 +125,7 @@ class VerificacionDocumentosController
             $documentoUser->archivo_url = Storage::url($documentoUser->archivo);
         }
     }
-/**
+    /**
      * Agrega la URL pública a los documentos de relaciones anidadas del usuario.
      *
      * @param User $usuario Usuario al que se le agregarán las URLs.
@@ -125,7 +141,7 @@ class VerificacionDocumentosController
         }
     }
 
- /**
+    /**
      * Obtiene todos los usuarios con documentos en un estado específico.
      * Carga solo los documentos que estén en el estado solicitado y agrega la URL pública de cada archivo.
      *
@@ -162,7 +178,7 @@ class VerificacionDocumentosController
         }
     }
 
-/**
+    /**
      * Lista todos los docentes del sistema.
      * Devuelve información básica de cada docente, como su nombre completo, email y número de identificación.
      *
@@ -204,7 +220,7 @@ class VerificacionDocumentosController
     public function verDocumentosPorDocente($user_id)
     {
         try {
-             // Carga el usuario con todas las relaciones de documentos definidas en $relaciones.
+            // Carga el usuario con todas las relaciones de documentos definidas en $relaciones.
             // Se utiliza array_merge para combinar las relaciones anidadas y la relación directa 'documentosUser'.
             $usuario = User::with(array_merge(
                 // Cargar relaciones anidadas
@@ -252,7 +268,6 @@ class VerificacionDocumentosController
             $documento->estado = $request->estado;
             // Guarda los cambios realizados en el documento en la base de datos.
             $documento->save();
-            // Si todo sale bien, retorna una respuesta JSON indicando éxito.
             // El mensaje informa que el estado del documento fue actualizado correctamente.
             return response()->json([
                 'message' => 'Estado del documento actualizado correctamente.',
