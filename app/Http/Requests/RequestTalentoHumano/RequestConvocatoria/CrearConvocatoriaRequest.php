@@ -40,7 +40,7 @@ class CrearConvocatoriaRequest extends FormRequest
             'fecha_cierre'          => 'required|date|after:fecha_publicacion',
              // El campo `fecha_cierre` es obligatorio (`required`).
             // Debe ser una fecha válida (`date`) y posterior a `fecha_publicacion`.
-            'descripcion'           => 'required|string|max:1000|regex:/^[\pL\pN\s\-]+$/u',
+            'descripcion'           => 'required|string|max:1000|regex:/^[\pL\pN\s\-,.]+$/u',
              // El campo `descripcion` es obligatorio (`required`).
             // Debe ser una cadena con un máximo de 1000 caracteres y cumplir con el mismo patrón regex.
             'estado_convocatoria'   => ['required','string', Rule::in(EstadoConvocatoria::all())],

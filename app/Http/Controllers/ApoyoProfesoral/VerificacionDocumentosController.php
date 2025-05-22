@@ -24,8 +24,7 @@ class VerificacionDocumentosController
         'rutUsuario' => 'documentosRut',
         'informacionContactoUsuario' => 'documentosInformacionContacto',
         'epsUsuario' => 'documentosEps',
-        // Relación directa del usuario (polimórfica)
-        'usuario'                 => 'documentosUser',
+        'usuario'      => 'documentosUser',
     ];
 
     /**
@@ -95,22 +94,33 @@ class VerificacionDocumentosController
             foreach ($this->relaciones as $relacionPadre => $relacionDocumentos) {
                 if ($relacionPadre === 'usuario') {
                     $this->agregarUrlADocumentosDirectos($usuario);
-                    // Oculta los documentos vacíos si no hay nada en documentosUser
-                    if ($usuario->documentosUser->isEmpty()) {
+
+                    if (empty($usuario->documentosUser) || $usuario->documentosUser->isEmpty()) {
                         $usuario->unsetRelation('documentosUser');
                     }
                 } else {
                     $this->agregarUrlADocumentosRelacionados($usuario, $relacionPadre, $relacionDocumentos);
 
-                    $filtrados = collect($usuario->$relacionPadre)->filter(function ($item) use ($relacionDocumentos) {
-                        return count($item->$relacionDocumentos) > 0;
-                    })->values();
+                    $relacion = $usuario->$relacionPadre ?? null;
 
-                    $usuario->setRelation($relacionPadre, $filtrados);
+                    if (is_iterable($relacion)) {
+                        // Si es HasMany: filtrar elementos sin documentos
+                        $filtrados = collect($relacion)->filter(function ($item) use ($relacionDocumentos) {
+                            return count($item->$relacionDocumentos ?? []) > 0;
+                        })->values();
+
+                        $usuario->setRelation($relacionPadre, $filtrados);
+                    } elseif (is_object($relacion)) {
+                        // Si es HasOne: eliminar si no tiene documentos
+                        if (empty($relacion->$relacionDocumentos) || count($relacion->$relacionDocumentos) === 0) {
+                            $usuario->unsetRelation($relacionPadre);
+                        }
+                    }
                 }
             }
         }
     }
+
 
     /**
      * Agrega la URL pública a los documentos directos del usuario.
@@ -134,12 +144,23 @@ class VerificacionDocumentosController
      */
     private function agregarUrlADocumentosRelacionados($usuario, $relacionPadre, $relacionDocumentos): void
     {
-        foreach ($usuario->$relacionPadre ?? [] as $elemento) {  // Itera sobre cada elemento de la relación padre (ej: cada estudio del usuario).
-            foreach ($elemento->$relacionDocumentos ?? [] as $documento) { // Itera sobre cada documento asociado al elemento.
-                $documento->archivo_url = Storage::url($documento->archivo); // Genera la URL pública del archivo y la asigna al atributo 'archivo_url'.
+        $relacion = $usuario->$relacionPadre ?? null;
+
+        if (is_iterable($relacion)) {
+            // Caso HasMany
+            foreach ($relacion as $elemento) {
+                foreach ($elemento->$relacionDocumentos ?? [] as $documento) {
+                    $documento->archivo_url = Storage::url($documento->archivo);
+                }
+            }
+        } elseif (is_object($relacion)) {
+            // Caso HasOne
+            foreach ($relacion->$relacionDocumentos ?? [] as $documento) {
+                $documento->archivo_url = Storage::url($documento->archivo);
             }
         }
     }
+
 
     /**
      * Obtiene todos los usuarios con documentos en un estado específico.

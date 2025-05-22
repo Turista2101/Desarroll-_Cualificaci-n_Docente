@@ -29,7 +29,7 @@ class CrearNormativaRequest extends FormRequest
         return [
             'nombre' => 'required|string|max:255',
             // El campo `nombre` es obligatorio (`required`), debe ser una cadena (`string`) con un máximo de 255 caracteres.
-            'descripcion' => 'nullable|string',
+            'descripcion' => 'nullable|string|max:255|regex:/^[\pL\pN\s\-,.]+$/u',
             // El campo `descripcion` es opcional (`nullable`), pero si está presente, debe ser una cadena (`string`).
             'tipo' => 'required|string|max:50',
             // El campo `tipo` es obligatorio (`required`), debe ser una cadena con un máximo de 50 caracteres.
