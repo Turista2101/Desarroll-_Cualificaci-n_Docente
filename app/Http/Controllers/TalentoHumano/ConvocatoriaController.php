@@ -119,6 +119,7 @@ class ConvocatoriaController
         try {
             $convocatoria = Convocatoria::findOrFail($id); // Buscamos la convocatoria por su ID
             DB::transaction(function () use ($convocatoria) { // Inicio de la transacción
+                $convocatoria->postulacionesConvocatoria()->delete();
                 $this->archivoService->eliminarArchivoDocumento($convocatoria); // Eliminamos el archivo asociado a la convocatoria
                 $convocatoria->delete(); // Eliminamos la convocatoria de la base de datos
             });
