@@ -30,6 +30,12 @@ Route::group([
     Route::get('filtrar-docentes-produccion/{id}', [FiltrarDocentesController::class, 'obtenerProduccionAcademicaPorDocente']);
     Route::get('filtrar-docentes-ambito/{ambitoId}', [FiltrarDocentesController::class, 'filtrarPorAmbitoDivulgacion']);
 
+    // Rutas para filtrar docentes por experiencia profesional
+    Route::get('mostrar-todas-experiencia', [FiltrarDocentesController::class, 'obtenerTodasLasExperiencias']);
+    Route::get('filtrar-docentes-experiencia-id/{id}', [FiltrarDocentesController::class, 'obtenerExperienciasPorDocente']);
+    Route::get('filtrar-docentes-tipo-experiecnia/{tipo}', [FiltrarDocentesController::class, 'filtrarPorTipoExperiencia']);
+
+
     // Rutas para generar certificados
     Route::post('crear-certificados-masivos', [GenerarCertificadosController::class, 'crearCertificadosMasivos']);
 
